@@ -2,7 +2,6 @@
   "name": "base",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node build/index.js",
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
@@ -42,8 +41,5 @@
     "tsc-alias": "1.8.16",
     "tsconfig-paths": "4.2.0",
     "typescript": "6.0.2"
-  },
-  "imports": {
-    "#/*": "./dist/*"
   }
 }

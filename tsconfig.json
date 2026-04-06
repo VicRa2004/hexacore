@@ -3,21 +3,20 @@
     "baseUrl": ".",
     "rootDir": "./",
     "outDir": "./dist",
-    "types": [],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    //"verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "target": "ES2023",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "es2016",
     "strict": true,
     "esModuleInterop": true,
     "ignoreDeprecations": "6.0",
@@ -26,6 +25,14 @@
       "@core/*": ["src/core/*"],
       "@shared/*": ["src/shared/*"],
       "@modules/*": ["src/modules/*"]
+    },
+    "typeRoots": ["src/types", "node_modules/@types"]
+  },
+  "include": ["src/**/*", "src/types/**/*"],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS" // Esto fuerza a ts-node a no intentar usar ESM
     }
   },
   "exclude": ["node_modules", "docs"]

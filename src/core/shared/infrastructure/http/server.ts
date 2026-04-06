@@ -7,7 +7,8 @@ app.use(express.json());
 
 // Middleware manual súper sencillo para inyectar el scope en el Request
 app.use((req, res, next) => {
-  req.container = container.createScope();
+  // @ts-ignore - augmentación global de Request en src/types/express.d.ts
+  (req as any).container = container.createScope();
   next();
 });
 
@@ -17,3 +18,5 @@ function bootstrapEvents() {
 }
 
 bootstrapEvents();
+
+export { app };

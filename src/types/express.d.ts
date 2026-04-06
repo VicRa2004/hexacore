@@ -1,11 +1,9 @@
-import { AwilixContainer } from "awilix";
+import type { AwilixContainer } from "awilix";
 
-declare global {
-  namespace Express {
-    interface Request {
-      container?: AwilixContainer;
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    container?: AwilixContainer;
   }
 }
 
-export {};
+// Module augmentation for Express request to add Awilix container.
