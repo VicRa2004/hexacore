@@ -3,11 +3,11 @@ import { User } from "../User";
 import { UserFilters } from "./UserFilters";
 
 export interface UserRepository {
-  find: (filters: UserFilters) => Pagination<User>;
-  findById: (id: number) => User | null;
+  find: (filters: UserFilters) => Promise<Pagination<User>>;
+  findById: (id: number) => Promise<User | null>;
 
-  create: (data: User) => User;
-  update: (data: User) => User;
+  create: (data: User) => Promise<User>;
+  update: (data: User) => Promise<User>;
 
-  delete: (id: number) => void;
+  delete: (id: number) => Promise<void>;
 }

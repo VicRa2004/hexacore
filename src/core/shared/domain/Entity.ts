@@ -8,15 +8,10 @@ export abstract class Entity {
     this.id = id ?? new EntityId();
   }
 
-  public getId(): EntityId {
-    return this.id;
-  }
-
-  public equals(other?: Entity): boolean {
-    if (other == null) return false;
-    if (this === other) return true;
-
-    // Delega la comparación lógica al Value Object del ID
-    return this.id.equals(other.getId());
+  public getId(): number {
+    if (this.id.value === null || this.id.value === undefined) {
+      throw new Error("Entity has no ID");
+    }
+    return this.id.value;
   }
 }
