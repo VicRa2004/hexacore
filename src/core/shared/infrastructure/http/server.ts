@@ -1,14 +1,20 @@
 import express from "express";
 import { container } from "@/core/shared/infrastructure/di/container";
 import type { EventBus } from "../../domain/events/EventBus";
+import type { AwilixContainer } from "awilix";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    container?: AwilixContainer;
+  }
+}
 
 const app = express();
 app.use(express.json());
 
 // Middleware manual súper sencillo para inyectar el scope en el Request
 app.use((req, res, next) => {
-  // @ts-ignore - augmentación global de Request en src/types/express.d.ts
-  (req as any).container = container.createScope();
+  req.container = container.createScope();
   next();
 });
 
