@@ -1,5 +1,5 @@
 import { CreateUserDto } from "../dtos/CreateUserDto";
-import { UserDto } from "../dtos/UserResponseDto";
+import { UserDto } from "../dtos/UserDto";
 import { UserRepository } from "../../domain/repository/UserRepository";
 import { User } from "../../domain/User";
 import { BaseError } from "@/core/shared/domain/error/BaseError";

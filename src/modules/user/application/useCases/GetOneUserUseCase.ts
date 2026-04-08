@@ -1,7 +1,7 @@
+import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 import { UserRepository } from "../../domain/repository/UserRepository";
-import { BaseError } from "@/core/shared/domain/error/BaseError";
 import { GetOneUserDto } from "../dtos/GetOneUserDto";
-import { UserDto } from "../dtos/UserResponseDto";
+import { UserDto } from "../dtos/UserDto";
 import { UserMapper } from "../mappers/UserMapper";
 
 export class GetOneUserUseCase {
@@ -10,7 +10,7 @@ export class GetOneUserUseCase {
   async run(dto: GetOneUserDto): Promise<UserDto> {
     const user = await this.userRepository.findById(dto.id);
     if (!user) {
-      throw new BaseError("Usuario no encontrado", 404);
+      throw new UserNotFoundError();
     }
     return UserMapper.toDto(user);
   }

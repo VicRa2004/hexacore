@@ -1,6 +1,6 @@
 import { UserRepository } from "../../domain/repository/UserRepository";
 import { GetAllUsersDto } from "../dtos/GetAllUsersDto";
-import { UserDto } from "../dtos/UserResponseDto";
+import { UserDto } from "../dtos/UserDto";
 import { UserMapper } from "../mappers/UserMapper";
 import { Pagination } from "@/core/shared/domain/Pagination";
 
