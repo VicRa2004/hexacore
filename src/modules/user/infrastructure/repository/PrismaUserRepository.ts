@@ -2,12 +2,120 @@ import { Pagination } from "@/core/shared/domain/Pagination";
 import { UserFilters } from "../../domain/repository/UserFilters";
 import { UserRepository } from "../../domain/repository/UserRepository";
 import { prisma } from "@/core/config/prisma";
-import type { User } from "../../domain/User";
+import { User } from "../../domain/User";
+
+/**
+ * Representa la estructura cruda del registro de Prisma.
+ * Se define localmente para desacoplar la infraestructura de los tipos auto-generados.
+ */
+interface PrismaUserRecord {
+  id: number;
+  email: string;
+  name: string;
+  password: string;
+  isActive: boolean;
+}
 
 export class PrismaUserRepository implements UserRepository {
-  async find(filters: UserFilters): Promise<Pagination<User>> {}
-  findById: (id: number) => Promise<User | null>;
-  create: (data: User) => Promise<User>;
-  update: (data: User) => Promise<User>;
-  delete: (id: number) => Promise<void>;
+  /**
+   * Transforma un registro de Prisma en una entidad de dominio.
+   * Se utiliza `reconstitute` porque el usuario ya existe en la base de datos.
+   */
+  private toDomain(raw: PrismaUserRecord): User {
+    return User.reconstitute(
+      raw.name,
+      raw.email,
+      raw.password,
+      raw.isActive,
+      raw.id,
+    );
+  }
+
+  /**
+   * Busca usuarios con paginación y filtros opcionales.
+   * Calcula el offset basado en la página y el límite solicitados.
+   */
+  async find(filters: UserFilters): Promise<Pagination<User>> {
+    const { page, limit, email } = filters;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(email && { email: { contains: email, mode: "insensitive" as const } }),
+    };
+
+    const [data, totalItems] = await prisma.$transaction([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { id: "asc" },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: data.map((record) => this.toDomain(record)),
+      page,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    };
+  }
+
+  /**
+   * Busca un usuario por su ID.
+   * Retorna null si no existe, delegando la validación al caso de uso.
+   */
+  async findById(id: number): Promise<User | null> {
+    const record = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!record) return null;
+
+    return this.toDomain(record);
+  }
+
+  /**
+   * Persiste un nuevo usuario en la base de datos.
+   * Los datos se extraen de la entidad de dominio para respetar la separación de capas.
+   */
+  async create(data: User): Promise<User> {
+    const record = await prisma.user.create({
+      data: {
+        name: data.getName(),
+        email: data.getEmail(),
+        password: data.getPasswordHash(),
+        isActive: data.getIsActive(),
+      },
+    });
+
+    return this.toDomain(record);
+  }
+
+  /**
+   * Actualiza un usuario existente en la base de datos.
+   * Se actualiza por ID, extrayendo los datos actuales de la entidad de dominio.
+   */
+  async update(data: User): Promise<User> {
+    const record = await prisma.user.update({
+      where: { id: data.getId() },
+      data: {
+        name: data.getName(),
+        email: data.getEmail(),
+        password: data.getPasswordHash(),
+        isActive: data.getIsActive(),
+      },
+    });
+
+    return this.toDomain(record);
+  }
+
+  /**
+   * Elimina un usuario por su ID.
+   */
+  async delete(id: number): Promise<void> {
+    await prisma.user.delete({
+      where: { id },
+    });
+  }
 }
