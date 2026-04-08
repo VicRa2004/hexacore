@@ -26,6 +26,7 @@ Este proyecto se rige por los principios básicos de la Arquitectura Hexagonal.
 - **Aislamiento del Dominio:** Queda estrictamente prohibido que un Caso de Uso devuelva directamente entidades u objetos del Dominio. 
 - **Uso de DTOs:** Los DTOs se utilizan tanto para estructuras de **entrada** (parámetros hacia el caso de uso) como para encapsular las **salidas** de estos. En el caso de salidas o de respuesta, estas deben nombrarse de manera simple (ejemplo: `UserDto`, note que se omite la palabra "Response").
 - **Mappers Obligatorios:** Se debe crear un `Mapper` dentro del módulo de aplicación (ejemplo: `src/modules/.../application/mappers/UserMapper.ts`) para encargarse de transformar datos y aislar la entidad de dominio antes de cruzar la respuesta hacia afuera.
+- **Nomenclatura de Ejecución:** El método público principal de invocación para componentes tipo servicio (Casos de Uso, Controladores, etc.) debe llamarse obligatoriamente `run` (y no `execute`).
 
 ## 7. Capa de Dominio (Repositorios, Servicios y Errores)
 - **Repositorios de Dominio:** La definición o interfaz del repositorio correspondiente a cada entidad debe ubicarse forzosamente dentro de una carpeta `repository` específica en el dominio de ese módulo (ejemplo: `src/modules/user/domain/repository/UserRepository.ts`).

@@ -7,7 +7,7 @@ import { Pagination } from "@/core/shared/domain/Pagination";
 export class GetAllUsersUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async execute(dto: GetAllUsersDto): Promise<Pagination<UserDto>> {
+  async run(dto: GetAllUsersDto): Promise<Pagination<UserDto>> {
     const filters = {
       page: dto.page,
       limit: dto.limit,

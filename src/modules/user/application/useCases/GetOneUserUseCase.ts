@@ -7,7 +7,7 @@ import { UserMapper } from "../mappers/UserMapper";
 export class GetOneUserUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async execute(dto: GetOneUserDto): Promise<UserDto> {
+  async run(dto: GetOneUserDto): Promise<UserDto> {
     const user = await this.userRepository.findById(dto.id);
     if (!user) {
       throw new BaseError("Usuario no encontrado", 404);

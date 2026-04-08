@@ -4,7 +4,7 @@ import { BaseError } from '@/core/shared/domain/error/BaseError';
 export class DeleteUserUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async execute(id: number) {
+  async run(id: number) {
     const user = await this.userRepository.findById(id);
     if (!user) {
       throw new BaseError('Usuario no encontrado', 404);

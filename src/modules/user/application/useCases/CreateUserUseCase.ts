@@ -8,7 +8,7 @@ import { UserMapper } from "../mappers/UserMapper";
 export class CreateUserUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async execute(dto: CreateUserDto): Promise<UserDto> {
+  async run(dto: CreateUserDto): Promise<UserDto> {
     const existingUsers = await this.userRepository.find({
       page: 1,
       limit: 1,
