@@ -10,17 +10,21 @@ export class UpdateUserController {
     try {
       const { id } = userIdSchema.parse(req.params);
       const dto = updateUserSchema.parse(req.body);
-      
+
       const result = await this.updateUserUseCase.run(id, dto);
-      
+
       res.status(200).json(result);
     } catch (error: any) {
       if (error instanceof ZodError) {
-        res.status(400).json({ error: "Error de validación", details: error.errors });
+        res
+          .status(400)
+          .json({ error: "Error de validación", details: error.format() });
       } else if (error.statusCode) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
-        res.status(500).json({ error: error.message || "Internal server error" });
+        res
+          .status(500)
+          .json({ error: error.message || "Internal server error" });
       }
     }
   }

@@ -13,11 +13,15 @@ export class DeleteUserController {
       res.status(204).send();
     } catch (error: any) {
       if (error instanceof ZodError) {
-        res.status(400).json({ error: "Error de validación", details: error.errors });
+        res
+          .status(400)
+          .json({ error: "Error de validación", details: error.format() });
       } else if (error.statusCode) {
         res.status(error.statusCode).json({ error: error.message });
       } else {
-        res.status(500).json({ error: error.message || "Internal server error" });
+        res
+          .status(500)
+          .json({ error: error.message || "Internal server error" });
       }
     }
   }
