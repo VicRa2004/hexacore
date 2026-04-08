@@ -3,6 +3,9 @@ import { z } from "zod";
 export const createUserSchema = z.object({
   email: z.email("Debe ser un email válido"),
   name: z.string().optional(),
+  password: z
+    .string("La contraseña es requerida")
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 export const updateUserSchema = z.object({

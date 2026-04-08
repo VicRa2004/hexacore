@@ -4,9 +4,13 @@ import { UserRepository } from "../../domain/repository/UserRepository";
 import { User } from "../../domain/User";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import { UserMapper } from "../mappers/UserMapper";
+import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 
 export class CreateUserUseCase {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly bcryptPasswordHasherService: PasswordHasher,
+  ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
     const existingUsers = await this.userRepository.find({
@@ -21,9 +25,13 @@ export class CreateUserUseCase {
       );
     }
 
-    const user = User.create(dto.name || "", dto.email);
+    const passwordHash = await this.bcryptPasswordHasherService.hash(
+      dto.password,
+    );
+    const user = User.create(dto.name || "", dto.email, passwordHash);
     const createdUser = await this.userRepository.create(user);
 
     return UserMapper.toDto(createdUser);
   }
 }
+
