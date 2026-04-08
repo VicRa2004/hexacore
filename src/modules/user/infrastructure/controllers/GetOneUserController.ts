@@ -1,30 +1,21 @@
 import { Request, Response } from "express";
 import { GetOneUserUseCase } from "../../application/useCases/GetOneUserUseCase";
 import { userIdSchema } from "../schemas/userSchemas";
-import { ZodError } from "zod";
+import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
+import { validate } from "@/core/shared/infrastructure/libs/validate";
 
-export class GetOneUserController {
-  constructor(private readonly getOneUserUseCase: GetOneUserUseCase) {}
+export class GetOneUserController extends BaseController {
+  constructor(private readonly getOneUserUseCase: GetOneUserUseCase) {
+    super();
+  }
 
-  async run(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = userIdSchema.parse(req.params);
-      const dto = { id };
-      const result = await this.getOneUserUseCase.run(dto);
+  run(req: Request, res: Response): Promise<void> {
+    return this.executeSafely(async () => {
+      const { id } = validate(userIdSchema, req.params);
 
-      res.status(200).json(result);
-    } catch (error: any) {
-      if (error instanceof ZodError) {
-        res
-          .status(400)
-          .json({ error: "Error de validación", details: error.format() });
-      } else if (error.statusCode) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res
-          .status(500)
-          .json({ error: error.message || "Internal server error" });
-      }
-    }
+      const result = await this.getOneUserUseCase.run({ id });
+
+      this.ok(res, result);
+    }, res);
   }
 }
