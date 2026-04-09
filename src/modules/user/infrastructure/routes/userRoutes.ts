@@ -1,30 +1,23 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { makeInvoker } from "awilix-express";
+import { CreateUserController } from "../controllers/CreateUserController";
 import { GetAllUsersController } from "../controllers/GetAllUsersController";
+import { GetOneUserController } from "../controllers/GetOneUserController";
+import { UpdateUserController } from "../controllers/UpdateUserController";
+import { DeleteUserController } from "../controllers/DeleteUserController";
 
 const userRoutes = Router();
 
-const getAllUsersController = makeInvoker(GetAllUsersController);
+const createUser = makeInvoker(CreateUserController);
+const getAllUsers = makeInvoker(GetAllUsersController);
+const getOneUser = makeInvoker(GetOneUserController);
+const updateUser = makeInvoker(UpdateUserController);
+const deleteUser = makeInvoker(DeleteUserController);
 
-// Endpoint para crear un usuario
-userRoutes.post("/", getAllUsersController("run"));
-
-// Endpoint para obtener todos los usuarios (con paginación)
-userRoutes.get("/", getAllUsersController("run"));
-
-// Endpoint para obtener un usuario por id
-userRoutes.get("/:id", (req: Request, res: Response) => {
-  (req.container as any).resolve("getOneUserController").run(req, res);
-});
-
-// Endpoint para actualizar un usuario
-userRoutes.put("/:id", (req: Request, res: Response) => {
-  (req.container as any).resolve("updateUserController").run(req, res);
-});
-
-// Endpoint para eliminar un usuario
-userRoutes.delete("/:id", (req: Request, res: Response) => {
-  (req.container as any).resolve("deleteUserController").run(req, res);
-});
+userRoutes.post("/", createUser("run"));
+userRoutes.get("/", getAllUsers("run"));
+userRoutes.get("/:id", getOneUser("run"));
+userRoutes.put("/:id", updateUser("run"));
+userRoutes.delete("/:id", deleteUser("run"));
 
 export { userRoutes };

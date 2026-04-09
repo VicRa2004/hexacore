@@ -2,7 +2,7 @@ import { createContainer, asClass, InjectionMode } from "awilix";
 import { NodeEventBus } from "../events/NodeEventBus";
 
 const container = createContainer({
-  injectionMode: InjectionMode.CLASSIC,
+  injectionMode: InjectionMode.PROXY,
 });
 
 container.loadModules(

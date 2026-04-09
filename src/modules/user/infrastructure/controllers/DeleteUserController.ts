@@ -1,28 +1,19 @@
 import { Request, Response } from "express";
 import { DeleteUserUseCase } from "../../application/useCases/DeleteUserUseCase";
 import { userIdSchema } from "../schemas/userSchemas";
-import { ZodError } from "zod";
+import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
+import { validate } from "@/core/shared/infrastructure/libs/validate";
 
-export class DeleteUserController {
-  constructor(private readonly deleteUserUseCase: DeleteUserUseCase) {}
+export class DeleteUserController extends BaseController {
+  constructor(private readonly deleteUserUseCase: DeleteUserUseCase) {
+    super();
+  }
 
-  async run(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = userIdSchema.parse(req.params);
+  run(req: Request, res: Response): Promise<void> {
+    return this.executeSafely(async () => {
+      const { id } = validate(userIdSchema, req.params);
       await this.deleteUserUseCase.run(id);
       res.status(204).send();
-    } catch (error: any) {
-      if (error instanceof ZodError) {
-        res
-          .status(400)
-          .json({ error: "Error de validación", details: error.format() });
-      } else if (error.statusCode) {
-        res.status(error.statusCode).json({ error: error.message });
-      } else {
-        res
-          .status(500)
-          .json({ error: error.message || "Internal server error" });
-      }
-    }
+    }, res);
   }
 }
