@@ -9,7 +9,7 @@ import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 export class CreateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly bcryptPasswordHasherService: PasswordHasher,
+    private readonly passwordHasherService: PasswordHasher,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -25,13 +25,10 @@ export class CreateUserUseCase {
       );
     }
 
-    const passwordHash = await this.bcryptPasswordHasherService.hash(
-      dto.password,
-    );
+    const passwordHash = await this.passwordHasherService.hash(dto.password);
     const user = User.create(dto.name || "", dto.email, passwordHash);
     const createdUser = await this.userRepository.create(user);
 
     return UserMapper.toDto(createdUser);
   }
 }
-
