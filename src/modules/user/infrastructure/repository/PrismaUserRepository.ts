@@ -1,3 +1,4 @@
+import { injectable } from "tsyringe";
 import { Pagination } from "@/core/shared/domain/Pagination";
 import { UserFilters } from "../../domain/repository/UserFilters";
 import { UserRepository } from "../../domain/repository/UserRepository";
@@ -16,6 +17,7 @@ interface PrismaUserRecord {
   isActive: boolean;
 }
 
+@injectable()
 export class PrismaUserRepository implements UserRepository {
   /**
    * Transforma un registro de Prisma en una entidad de dominio.

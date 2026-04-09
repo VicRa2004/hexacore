@@ -1,8 +1,10 @@
+import { injectable, inject } from "tsyringe";
 import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 import { UserRepository } from "../../domain/repository/UserRepository";
 
+@injectable()
 export class DeleteUserUseCase {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(@inject("UserRepository") private readonly userRepository: UserRepository) {}
 
   async run(id: number) {
     const user = await this.userRepository.findById(id);

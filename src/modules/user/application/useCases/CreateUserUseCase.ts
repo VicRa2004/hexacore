@@ -1,3 +1,4 @@
+import { injectable, inject } from "tsyringe";
 import { CreateUserDto } from "../dtos/CreateUserDto";
 import { UserDto } from "../dtos/UserDto";
 import { UserRepository } from "../../domain/repository/UserRepository";
@@ -6,10 +7,11 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 import { UserMapper } from "../mappers/UserMapper";
 import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 
+@injectable()
 export class CreateUserUseCase {
   constructor(
-    private readonly userRepository: UserRepository,
-    private readonly passwordHasherService: PasswordHasher,
+    @inject("UserRepository") private readonly userRepository: UserRepository,
+    @inject("PasswordHasher") private readonly passwordHasherService: PasswordHasher,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {

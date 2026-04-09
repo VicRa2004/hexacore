@@ -1,11 +1,13 @@
+import { injectable, inject } from "tsyringe";
 import { UpdateUserDto } from "../dtos/UpdateUserDto";
 import { UserDto } from "../dtos/UserDto";
 import { UserRepository } from "../../domain/repository/UserRepository";
 import { UserMapper } from "../mappers/UserMapper";
 import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 
+@injectable()
 export class UpdateUserUseCase {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(@inject("UserRepository") private readonly userRepository: UserRepository) {}
 
   async run(id: number, dto: UpdateUserDto): Promise<UserDto> {
     const user = await this.userRepository.findById(id);

@@ -1,11 +1,13 @@
+import { injectable, inject } from "tsyringe";
 import { UserRepository } from "../../domain/repository/UserRepository";
 import { GetAllUsersDto } from "../dtos/GetAllUsersDto";
 import { UserDto } from "../dtos/UserDto";
 import { UserMapper } from "../mappers/UserMapper";
 import { Pagination } from "@/core/shared/domain/Pagination";
 
+@injectable()
 export class GetAllUsersUseCase {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(@inject("UserRepository") private readonly userRepository: UserRepository) {}
 
   async run(dto: GetAllUsersDto): Promise<Pagination<UserDto>> {
     const filters = {
