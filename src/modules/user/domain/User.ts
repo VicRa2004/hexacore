@@ -1,6 +1,7 @@
 import { Entity } from "@/core/shared/domain/Entity";
 import { Email } from "./value-objects/Email";
 import { EntityId } from "@/core/shared/domain/EntityId";
+import { CreateUserEvent } from "./event/CreateUserEvent";
 
 export class User extends Entity {
   private name: string;
@@ -68,5 +69,11 @@ export class User extends Entity {
   // Comportamiento de dominio
   public deactivate(): void {
     this.isActive = false;
+  }
+
+  public addCreateEvent() {
+    this.addDomainEvent(
+      new CreateUserEvent({ id: this.getId(), email: this.email.value }),
+    );
   }
 }

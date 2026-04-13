@@ -6,6 +6,7 @@ import { User } from "../../domain/User";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import { UserMapper } from "../mappers/UserMapper";
 import type { PasswordHasher } from "../../domain/service/PasswordHasher";
+import type { EventBus } from "@/core/shared/domain/events/EventBus";
 
 @injectable()
 export class CreateUserUseCase {
@@ -13,6 +14,7 @@ export class CreateUserUseCase {
     @inject("UserRepository") private readonly userRepository: UserRepository,
     @inject("PasswordHasher")
     private readonly passwordHasherService: PasswordHasher,
+    @inject("EventBus") private readonly eventBus: EventBus,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -31,6 +33,10 @@ export class CreateUserUseCase {
     const passwordHash = await this.passwordHasherService.hash(dto.password);
     const user = User.create(dto.name || "", dto.email, passwordHash);
     const createdUser = await this.userRepository.create(user);
+
+    createdUser.addCreateEvent();
+
+    this.eventBus.publishAll(createdUser.pullDomainEvents());
 
     return UserMapper.toDto(createdUser);
   }
