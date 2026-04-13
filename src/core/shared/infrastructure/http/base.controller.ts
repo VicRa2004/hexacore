@@ -1,5 +1,6 @@
-import { Response } from "express";
+import type { Response } from "express";
 import z, { ZodError } from "zod";
+import { BaseError } from "../../domain/error/BaseError";
 
 export abstract class BaseController {
   protected handleError(error: unknown, res: Response): void {
@@ -11,9 +12,8 @@ export abstract class BaseController {
       return;
     }
 
-    if (typeof error === "object" && error !== null && "statusCode" in error) {
-      const err = error as any;
-      res.status(err.statusCode).json({ error: err.message });
+    if (error instanceof BaseError) {
+      res.status(error.code).json({ error: error.message });
       return;
     }
 
