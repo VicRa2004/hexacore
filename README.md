@@ -1,71 +1,77 @@
 # Hexacore
 
-Hexacore es una plantilla base (boilerplate) para proyectos backend en Node.js que implementa los principios de **Arquitectura Hexagonal**. Esta estructura está diseñada para mantener un código limpio, agnóstico, escalable y mantenible mediante la clara separación entre la lógica de negocio (dominio), las reglas de aplicación y la capa externa o de infraestructura.
+Hexacore es una plantilla base (boilerplate) para proyectos backend que implementa los principios de **Arquitectura Hexagonal**. Esta estructura está diseñada para mantener un código limpio, agnóstico, escalable y mantenible mediante la clara separación entre la lógica de negocio (dominio), las reglas de aplicación y la capa externa o de infraestructura.
+
+Ahora optimizado para ejecutarse con **Bun** para una velocidad superior y soporte nativo de TypeScript.
 
 ## 🛠️ Tecnologías Principales
 
-- **Lenguaje:** TypeScript
+- **Runtime & Package Manager:** [Bun](https://bun.sh/)
+- **Lenguaje:** TypeScript (Nativo)
 - **Framework Web:** Express
 - **Base de Datos:** PostgreSQL
 - **ORM:** Prisma
-- **Inyección de Dependencias (DI):** Awilix (`awilix`, `awilix-express`) para el manejo e inyección limpia de servicios, repositorios y controladores.
+- **Inyección de Dependencias (DI):** Awilix (`awilix`, `awilix-express`)
 - **Validación de Datos:** Zod
-- **Autenticación y Seguridad:** JWT (`jsonwebtoken`), Bcrypt, CORS
-- **Utilidades:** Variables de entorno seguras, Morgan para logs de peticiones HTTP, y Cookie-parser.
+- **Autenticación y Seguridad:** JWT, Bcrypt, CORS
 
 ## 🗂️ Estructura del Proyecto
 
 El código fuente está ubicado en el directorio `src/` agrupado estratégicamente:
 
-- `src/core/`: Archivos transversales del sistema como configuración central (`env`), servidor HTTP, abstracciones base e infraestructura compartida.
-- `src/modules/`: Contiene los módulos que componen el negocio. Cada módulo cuenta con su propio Dominio, Casos de Uso (Aplicación) y Adaptadores (Infraestructura).
-- `prisma/`: Esquemas de base de datos definidos para el ORM Prisma.
+- **`src/core/`**: Archivos transversales como configuración central, servidor HTTP, abstracciones base e infraestructura compartida.
+- **`src/modules/`**: Módulos de negocio. Cada uno con su propio Dominio, Casos de Uso (Aplicación) y Adaptadores (Infraestructura).
+- **`prisma/`**: Esquemas de base de datos y migraciones para Prisma.
 
 ## 🚀 Requisitos Previos
 
-Asegúrate de contar con lo siguiente en tu máquina local:
+Asegúrate de contar con lo siguiente:
 
-- **Node.js** (Se recomienda v18 o superior)
-- **PostgreSQL** ejecutándose localmente o en contenedor
-- Gestor de paquetes `npm`
+- **Bun** (v1.0 o superior recomendada)
+- **PostgreSQL** ejecutándose localmente o vía Docker.
 
 ## ⚙️ Configuración y Ejecución
 
 Sigue estos pasos para arrancar el entorno de desarrollo:
 
 1. **Instalar dependencias:**
+
    ```bash
-   npm install
+   bun install
    ```
 
 2. **Configurar las variables de entorno:**
-   - Haz una copia del archivo `.env.example` y renómbralo a `.env`:
-   - Revisa y ajusta las variables dentro del `.env` (como el puerto y la variable `DATABASE_URL` vinculándola a tu instancia local de PostgreSQL).
+   - Copia el archivo `.env.example` a `.env`:
+   - Ajusta las variables, especialmente `DATABASE_URL` para tu instancia de PostgreSQL.
+     > **Nota:** Bun carga automáticamente los archivos `.env`, por lo que no necesitas librerías externas para esto.
 
-3. **Sincronizar y generar cliente de base de datos (Prisma):**
+3. **Sincronizar base de datos (Prisma):**
+
    ```bash
-   npx prisma generate
-   npx prisma db push
-   # O en su defecto, si utilizas un esquema de migraciones estructurado:
-   npx prisma migrate dev
+   bunx prisma generate
+   bunx prisma db push
+   # O para migraciones formales:
+   bunx prisma migrate dev
    ```
 
 4. **Levantar el entorno de desarrollo:**
-   - Arranca el servidor (con recarga automática de cambios vía `ts-node-dev`):
+   - Arranca el servidor con el modo _hot reload_ nativo de Bun:
    ```bash
-   npm run dev
+   bun dev
    ```
 
 ## 📦 Construcción y Producción
 
-Si deseas compilar el código para su uso en un entorno productivo:
+Para desplegar o probar el entorno productivo:
 
-1. **Compilar los archivos TypeScript:**
+1. **Compilar el proyecto (si es necesario):**
+   Aunque Bun puede ejecutar `.ts` directamente, para producción podrías querer generar el build:
+
    ```bash
-   npm run build
+   bun run build
    ```
 
-2. **Ejecutar la compilación:**
+2. **Ejecutar en modo producción:**
    ```bash
-   npm start
+   bun start
    ```
