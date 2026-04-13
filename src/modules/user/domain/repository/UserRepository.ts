@@ -1,6 +1,6 @@
-import { Pagination } from "@/core/shared/domain/Pagination";
-import { User } from "../User";
-import { UserFilters } from "./UserFilters";
+import type { Pagination } from "@/core/shared/domain/Pagination";
+import type { User } from "../User";
+import type { UserFilters } from "./UserFilters";
 
 export interface UserRepository {
   find: (filters: UserFilters) => Promise<Pagination<User>>;
