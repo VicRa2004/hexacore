@@ -17,6 +17,10 @@
     "strict": true,
     "esModuleInterop": true,
 
+    "allowJs": true,
+    "types": ["bun"],
+    "lib": ["ESNext"],
+
     /* Decoradores para tsyringe */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
