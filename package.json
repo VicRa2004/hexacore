@@ -8,6 +8,9 @@
 		"dev": "bun --hot src/index.ts",
 		"build": "tsc && tsc-alias"
 	},
+	"prisma": {
+		"seed": "bun prisma/seed.ts"
+	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
