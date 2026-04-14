@@ -25,5 +25,6 @@
   - El método público principal en tus Use Cases OBLIGATORIAMENTE se debe llamar **`run`** (NUNCA `execute`).
   - **Mappers y DTOs:** Prohibido devolver la entidad viva del dominio hacia la salida HTTP. Siempre mapea tus Entidades a DTOs para la entrada y salida.
 - **Infrastructure:**
-  - **Controladores simples:** Crea un Controlador por caso de uso. Estos deben heredar de `BaseController` para utilizar `this.executeSafely()`. El método principal también debe ser `run(req, res)`.
-  - **Rutas:** Resuelve tu controlador mediante `const ctrl = container.resolve(Controller)` e invócalo apuntando su contexto obligatoriamente (ej: `router.get("/:", ctrl.run.bind(ctrl))`).
+  - **HTTP:** Toda interacción web (Rutas, Controladores, Middlewares, Schemas) va dentro de `infrastructure/http/`.
+  - **Controladores simples:** Crea un Controlador por caso de uso en `http/controllers/`. Heredan de `BaseController` usando `this.executeSafely()`. Su método es `run(req, res)`.
+  - **Rutas Inyectables:** Crea clases en `http/routes/` decoradas con `@injectable()`. Inyecta los controladores mediante el constructor, inicializa un `this.router = Router()` interno y mapea los endpoints usando `.bind()` (ej: `this.router.get("/", this.ctrl.run.bind(this.ctrl))`). Prohibido usar `container.resolve()` explícitamente en la declaración de rutas.

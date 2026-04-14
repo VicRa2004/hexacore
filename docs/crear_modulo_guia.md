@@ -22,15 +22,14 @@ src/modules/user
 │   ├── service/
 │   └── User.ts          <-- (Entidad principal)
 └── infrastructure/
-    ├── controllers/
+    ├── http/
+    │   ├── controllers/
+    │   ├── middlewares/
+    │   ├── routes/
+    │   └── schemas/
     ├── repository/
-    ├── routes/
-    ├── schemas/
     └── service/
-    └── middlewares/     <-- (PENDIENTE DE DISEÑAR)
 ```
-
-> **NOTA:** La sección de `middlewares` dentro de *infrastructure* aún queda pendiente por definir y no se usará por el momento.
 
 ---
 
@@ -82,33 +81,42 @@ Aquí el mundo exterior entra en contacto. Interacciones con HTTP, Express y fra
      // Implementación real usando PrismaClient
    }
    ```
-2. **Validadores (`schemas`):** Se recomiendan esquemas de Zod o manuales (ej: `userSchemas.ts`) para limpiar la data HTTP que llega en los cuerpos o params asumiendo que los datos externos no son de confianza.
-3. **Controladores (`controllers`):** Se creará obligatoriamente **un controlador por cada caso de uso**. Heredan de `BaseController` para manejo seguro de try/catch usando `this.executeSafely()`.
-   ```typescript
-   @injectable()
-   export class GetOneUserController extends BaseController {
-     // Recibe con DI el Use Case
-     constructor(private readonly getOneUserUseCase: GetOneUserUseCase) {
-       super();
+2. **HTTP (Router, Controladores, Middlewares, Schemas):** Toda lógica de transporte web debe ir encapsulada en la super-carpeta `infrastructure/http/`.
+   - **Validadores (`schemas`):** Se recomiendan esquemas de Zod o manuales (ej: `userSchemas.ts`) para limpiar la data HTTP que llega.
+   - **Middlewares (`middlewares`):** Archivos para lógica preventiva HTTP (autenticación, validación de permisos).
+   - **Controladores (`controllers`):** Se creará obligatoriamente **un controlador por cada caso de uso**. Heredan de `BaseController` para uso de `this.executeSafely()`.
+     ```typescript
+     @injectable()
+     export class GetOneUserController extends BaseController {
+       constructor(private readonly getOneUserUseCase: GetOneUserUseCase) { super(); }
+       run(req: Request, res: Response): Promise<void> {
+         return this.executeSafely(async () => {
+           // Validar request, ejecutar caso de uso y usar "this.ok(res, result);"
+         }, res);
+       }
      }
+     ```
+   - **Rutas (`routes`):** Coordina los "endpoints" resolviendo las dependencias puramente vía TSyringe. Se diseñan como Clases con la etiqueta `@injectable()` para no tener que llamar a `container.resolve()` manualmente y evitar acoplamiento.
+     ```typescript
+     import { Router } from "express";
+     import { injectable } from "tsyringe";
+     
+     @injectable()
+     export class UserRouter {
+       public readonly router: Router;
 
-     run(req: Request, res: Response): Promise<void> {
-       return this.executeSafely(async () => {
-         // Validar request, ejecutar caso de uso y usar "this.ok(res, result);"
-       }, res);
+       // Inyección automática mediante container
+       constructor(private readonly getOneUserController: GetOneUserController) {
+         this.router = Router();
+         this.initRoutes();
+       }
+
+       private initRoutes() {
+         // OBLIGATORIO usar .bind() para mantener el "this" referenciado.
+         this.router.get("/:id", this.getOneUserController.run.bind(this.getOneUserController));
+       }
      }
-   }
-   ```
-4. **Rutas (`routes`):** Coordina los "endpoints" resolviendo las dependencias de los controladores directamente desde el TSyringe.
-   ```typescript
-   import { container } from "@/core/shared/infrastructure/di/container";
-
-   // 1. Resuelve Instancia del Container (Inyectando todas las dependencias subyacentes mágicamente)
-   const getOneUserController = container.resolve(GetOneUserController);
-
-   // 2. Mapea la ruta (Si está siendo invocado por app web, es OBLIGATORIO usar .bind() para mantener el "this" referenciado).
-   userRoutes.get("/:id", getOneUserController.run.bind(getOneUserController));
-   ```
+     ```
 
 ---
 
@@ -138,4 +146,3 @@ container.register("UserRepository", {
 4. **Naming Convención de Ejecución:** El método principal de clases funcionales se llama OBLIGATORIAMENTE `run`. Ni `execute`, ni `invoke`.
 5. **Typescript & TSyringe:** Revisa que cada interfaz se registre en el contenedor global mediante `.register(token)`. Revisa que la clase UseCase o Controller porte `@injectable()` en la parte alta.
 
-*(Pendiente a diseñar las reglas de `middlewares` dentro de Infraestructura)*.
