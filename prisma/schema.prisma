@@ -13,6 +13,16 @@ model User {
   name     String
   password String
   isActive Boolean @default(true) @map("is_active")
+  roleId   Int     @default(1) @map("role_id")
+  role     Role    @relation(fields: [roleId], references: [id])
 
   @@map("users")
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique // e.g., 'USER', 'ADMIN'
+  users User[]
+
+  @@map("roles")
 }

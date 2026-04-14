@@ -8,6 +8,7 @@ export class UserMapper {
       name: user.getName(),
       email: user.getEmail(),
       isActive: user.getIsActive(),
+      role: user.getRole(),
     };
   }
 }

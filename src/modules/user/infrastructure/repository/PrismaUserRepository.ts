@@ -15,6 +15,9 @@ interface PrismaUserRecord {
   name: string;
   password: string;
   isActive: boolean;
+  role: {
+    name: string;
+  };
 }
 
 @injectable()
@@ -30,6 +33,7 @@ export class PrismaUserRepository implements UserRepository {
       raw.password,
       raw.isActive,
       raw.id,
+      raw.role.name,
     );
   }
 
@@ -51,6 +55,7 @@ export class PrismaUserRepository implements UserRepository {
         skip,
         take: limit,
         orderBy: { id: "asc" },
+        include: { role: true },
       }),
       prisma.user.count({ where }),
     ]);
@@ -70,6 +75,7 @@ export class PrismaUserRepository implements UserRepository {
   async findById(id: number): Promise<User | null> {
     const record = await prisma.user.findUnique({
       where: { id },
+      include: { role: true },
     });
 
     if (!record) return null;
@@ -88,7 +94,11 @@ export class PrismaUserRepository implements UserRepository {
         email: data.getEmail(),
         password: data.getPasswordHash(),
         isActive: data.getIsActive(),
+        role: {
+          connect: { name: data.getRole() },
+        },
       },
+      include: { role: true }
     });
 
     return this.toDomain(record);
@@ -106,7 +116,11 @@ export class PrismaUserRepository implements UserRepository {
         email: data.getEmail(),
         password: data.getPasswordHash(),
         isActive: data.getIsActive(),
+        role: {
+          connect: { name: data.getRole() },
+        },
       },
+      include: { role: true }
     });
 
     return this.toDomain(record);
