@@ -1,5 +1,6 @@
 import { Entity } from "@/core/shared/domain/Entity";
 import { Email } from "./value-objects/Email";
+import { Role } from "./value-objects/Role";
 import { EntityId } from "@/core/shared/domain/EntityId";
 import { CreateUserEvent } from "./event/CreateUserEvent";
 
@@ -8,7 +9,7 @@ export class User extends Entity {
   private email: Email;
   private passwordHash: string;
   private isActive: boolean;
-  private role: string;
+  private role: Role;
 
   // El constructor es privado para forzar el uso del Factory Method
   private constructor(
@@ -17,7 +18,7 @@ export class User extends Entity {
     email: Email,
     passwordHash: string,
     isActive: boolean,
-    role: string,
+    role: Role,
   ) {
     super(id);
     this.name = name;
@@ -32,9 +33,10 @@ export class User extends Entity {
     name: string,
     emailStr: string,
     passwordHash: string,
-    role: string = "USER",
+    roleStr: string = "USER",
   ): User {
     const emailVO = new Email(emailStr);
+    const roleVO = new Role(roleStr);
 
     // Aquí el ID es undefined porque es nuevo
     const user = new User(
@@ -43,7 +45,7 @@ export class User extends Entity {
       emailVO,
       passwordHash,
       true,
-      role,
+      roleVO,
     );
 
     return user;
@@ -56,12 +58,13 @@ export class User extends Entity {
     passwordHash: string,
     isActive: boolean,
     id: number,
-    role: string,
+    roleStr: string,
   ): User {
     const entityId = new EntityId(id);
     const emailVO = new Email(emailStr);
+    const roleVO = new Role(roleStr);
 
-    return new User(entityId, name, emailVO, passwordHash, isActive, role);
+    return new User(entityId, name, emailVO, passwordHash, isActive, roleVO);
   }
 
   getName() {
@@ -77,7 +80,7 @@ export class User extends Entity {
     return this.isActive;
   }
   getRole() {
-    return this.role;
+    return this.role.value;
   }
 
   // Comportamiento de dominio
