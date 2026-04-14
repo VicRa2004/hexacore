@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
-import { LoginUseCase } from "../../application/useCases/LoginUseCase";
+import { LoginUseCase } from "../../../application/useCases/LoginUseCase";
 
 import { validate } from "@/core/shared/infrastructure/libs/validate";
 import { loginSchema } from "../schemas/authSchemas";

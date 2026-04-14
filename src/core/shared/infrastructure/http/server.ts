@@ -1,14 +1,19 @@
 import express from "express";
-import { userRoutes } from "@/modules/user/infrastructure/routes/userRoutes";
 import cors from "cors";
-import { authRoutes } from "@/modules/auth/infrastructure/routes/authRoutes";
+
+import { container } from "@/core/shared/infrastructure/di/container";
+import { UserRouter } from "@/modules/user/infrastructure/http/routes/UserRouter";
+import { AuthRouter } from "@/modules/auth/infrastructure/http/routes/AuthRouter";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/user", userRoutes);
-app.use("/api/auth", authRoutes);
+const userRouter = container.resolve(UserRouter);
+const authRouter = container.resolve(AuthRouter);
+
+app.use("/api/user", userRouter.router);
+app.use("/api/auth", authRouter.router);
 
 export { app };

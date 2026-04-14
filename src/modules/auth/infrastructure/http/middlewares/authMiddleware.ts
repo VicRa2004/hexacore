@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { container } from "tsyringe";
-import { JwtService } from "../service/JwtService";
+import { JwtService } from "../../service/JwtService";
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;

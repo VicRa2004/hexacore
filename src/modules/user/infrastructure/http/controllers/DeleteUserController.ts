@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
 import { Request, Response } from "express";
-import { DeleteUserUseCase } from "../../application/useCases/DeleteUserUseCase";
+import { DeleteUserUseCase } from "../../../application/useCases/DeleteUserUseCase";
 import { userIdSchema } from "../schemas/userSchemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { validate } from "@/core/shared/infrastructure/libs/validate";
