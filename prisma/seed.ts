@@ -6,15 +6,15 @@ async function main() {
 
   // ─── 1. Roles ───────────────────────────────────────────────────────────────
   const rolesData = [
-    { id: 1, name: "USER",  description: "Usuario estándar del sistema" },
-    { id: 2, name: "ADMIN", description: "Administrador con acceso total" },
-    { id: 3, name: "MOD",   description: "Moderador con acceso parcial" },
+    { name: "USER",  description: "Usuario estándar del sistema" },
+    { name: "ADMIN", description: "Administrador con acceso total" },
+    { name: "MOD",   description: "Moderador con acceso parcial" },
   ];
 
   for (const role of rolesData) {
     await prisma.role.upsert({
-      where:  { id: role.id },
-      update: { name: role.name, description: role.description },
+      where:  { name: role.name },
+      update: { description: role.description },
       create: role,
     });
   }
