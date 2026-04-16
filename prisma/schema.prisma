@@ -8,87 +8,95 @@ datasource db {
 }
 
 // ─────────────────────────────────────────────
-//  Entidades principales
+//  1. Entidades principales
 // ─────────────────────────────────────────────
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String
-  password String
-  isActive Boolean @default(true) @map("is_active")
+  id        Int       @id @default(autoincrement()) @map("usr_id")
+  email     String    @unique @map("usr_email") @db.VarChar(128)
+  name      String    @map("usr_nombre") @db.VarChar(255)
+  password  String    @map("usr_password") @db.VarChar(255)
+  isActive  Boolean   @default(true) @map("estatus")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   // Relaciones N-a-N gestionadas por tablas intermedias explícitas
-  roles            UserRole[]
+  roles             UserRole[]
   directPermissions UserPermission[]
 
-  @@map("users")
+  @@map("user")
 }
 
 model Role {
-  id   Int    @id @default(autoincrement())
-  name String @unique // e.g., 'ADMIN', 'MOD', 'USER'
+  id          Int       @id @default(autoincrement()) @map("rol_id")
+  name        String    @unique @map("rol_nombre") @db.VarChar(150) // e.g., 'ADMIN', 'MOD', 'USER'
+  description String?   @map("rol_descripcion") @db.Text
+  isActive    Boolean   @default(true) @map("estatus")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
 
   users       UserRole[]
   permissions RolePermission[]
 
-  @@map("roles")
+  @@map("rol")
 }
 
 /// Permiso atómico: combinación única de recurso + acción.
 /// Ejemplo: resource="turnos", action="create"
 model Permission {
-  id       Int    @id @default(autoincrement())
-  resource String // e.g., "turnos", "users"
-  action   String // e.g., "create", "read", "update", "delete"
+  id       Int       @id @default(autoincrement()) @map("per_id")
+  resource String    @map("per_recurso") @db.VarChar(100) // e.g., "turnos", "users"
+  action   String    @map("per_accion") @db.VarChar(50)  // e.g., "create", "read", "update", "delete"
+  isActive Boolean   @default(true) @map("estatus")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   roles RolePermission[]
   users UserPermission[]
 
   @@unique([resource, action])
-  @@map("permissions")
+  @@map("permiso")
 }
 
 // ─────────────────────────────────────────────
-//  Tablas intermedias (N-a-N explícitas)
+//  2. Tablas intermedias (N-a-N explícitas)
 // ─────────────────────────────────────────────
 
 /// Asigna roles a usuarios
 model UserRole {
-  userId    Int      @map("user_id")
-  roleId    Int      @map("role_id")
+  userId    Int      @map("usrrol_fkuser")
+  roleId    Int      @map("usrrol_fkrol")
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
-  @@map("user_roles")
+  @@map("user_rol")
 }
 
 /// Permisos que posee un rol completo
 model RolePermission {
-  roleId       Int @map("role_id")
-  permissionId Int @map("permission_id")
+  roleId       Int @map("rolper_fkrol")
+  permissionId Int @map("rolper_fkpermiso")
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
-  @@map("role_permissions")
+  @@map("rol_permiso")
 }
 
 /// Permisos directos o excepcionales por usuario (pueden conceder O denegar)
 model UserPermission {
-  userId       Int     @map("user_id")
-  permissionId Int     @map("permission_id")
+  userId       Int     @map("usrper_fkuser")
+  permissionId Int     @map("usrper_fkpermiso")
   /// true = conceder, false = denegar (override sobre el rol)
-  granted      Boolean @default(true)
+  granted      Boolean @default(true) @map("usrper_concedido")
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([userId, permissionId])
-  @@map("user_permissions")
+  @@map("user_permiso")
 }
-
