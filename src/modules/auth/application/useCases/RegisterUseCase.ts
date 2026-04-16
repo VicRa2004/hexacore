@@ -1,12 +1,12 @@
 import { injectable, inject } from "tsyringe";
 import type { RegisterDto } from "../dtos/RegisterDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/modules/user/domain/repository/UserRepository";
-import type { PasswordHasher } from "@/modules/user/domain/service/PasswordHasher";
-import { User } from "@/modules/user/domain/User";
+import type { UserRepository } from "@/core/user/domain/repository/UserRepository";
+import type { PasswordHasher } from "@/core/user/domain/service/PasswordHasher";
+import { User } from "@/core/user/domain/User";
 import type { TokenService } from "../../domain/service/TokenService";
-import type { UserDto } from "@/modules/user/application/dtos/UserDto";
-import { UserMapper } from "@/modules/user/application/mappers/UserMapper";
+import type { UserDto } from "@/core/user/application/dtos/UserDto";
+import { UserMapper } from "@/core/user/application/mappers/UserMapper";
 
 @injectable()
 export class RegisterUseCase {
@@ -24,13 +24,16 @@ export class RegisterUseCase {
     });
 
     if (existingUsers?.data?.length > 0) {
-      throw new BaseError("El usuario con este correo electrónico ya existe", 400);
+      throw new BaseError(
+        "El usuario con este correo electrónico ya existe",
+        400,
+      );
     }
 
     const passwordHash = await this.passwordHasher.hash(dto.password);
     // Role comes as 'USER' by default in user create
     const user = User.create(dto.name, dto.email, passwordHash, "USER");
-    
+
     const createdUser = await this.userRepository.create(user);
 
     // Generar el token para iniciar sesión automáticamente

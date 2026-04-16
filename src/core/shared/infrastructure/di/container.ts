@@ -1,10 +1,10 @@
 import { Lifecycle, container } from "tsyringe";
 
 // Import implementations
-import { PrismaUserRepository } from "@/modules/user/infrastructure/repository/PrismaUserRepository";
-import { BcryptPasswordHasherService } from "@/modules/user/infrastructure/service/BcryptPasswordHasherService";
+import { PrismaUserRepository } from "@/core/user/infrastructure/repository/PrismaUserRepository";
+import { BcryptPasswordHasherService } from "@/core/user/infrastructure/service/BcryptPasswordHasherService";
 import { NodeEventBus } from "../events/NodeEventBus";
-import { SendWelcomeEmail } from "@/modules/user/application/subscribers/SendWelcomeEmail";
+import { SendWelcomeEmail } from "@/core/user/application/subscribers/SendWelcomeEmail";
 import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
 import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
 

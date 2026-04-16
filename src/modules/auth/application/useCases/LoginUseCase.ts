@@ -1,11 +1,11 @@
 import { injectable, inject } from "tsyringe";
 import type { LoginDto } from "../dtos/LoginDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/modules/user/domain/repository/UserRepository";
-import type { PasswordHasher } from "@/modules/user/domain/service/PasswordHasher";
+import type { UserRepository } from "@/core/user/domain/repository/UserRepository";
+import type { PasswordHasher } from "@/core/user/domain/service/PasswordHasher";
 import type { TokenService } from "../../domain/service/TokenService";
-import type { UserDto } from "@/modules/user/application/dtos/UserDto";
-import { UserMapper } from "@/modules/user/application/mappers/UserMapper";
+import type { UserDto } from "@/core/user/application/dtos/UserDto";
+import { UserMapper } from "@/core/user/application/mappers/UserMapper";
 
 @injectable()
 export class LoginUseCase {
