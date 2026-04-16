@@ -2,7 +2,7 @@ import { Router } from "express";
 import { injectable } from "tsyringe";
 
 import { authMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import { roleMiddleware } from "@/modules/auth/infrastructure/http/middlewares/roleMiddleware";
+import { requirePermission } from "@/modules/authorization/infrastructure/http/middlewares/requirePermission";
 
 // Controladores
 import { CreateUserController } from "../controllers/CreateUserController";
@@ -27,17 +27,40 @@ export class UserRouter {
   }
 
   private initRoutes() {
-    // Protegemos todas las rutas requeridas de autenticación
+    // Todas las rutas requieren token JWT válido
     this.router.use(authMiddleware);
 
-    // Permisos
-    const adminModAccess = roleMiddleware(["ADMIN", "MOD"]);
-    const adminOnlyAccess = roleMiddleware(["ADMIN"]);
+    // Cada ruta verifica dinámicamente en la BD si el usuario tiene
+    // el permiso exacto para el recurso "users" y la acción requerida.
+    this.router.post(
+      "/",
+      requirePermission("users", "create"),
+      this.createUserController.run.bind(this.createUserController),
+    );
 
-    this.router.post("/", adminModAccess, this.createUserController.run.bind(this.createUserController));
-    this.router.get("/", adminModAccess, this.getAllUsersController.run.bind(this.getAllUsersController));
-    this.router.get("/:id", adminModAccess, this.getOneUserController.run.bind(this.getOneUserController));
-    this.router.put("/:id", adminModAccess, this.updateUserController.run.bind(this.updateUserController));
-    this.router.delete("/:id", adminOnlyAccess, this.deleteUserController.run.bind(this.deleteUserController));
+    this.router.get(
+      "/",
+      requirePermission("users", "read"),
+      this.getAllUsersController.run.bind(this.getAllUsersController),
+    );
+
+    this.router.get(
+      "/:id",
+      requirePermission("users", "read"),
+      this.getOneUserController.run.bind(this.getOneUserController),
+    );
+
+    this.router.put(
+      "/:id",
+      requirePermission("users", "update"),
+      this.updateUserController.run.bind(this.updateUserController),
+    );
+
+    this.router.delete(
+      "/:id",
+      requirePermission("users", "delete"),
+      this.deleteUserController.run.bind(this.deleteUserController),
+    );
   }
 }
+

@@ -6,6 +6,7 @@ import { BcryptPasswordHasherService } from "@/modules/user/infrastructure/servi
 import { NodeEventBus } from "../events/NodeEventBus";
 import { SendWelcomeEmail } from "@/modules/user/application/subscribers/SendWelcomeEmail";
 import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
+import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
 
 // Register Tokens
 container.register("UserRepository", {
@@ -18,6 +19,10 @@ container.register("PasswordHasher", {
 
 container.register("JwtService", {
   useClass: JwtService,
+});
+
+container.register("AuthorizationRepository", {
+  useClass: PrismaAuthorizationRepository,
 });
 
 container.register(

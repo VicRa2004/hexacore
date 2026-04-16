@@ -15,9 +15,9 @@ interface PrismaUserRecord {
   name: string;
   password: string;
   isActive: boolean;
-  role: {
-    name: string;
-  };
+  roles: {
+    role: { name: string };
+  }[];
 }
 
 @injectable()
@@ -27,13 +27,18 @@ export class PrismaUserRepository implements UserRepository {
    * Se utiliza `reconstitute` porque el usuario ya existe en la base de datos.
    */
   private toDomain(raw: PrismaUserRecord): User {
+    // Con el esquema N-a-N un usuario puede tener varios roles.
+    // Tomamos el primero como "rol principal" para mantener compatibilidad
+    // con la entidad de dominio User que actualmente modela un único rol.
+    const primaryRole = raw.roles[0]?.role.name ?? "USER";
+
     return User.reconstitute(
       raw.name,
       raw.email,
       raw.password,
       raw.isActive,
       raw.id,
-      raw.role.name,
+      primaryRole,
     );
   }
 
@@ -55,7 +60,7 @@ export class PrismaUserRepository implements UserRepository {
         skip,
         take: limit,
         orderBy: { id: "asc" },
-        include: { role: true },
+        include: { roles: { include: { role: true } } },
       }),
       prisma.user.count({ where }),
     ]);
@@ -75,7 +80,7 @@ export class PrismaUserRepository implements UserRepository {
   async findById(id: number): Promise<User | null> {
     const record = await prisma.user.findUnique({
       where: { id },
-      include: { role: true },
+      include: { roles: { include: { role: true } } },
     });
 
     if (!record) return null;
@@ -94,11 +99,14 @@ export class PrismaUserRepository implements UserRepository {
         email: data.getEmail(),
         password: data.getPasswordHash(),
         isActive: data.getIsActive(),
-        role: {
-          connect: { name: data.getRole() },
+        // Asignar el rol inicial del usuario via la tabla intermedia UserRole
+        roles: {
+          create: {
+            role: { connect: { name: data.getRole() } },
+          },
         },
       },
-      include: { role: true }
+      include: { roles: { include: { role: true } } },
     });
 
     return this.toDomain(record);
@@ -116,11 +124,8 @@ export class PrismaUserRepository implements UserRepository {
         email: data.getEmail(),
         password: data.getPasswordHash(),
         isActive: data.getIsActive(),
-        role: {
-          connect: { name: data.getRole() },
-        },
       },
-      include: { role: true }
+      include: { roles: { include: { role: true } } },
     });
 
     return this.toDomain(record);
