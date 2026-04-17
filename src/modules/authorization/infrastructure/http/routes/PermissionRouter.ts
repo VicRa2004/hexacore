@@ -50,43 +50,144 @@ export class PermissionRouter {
     // Todas las rutas requieren token JWT válido
     this.router.use(authMiddleware);
 
-    // GET /api/permissions/users/:userId — permisos efectivos de un usuario
-    // (definida antes de /:id para evitar que "users" sea interpretado como ID)
+    /**
+     * @openapi
+     * /api/permissions/users/{userId}:
+     *   get:
+     *     tags: [Permissions]
+     *     summary: Obtener permisos efectivos de un usuario
+     *     parameters:
+     *       - in: path
+     *         name: userId
+     *         required: true
+     *         schema:
+     *           type: integer
+     *     responses:
+     *       200:
+     *         description: Lista de permisos del usuario
+     *       401:
+     *         description: No autorizado
+     */
     this.router.get(
       "/users/:userId",
       requirePermission("permissions", "read"),
       this.getUserPermissionsController.run.bind(this.getUserPermissionsController),
     );
 
-    // GET /api/permissions
+    /**
+     * @openapi
+     * /api/permissions:
+     *   get:
+     *     tags: [Permissions]
+     *     summary: Listar todos los permisos
+     *     responses:
+     *       200:
+     *         description: Lista de permisos
+     */
     this.router.get(
       "/",
       requirePermission("permissions", "read"),
       this.getAllPermissionsController.run.bind(this.getAllPermissionsController),
     );
 
-    // GET /api/permissions/:id
+    /**
+     * @openapi
+     * /api/permissions/{id}:
+     *   get:
+     *     tags: [Permissions]
+     *     summary: Obtener un permiso por ID
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *     responses:
+     *       200:
+     *         description: Datos del permiso
+     */
     this.router.get(
       "/:id",
       requirePermission("permissions", "read"),
       this.getPermissionController.run.bind(this.getPermissionController),
     );
 
-    // POST /api/permissions
+    /**
+     * @openapi
+     * /api/permissions:
+     *   post:
+     *     tags: [Permissions]
+     *     summary: Crear un nuevo permiso
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               resource:
+     *                 type: string
+     *               action:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Permiso creado
+     */
     this.router.post(
       "/",
       requirePermission("permissions", "create"),
       this.createPermissionController.run.bind(this.createPermissionController),
     );
 
-    // PUT /api/permissions/:id
+    /**
+     * @openapi
+     * /api/permissions/{id}:
+     *   put:
+     *     tags: [Permissions]
+     *     summary: Actualizar un permiso
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               resource:
+     *                 type: string
+     *               action:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Permiso actualizado
+     */
     this.router.put(
       "/:id",
       requirePermission("permissions", "update"),
       this.updatePermissionController.run.bind(this.updatePermissionController),
     );
 
-    // DELETE /api/permissions/:id
+    /**
+     * @openapi
+     * /api/permissions/{id}:
+     *   delete:
+     *     tags: [Permissions]
+     *     summary: Eliminar un permiso
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *     responses:
+     *       204:
+     *         description: Permiso eliminado
+     */
     this.router.delete(
       "/:id",
       requirePermission("permissions", "delete"),

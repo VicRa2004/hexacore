@@ -44,10 +44,10 @@ model Role {
 /// Permiso atómico: combinación única de recurso + acción.
 /// Ejemplo: resource="turnos", action="create"
 model Permission {
-  id       Int       @id @default(autoincrement()) @map("per_id")
-  resource String    @map("per_recurso") @db.VarChar(100) // e.g., "turnos", "users"
-  action   String    @map("per_accion") @db.VarChar(50)  // e.g., "create", "read", "update", "delete"
-  isActive Boolean   @default(true) @map("estatus")
+  id        Int       @id @default(autoincrement()) @map("per_id")
+  resource  String    @map("per_recurso") @db.VarChar(100) // e.g., "turnos", "users"
+  action    String    @map("per_accion") @db.VarChar(50) // e.g., "create", "read", "update", "delete"
+  isActive  Boolean   @default(true) @map("estatus")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
@@ -68,8 +68,8 @@ model UserRole {
   roleId    Int      @map("usrrol_fkrol")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
   @@map("user_rol")
@@ -80,8 +80,8 @@ model RolePermission {
   roleId       Int @map("rolper_fkrol")
   permissionId Int @map("rolper_fkpermiso")
 
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
 
   @@id([roleId, permissionId])
   @@map("rol_permiso")
@@ -94,8 +94,8 @@ model UserPermission {
   /// true = conceder, false = denegar (override sobre el rol)
   granted      Boolean @default(true) @map("usrper_concedido")
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
 
   @@id([userId, permissionId])
   @@map("user_permiso")

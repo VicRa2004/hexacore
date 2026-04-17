@@ -17,7 +17,54 @@ export class AuthRouter {
   }
 
   private initRoutes() {
+    /**
+     * @openapi
+     * /api/auth/login:
+     *   post:
+     *     tags: [Auth]
+     *     summary: Iniciar sesión
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Login exitoso, devuelve JWT
+     *       401:
+     *         description: Credenciales inválidas
+     */
     this.router.post("/login", this.loginController.run.bind(this.loginController));
+
+    /**
+     * @openapi
+     * /api/auth/register:
+     *   post:
+     *     tags: [Auth]
+     *     summary: Registrar un nuevo usuario
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
+     *                 type: string
+     *               name:
+     *                 type: string
+     *     responses:
+     *       201:
+     *         description: Usuario registrado exitosamente
+     */
     this.router.post("/register", this.registerController.run.bind(this.registerController));
   }
 }

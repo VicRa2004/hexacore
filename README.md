@@ -11,7 +11,7 @@ Ahora optimizado para ejecutarse con **Bun** para una velocidad superior y sopor
 - **Framework Web:** Express
 - **Base de Datos:** PostgreSQL
 - **ORM:** Prisma
-- **Inyección de Dependencias (DI):** Awilix (`awilix`, `awilix-express`)
+- **Inyección de Dependencias (DI):** [TSyringe](https://github.com/microsoft/tsyringe)
 - **Validación de Datos:** Zod
 - **Autenticación y Seguridad:** JWT, Bcrypt, CORS
 
@@ -19,8 +19,9 @@ Ahora optimizado para ejecutarse con **Bun** para una velocidad superior y sopor
 
 El código fuente está ubicado en el directorio `src/` agrupado estratégicamente:
 
-- **`src/core/`**: Archivos transversales como configuración central, servidor HTTP, abstracciones base e infraestructura compartida.
-- **`src/modules/`**: Módulos de negocio. Cada uno con su propio Dominio, Casos de Uso (Aplicación) y Adaptadores (Infraestructura).
+- **`src/core/`**: Contiene la configuración central, servidor HTTP, abstracciones base e infraestructura compartida.
+  - **`src/core/user/`**: Módulo de identidad y usuarios. Se ubica en `core` por su naturaleza transversal y su uso intensivo por parte del resto de los módulos del sistema.
+- **`src/modules/`**: Módulos de negocio específicos (ej. `auth`, `authorization`). Cada uno con su propio Dominio, Casos de Uso (Aplicación) y Adaptadores (Infraestructura).
 - **`prisma/`**: Esquemas de base de datos y migraciones para Prisma.
 
 ## 🚀 Requisitos Previos
@@ -75,3 +76,15 @@ Para desplegar o probar el entorno productivo:
    ```bash
    bun start
    ```
+
+## 🧪 Testing
+
+El proyecto utiliza el test runner nativo de **Bun** junto con `supertest` para pruebas de integración.
+
+```bash
+# Ejecutar todos los tests
+bun test
+
+# Ejecutar tests con observador (watch)
+bun test --watch
+```
