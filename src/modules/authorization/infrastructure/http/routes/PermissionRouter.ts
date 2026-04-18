@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { injectable, inject } from "tsyringe";
 
 import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
@@ -14,7 +14,7 @@ import { GetUserPermissionsController } from "../controllers/GetUserPermissionsC
 
 @injectable()
 export class PermissionRouter {
-  public readonly router: Router;
+  public readonly router: Hono;
 
   constructor(
     @inject("AuthMiddleware")
@@ -28,7 +28,7 @@ export class PermissionRouter {
     private readonly deletePermissionController: DeletePermissionController,
     private readonly getUserPermissionsController: GetUserPermissionsController,
   ) {
-    this.router = Router();
+    this.router = new Hono();
     this.initRoutes();
   }
 
@@ -38,41 +38,37 @@ export class PermissionRouter {
     this.router.get(
       "/users/:userId",
       this.requirePermissionMiddleware.handle("permissions", "read"),
-      this.getUserPermissionsController.run.bind(
-        this.getUserPermissionsController,
-      ),
+      this.getUserPermissionsController.run,
     );
 
     this.router.get(
       "/",
       this.requirePermissionMiddleware.handle("permissions", "read"),
-      this.getAllPermissionsController.run.bind(
-        this.getAllPermissionsController,
-      ),
+      this.getAllPermissionsController.run,
     );
 
     this.router.get(
       "/:id",
       this.requirePermissionMiddleware.handle("permissions", "read"),
-      this.getPermissionController.run.bind(this.getPermissionController),
+      this.getPermissionController.run,
     );
 
     this.router.post(
       "/",
       this.requirePermissionMiddleware.handle("permissions", "create"),
-      this.createPermissionController.run.bind(this.createPermissionController),
+      this.createPermissionController.run,
     );
 
     this.router.put(
       "/:id",
       this.requirePermissionMiddleware.handle("permissions", "update"),
-      this.updatePermissionController.run.bind(this.updatePermissionController),
+      this.updatePermissionController.run,
     );
 
     this.router.delete(
       "/:id",
       this.requirePermissionMiddleware.handle("permissions", "delete"),
-      this.deletePermissionController.run.bind(this.deletePermissionController),
+      this.deletePermissionController.run,
     );
   }
 }

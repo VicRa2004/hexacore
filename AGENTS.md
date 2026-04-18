@@ -3,6 +3,7 @@
 ## Stack
 
 - **Runtime:** Bun. Instalar paquetes con versión exacta: `bun add -E <paquete>`
+- **Framework:** Hono
 - **DB:** Solo Prisma con PostgreSQL
 - **Idioma de respuesta:** Español
 

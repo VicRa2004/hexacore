@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { Context } from "hono";
 import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { RegisterUseCase } from "../../../application/useCases/RegisterUseCase";
@@ -14,12 +14,13 @@ export class RegisterController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const dto = validate(registerSchema, req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const body = await c.req.json();
+      const dto = validate(registerSchema, body);
       const result = await this.registerUseCase.run(dto);
 
-      this.created(res, result);
-    }, res);
-  }
+      return this.created(c, result);
+    });
+  };
 }

@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { GetAllPermissionsUseCase } from "../../../application/useCases/GetAllPermissionsUseCase";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 
@@ -9,10 +9,10 @@ export class GetAllPermissionsController extends BaseController {
     super();
   }
 
-  run(_req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
       const result = await this.getAllPermissionsUseCase.run();
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }

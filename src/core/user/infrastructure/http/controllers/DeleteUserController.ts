@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { DeleteUserUseCase } from "../../../application/useCases/DeleteUserUseCase";
 import { userIdSchema } from "../schemas/userSchemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
@@ -11,11 +11,11 @@ export class DeleteUserController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const { id } = validate(userIdSchema, req.params);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const { id } = validate(userIdSchema, c.req.param());
       await this.deleteUserUseCase.run(id);
-      res.status(204).send();
-    }, res);
-  }
+      return c.body(null, 204);
+    });
+  };
 }

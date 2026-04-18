@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { UpdateUserUseCase } from "../../../application/useCases/UpdateUserUseCase";
 import { userIdSchema, updateUserSchema } from "../schemas/userSchemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
@@ -11,12 +11,13 @@ export class UpdateUserController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const { id } = validate(userIdSchema, req.params);
-      const dto = validate(updateUserSchema, req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const { id } = validate(userIdSchema, c.req.param());
+      const body = await c.req.json();
+      const dto = validate(updateUserSchema, body);
       const result = await this.updateUserUseCase.run(id, dto);
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }

@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { UpdatePermissionUseCase } from "../../../application/useCases/UpdatePermissionUseCase";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { validate } from "@/core/shared/infrastructure/libs/validate";
@@ -14,12 +14,13 @@ export class UpdatePermissionController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const { id } = validate(permissionIdSchema, req.params);
-      const dto = validate(updatePermissionSchema, req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const { id } = validate(permissionIdSchema, c.req.param());
+      const body = await c.req.json();
+      const dto = validate(updatePermissionSchema, body);
       const result = await this.updatePermissionUseCase.run(id, dto);
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }

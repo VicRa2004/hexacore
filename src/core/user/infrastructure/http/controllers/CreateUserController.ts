@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { CreateUserUseCase } from "../../../application/useCases/CreateUserUseCase";
 import { createUserSchema } from "../schemas/userSchemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
@@ -11,11 +11,18 @@ export class CreateUserController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const dto = validate(createUserSchema, req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const body = await c.req.json();
+
+      // validacion de datos
+      const dto = validate(createUserSchema, body);
+
+      // ejecucion del caso de uso
       const result = await this.createUserUseCase.run(dto);
-      this.created(res, result);
-    }, res);
-  }
+
+      // respuesta
+      return this.created(c, result);
+    });
+  };
 }

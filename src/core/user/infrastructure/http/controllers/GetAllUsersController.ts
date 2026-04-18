@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { Request, Response } from "express";
+import type { Context } from "hono";
 import { GetAllUsersUseCase } from "../../../application/useCases/GetAllUsersUseCase";
 import { getAllUsersSchema } from "../schemas/userSchemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
@@ -11,11 +11,11 @@ export class GetAllUsersController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const dto = validate(getAllUsersSchema, req.query);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const dto = validate(getAllUsersSchema, c.req.query());
       const result = await this.getAllUsersUseCase.run(dto);
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }

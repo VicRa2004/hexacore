@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { injectable, inject } from "tsyringe";
 
 import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
@@ -13,7 +13,7 @@ import { DeleteUserController } from "../controllers/DeleteUserController";
 
 @injectable()
 export class UserRouter {
-  public readonly router: Router;
+  public readonly router: Hono;
 
   constructor(
     @inject("AuthMiddleware")
@@ -26,7 +26,7 @@ export class UserRouter {
     private readonly updateUserController: UpdateUserController,
     private readonly deleteUserController: DeleteUserController,
   ) {
-    this.router = Router();
+    this.router = new Hono();
     this.initRoutes();
   }
 
@@ -73,7 +73,7 @@ export class UserRouter {
     this.router.post(
       "/",
       this.requirePermissionMiddleware.handle("users", "create"),
-      this.createUserController.run.bind(this.createUserController),
+      this.createUserController.run,
     );
 
     /**
@@ -113,7 +113,7 @@ export class UserRouter {
     this.router.get(
       "/",
       this.requirePermissionMiddleware.handle("users", "read"),
-      this.getAllUsersController.run.bind(this.getAllUsersController),
+      this.getAllUsersController.run,
     );
 
     /**
@@ -144,7 +144,7 @@ export class UserRouter {
     this.router.get(
       "/:id",
       this.requirePermissionMiddleware.handle("users", "read"),
-      this.getOneUserController.run.bind(this.getOneUserController),
+      this.getOneUserController.run,
     );
 
     /**
@@ -193,7 +193,7 @@ export class UserRouter {
     this.router.put(
       "/:id",
       this.requirePermissionMiddleware.handle("users", "update"),
-      this.updateUserController.run.bind(this.updateUserController),
+      this.updateUserController.run,
     );
 
     /**
@@ -224,7 +224,7 @@ export class UserRouter {
     this.router.delete(
       "/:id",
       this.requirePermissionMiddleware.handle("users", "delete"),
-      this.deleteUserController.run.bind(this.deleteUserController),
+      this.deleteUserController.run,
     );
   }
 }

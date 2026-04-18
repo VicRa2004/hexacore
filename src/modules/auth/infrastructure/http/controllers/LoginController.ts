@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { Context } from "hono";
 import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { LoginUseCase } from "../../../application/useCases/LoginUseCase";
@@ -14,12 +14,13 @@ export class LoginController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const dto = validate(loginSchema, req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const body = await c.req.json();
+      const dto = validate(loginSchema, body);
       const result = await this.loginUseCase.run(dto);
 
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }
