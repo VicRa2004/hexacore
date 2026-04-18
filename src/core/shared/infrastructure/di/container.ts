@@ -10,6 +10,7 @@ import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastru
 import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
 import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
 import { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
+import { PrismaRefreshTokenRepository } from "@/modules/auth/infrastructure/repository/PrismaRefreshTokenRepository";
 
 // Register Tokens
 container.register("UserRepository", {
@@ -38,6 +39,10 @@ container.register("RequirePermissionMiddleware", {
 
 container.register("CheckUserPermissionUseCase", {
   useClass: CheckUserPermissionUseCase,
+});
+
+container.register("RefreshTokenRepository", {
+  useClass: PrismaRefreshTokenRepository,
 });
 
 container.register(

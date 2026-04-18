@@ -21,3 +21,7 @@ export const registerSchema = z.object({
   email: z.email("El email es requerido y debe ser válido"),
   password: passwordSchema,
 });
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, "El refresh token es requerido"),
+});

@@ -11,6 +11,7 @@
     "declarationMap": true,
     "noUncheckedIndexedAccess": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
@@ -30,9 +31,9 @@
       "@/*": ["src/*"],
       "@core/*": ["src/core/*"],
       "@shared/*": ["src/shared/*"],
-      "@modules/*": ["src/modules/*"],
+      "@modules/*": ["src/modules/*"]
     },
-    "typeRoots": ["src/types", "node_modules/@types"],
+    "typeRoots": ["src/types", "node_modules/@types"]
   },
   "include": ["src/**/*", "src/types/**/*"],
   "exclude": [
@@ -41,6 +42,6 @@
     "dist",
     "**/*.spec.ts",
     "**/*.test.ts",
-    "**/*.e2e.spec.ts",
-  ],
+    "**/*.e2e.spec.ts"
+  ]
 }

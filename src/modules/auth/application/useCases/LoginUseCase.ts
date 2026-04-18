@@ -4,8 +4,12 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UserRepository } from "@/core/user/domain/repository/UserRepository";
 import type { PasswordHasher } from "@/core/user/domain/service/PasswordHasher";
 import type { TokenService } from "../../domain/service/TokenService";
+import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 import type { UserDto } from "@/core/user/application/dtos/UserDto";
 import { UserMapper } from "@/core/user/application/mappers/UserMapper";
+
+/** Duración del refresh token: 7 días */
+const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 @injectable()
 export class LoginUseCase {
@@ -13,9 +17,13 @@ export class LoginUseCase {
     @inject("UserRepository") private readonly userRepository: UserRepository,
     @inject("PasswordHasher") private readonly passwordHasher: PasswordHasher,
     @inject("JwtService") private readonly tokenService: TokenService,
+    @inject("RefreshTokenRepository")
+    private readonly refreshTokenRepo: RefreshTokenRepository,
   ) {}
 
-  async run(dto: LoginDto): Promise<{ token: string; user: UserDto }> {
+  async run(
+    dto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
     const users = await this.userRepository.find({
       page: 1,
       limit: 1,
@@ -37,15 +45,29 @@ export class LoginUseCase {
       throw new BaseError("Credenciales inválidas", 401);
     }
 
-    // Generar el token
-    const token = this.tokenService.generateToken({
+    // Access token de corta duración (15 min)
+    const accessToken = this.tokenService.generateToken({
       id: user.getId(),
       email: user.getEmail(),
       role: user.getRole(),
     });
 
+    // Refresh token opaco, persistido como hash en BD
+    const rawRefreshToken = this.tokenService.generateRefreshToken();
+    const tokenHash = this.tokenService.hashRefreshToken(rawRefreshToken);
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
+
+    await this.refreshTokenRepo.create({
+      tokenHash,
+      userId: user.getId(),
+      expiresAt,
+    });
+
     return {
-      token,
+      accessToken,
+      refreshToken: rawRefreshToken,
       user: UserMapper.toDto(user),
     };
   }
