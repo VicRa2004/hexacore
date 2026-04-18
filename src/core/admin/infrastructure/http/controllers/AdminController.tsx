@@ -20,6 +20,20 @@ export class AdminController extends BaseController {
     });
   };
 
+  public showRoles = async (c: Context): Promise<Response> => {
+    const { Roles } = await import("../views/Security/Roles");
+    return this.executeSafely(c, async () => {
+      return c.html(<Roles />);
+    });
+  };
+
+  public showPermissions = async (c: Context): Promise<Response> => {
+    const { Permissions } = await import("../views/Security/Permissions");
+    return this.executeSafely(c, async () => {
+      return c.html(<Permissions />);
+    });
+  };
+
   // Proceso simple de login para el admin
   public processLogin = async (c: Context): Promise<Response> => {
     return this.executeSafely(c, async () => {

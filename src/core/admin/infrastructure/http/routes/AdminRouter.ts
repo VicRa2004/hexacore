@@ -19,6 +19,10 @@ export class AdminRouter {
     // Dashboard - protegido lógicamente
     this.router.get("/dashboard", this.adminController.showDashboard.bind(this.adminController));
     
+    // Security 
+    this.router.get("/roles", this.adminController.showRoles.bind(this.adminController));
+    this.router.get("/permissions", this.adminController.showPermissions.bind(this.adminController));
+
     // Logout simple
     this.router.get("/logout", (c) => c.redirect("/admin/login"));
   }
