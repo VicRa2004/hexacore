@@ -2,15 +2,15 @@ import { Router } from "express";
 import { injectable, inject } from "tsyringe";
 
 import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/requirePermission";
+import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
 
 // Controladores CRUD de permisos
-import type { GetAllPermissionsController } from "../controllers/GetAllPermissionsController";
-import type { GetPermissionController } from "../controllers/GetPermissionController";
-import type { CreatePermissionController } from "../controllers/CreatePermissionController";
-import type { UpdatePermissionController } from "../controllers/UpdatePermissionController";
-import type { DeletePermissionController } from "../controllers/DeletePermissionController";
-import type { GetUserPermissionsController } from "../controllers/GetUserPermissionsController";
+import { GetAllPermissionsController } from "../controllers/GetAllPermissionsController";
+import { GetPermissionController } from "../controllers/GetPermissionController";
+import { CreatePermissionController } from "../controllers/CreatePermissionController";
+import { UpdatePermissionController } from "../controllers/UpdatePermissionController";
+import { DeletePermissionController } from "../controllers/DeletePermissionController";
+import { GetUserPermissionsController } from "../controllers/GetUserPermissionsController";
 
 @injectable()
 export class PermissionRouter {

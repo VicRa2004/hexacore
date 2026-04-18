@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { injectable, inject } from "tsyringe";
 
-import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/requirePermission";
+import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
+import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
 
 // Controladores
 import { CreateUserController } from "../controllers/CreateUserController";

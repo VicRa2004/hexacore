@@ -2,8 +2,8 @@ import { Router } from "express";
 import { injectable } from "tsyringe";
 import rateLimit from "express-rate-limit";
 
-import type { LoginController } from "../controllers/LoginController";
-import type { RegisterController } from "../controllers/RegisterController";
+import { LoginController } from "../controllers/LoginController";
+import { RegisterController } from "../controllers/RegisterController";
 
 @injectable()
 export class AuthRouter {

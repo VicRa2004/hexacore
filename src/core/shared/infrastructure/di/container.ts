@@ -8,7 +8,7 @@ import { SendWelcomeEmail } from "@/core/user/application/subscribers/SendWelcom
 import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
 import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
 import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/requirePermission";
+import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
 import { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
 
 // Register Tokens
