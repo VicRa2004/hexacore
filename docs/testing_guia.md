@@ -90,7 +90,6 @@ Junto a la ruta que prueba. Requiere exportar `app` sin `.listen()`. Usa `DATABA
 
 ```typescript
 import { describe, expect, it, beforeEach } from "bun:test";
-import request from "supertest";
 import { container } from "tsyringe";
 import { app } from "@/app";
 
@@ -100,25 +99,35 @@ describe("POST /api/users/register", () => {
   });
 
   it("devuelve 400 si el payload es inválido (Zod)", async () => {
-    const res = await request(app)
-      .post("/api/users/register")
-      .send({ email: "no-es-correo", password: "1" });
+    const res = await app.request("/api/users/register", {
+      method: "POST",
+      body: JSON.stringify({ email: "no-es-correo", password: "1" }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const body = await res.json();
 
     expect(res.status).toBe(400);
-    expect(res.body).toHaveProperty("success", false);
-    expect(res.body.errors).toBeArray();
+    expect(body).toHaveProperty("success", false);
+    expect(body.errors).toBeArray();
   });
 
   it("devuelve 201 y el DTO limpio al crear usuario", async () => {
-    const res = await request(app).post("/api/users/register").send({
-      email: "john@doe.com",
-      password: "PasswordFuerte123",
-      roleId: "BASIC",
+    const res = await app.request("/api/users/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "john@doe.com",
+        password: "PasswordFuerte123",
+        roleId: "BASIC",
+      }),
+      headers: { "Content-Type": "application/json" }
     });
 
+    const body = await res.json();
+
     expect(res.status).toBe(201);
-    expect(res.body.data.email).toBe("john@doe.com");
-    expect(res.body.data).not.toHaveProperty("password");
+    expect(body.data.email).toBe("john@doe.com");
+    expect(body.data).not.toHaveProperty("password");
   });
 });
 ```

@@ -10,7 +10,7 @@ Boilerplate backend con **Arquitectura Hexagonal**, construido sobre **Bun** y *
 | ------------------------- | ------------------------------------------------- |
 | Runtime & Package Manager | [Bun](https://bun.sh/)                            |
 | Lenguaje                  | TypeScript (nativo)                               |
-| Framework Web             | Express                                           |
+| Framework Web             | Hono                                              |
 | Base de datos             | PostgreSQL                                        |
 | ORM                       | Prisma                                            |
 | Inyección de dependencias | [TSyringe](https://github.com/microsoft/tsyringe) |

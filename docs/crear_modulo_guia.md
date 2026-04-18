@@ -75,13 +75,14 @@ export class CreateUserController extends BaseController {
     super();
   }
 
-  run(req: Request, res: Response): Promise<void> {
-    return this.executeSafely(async () => {
-      const dto = parseCreateUserDto(req.body);
+  run = async (c: Context): Promise<Response> => {
+    return this.executeSafely(c, async () => {
+      const body = await c.req.json();
+      const dto = parseCreateUserDto(body);
       const result = await this.createUserUseCase.run(dto);
-      this.ok(res, result);
-    }, res);
-  }
+      return this.ok(c, result);
+    });
+  };
 }
 ```
 
@@ -90,13 +91,13 @@ export class CreateUserController extends BaseController {
 ```typescript
 @injectable()
 export class UserRouter {
-  public readonly router: Router;
+  public readonly router: Hono;
 
   constructor(private readonly createUserController: CreateUserController) {
-    this.router = Router();
+    this.router = new Hono();
     this.router.post(
       "/",
-      this.createUserController.run.bind(this.createUserController),
+      this.createUserController.run,
     );
   }
 }
