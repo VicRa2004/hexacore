@@ -1,30 +1,53 @@
 # Reglas del Proyecto (Hexacore)
 
-## 1. Stack y Dependencias
-- **Bun y Versiones Exactas:** Usamos Bun como runtime/gestor. Para instalar paquetes usa la versión exacta sin modificadores: `bun add -E <paquete>`.
-- **Pre-verificación de dependencias:** ANTES de sugerir o intentar instalar cualquier dependencia de terceros, SIEMPRE revisa primero el archivo `package.json` para confirmar si la librería ya se encuentra instalada y qué versión exacta posee.
+## Stack
 
-## 2. Arquitectura Hexagonal
-- **Estructura base:** Todo el código va en `src/`. Base general en `src/core/`. El negocio va aislado en componentes dentro de `src/modules/` divididos en las 3 capas: `domain`, `application` e `infrastructure`.
-- **Documentación:** Para guías en profundidad (como por ejemplo, pasos para crear un nuevo módulo completo), debes consultar siempre los archivos Markdown dentro de la carpeta `/docs`.
+- **Runtime:** Bun. Instalar paquetes con versión exacta: `bun add -E <paquete>`
+- **DB:** Solo Prisma con PostgreSQL
+- **Idioma de respuesta:** Español
 
-## 3. Inyección de Dependencias (TSyringe)
-- Uso obligatorio de `@injectable()` en Clases (Casos de Uso, Controladores, Repos, Mappers).
-- Prohibido acoplar con `new`. 
-- Interfaces abstractas se inyectan vía `@inject("TokenName")` y se registran manual en `src/core/shared/infrastructure/di/container.ts`.
+## Dependencias
 
-## 4. Base de Datos
-- Unicamente **Prisma** con PostgreSQL.
+Antes de instalar cualquier paquete, revisar `package.json` para confirmar si ya existe.
 
-## 5. Normas para IA
-- Responde siempre en **Español**.
+## Arquitectura
 
-## 6. Reglas por Capas
-- **Domain:** Las interfaces y los Errores (extendiendo `BaseError`) y modelos centrales se definen aquí sin depender de frameworks.
-- **Application:**
-  - El método público principal en tus Use Cases OBLIGATORIAMENTE se debe llamar **`run`** (NUNCA `execute`).
-  - **Mappers y DTOs:** Prohibido devolver la entidad viva del dominio hacia la salida HTTP. Siempre mapea tus Entidades a DTOs para la entrada y salida.
-- **Infrastructure:**
-  - **HTTP:** Toda interacción web (Rutas, Controladores, Middlewares, Schemas) va dentro de `infrastructure/http/`.
-  - **Controladores simples:** Crea un Controlador por caso de uso en `http/controllers/`. Heredan de `BaseController` usando `this.executeSafely()`. Su método es `run(req, res)`.
-  - **Rutas Inyectables:** Crea clases en `http/routes/` decoradas con `@injectable()`. Inyecta los controladores mediante el constructor, inicializa un `this.router = Router()` interno y mapea los endpoints usando `.bind()` (ej: `this.router.get("/", this.ctrl.run.bind(this.ctrl))`). Prohibido usar `container.resolve()` explícitamente en la declaración de rutas.
+- `src/` — todo el código
+- `src/core/` — base general
+- `src/modules/<nombre>/{domain,application,infrastructure}` — lógica de negocio
+- `/docs` — guías detalladas (p.ej., cómo crear un módulo completo)
+
+## Capas
+
+### Domain
+
+Interfaces, errores (extendiendo `BaseError`) y modelos. Sin dependencias de frameworks.
+
+### Application
+
+- Método principal de Use Cases: `run` (nunca `execute`)
+- Prohibido devolver entidades de dominio hacia HTTP. Usar Mappers y DTOs
+
+### Infrastructure — HTTP
+
+Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
+
+**Controladores** — uno por caso de uso en `http/controllers/`:
+
+- Heredan de `BaseController`, usan `this.executeSafely()`
+- Método: `run(req, res)`
+
+**Rutas** — clases en `http/routes/` decoradas con `@injectable()`:
+
+- Inyectar controladores por constructor
+- `this.router = Router()` interno
+- Bind de métodos: `this.router.get("/", this.ctrl.run.bind(this.ctrl))`
+- Prohibido usar `container.resolve()` en la declaración de rutas
+
+## Inyección de dependencias (TSyringe)
+
+- `@injectable()` obligatorio en: Casos de Uso, Controladores, Repos, Mappers
+- Prohibido instanciar con `new`
+- Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` e inyectar con `@inject("TokenName")`
+- `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
+- `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
