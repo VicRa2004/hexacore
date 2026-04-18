@@ -7,6 +7,9 @@ import { NodeEventBus } from "../events/NodeEventBus";
 import { SendWelcomeEmail } from "@/core/user/application/subscribers/SendWelcomeEmail";
 import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
 import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
+import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
+import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/requirePermission";
+import { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
 
 // Register Tokens
 container.register("UserRepository", {
@@ -23,6 +26,18 @@ container.register("JwtService", {
 
 container.register("AuthorizationRepository", {
   useClass: PrismaAuthorizationRepository,
+});
+
+container.register("AuthMiddleware", {
+  useClass: AuthMiddleware,
+});
+
+container.register("RequirePermissionMiddleware", {
+  useClass: RequirePermissionMiddleware,
+});
+
+container.register("CheckUserPermissionUseCase", {
+  useClass: CheckUserPermissionUseCase,
 });
 
 container.register(

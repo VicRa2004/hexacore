@@ -1,13 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import { User } from "./User";
 import { CreateUserEvent } from "./event/CreateUserEvent";
+import type { RoleType } from "./value-objects/Role";
 
 describe("User Entity", () => {
   const userData = {
     name: "John Doe",
     email: "john@example.com",
     passwordHash: "hashed_password",
-    role: "USER",
+    role: "USER" as RoleType,
   };
 
   it("debería crear un usuario nuevo correctamente usando User.create", () => {

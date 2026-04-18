@@ -30,10 +30,17 @@
       "@/*": ["src/*"],
       "@core/*": ["src/core/*"],
       "@shared/*": ["src/shared/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
     },
-    "typeRoots": ["src/types", "node_modules/@types"]
+    "typeRoots": ["src/types", "node_modules/@types"],
   },
   "include": ["src/**/*", "src/types/**/*"],
-  "exclude": ["node_modules", "docs", "dist"] // Añadimos dist a exclude
+  "exclude": [
+    "node_modules",
+    "docs",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.e2e.spec.ts",
+  ],
 }

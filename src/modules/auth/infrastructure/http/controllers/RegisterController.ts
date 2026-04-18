@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { RegisterUseCase } from "../../../application/useCases/RegisterUseCase";
@@ -16,7 +16,7 @@ export class RegisterController extends BaseController {
 
   run(req: Request, res: Response): Promise<void> {
     return this.executeSafely(async () => {
-      const dto = validate(registerSchema, req.body).body;
+      const dto = validate(registerSchema, req.body);
       const result = await this.registerUseCase.run(dto);
 
       this.created(res, result);

@@ -1,16 +1,26 @@
 import { z } from "zod";
 
+const passwordSchema = z
+  .string("La contraseña es requerida")
+  .min(12, "La contraseña debe tener al menos 12 caracteres")
+  .regex(/[A-Z]/, "La contraseña debe incluir al menos una mayúscula")
+  .regex(/[a-z]/, "La contraseña debe incluir al menos una minúscula")
+  .regex(/[0-9]/, "La contraseña debe incluir al menos un número")
+  .regex(
+    /[^A-Za-z0-9]/,
+    "La contraseña debe incluir al menos un carácter especial",
+  );
+
 export const createUserSchema = z.object({
   email: z.email("Debe ser un email válido"),
   name: z.string().optional(),
-  password: z
-    .string("La contraseña es requerida")
-    .min(8, "La contraseña debe tener al menos 8 caracteres"),
+  password: passwordSchema,
 });
 
 export const updateUserSchema = z.object({
   email: z.email("Debe ser un email válido").optional(),
   name: z.string().optional(),
+  password: passwordSchema.optional(),
 });
 
 export const userIdSchema = z.object({

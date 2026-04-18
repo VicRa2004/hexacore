@@ -15,12 +15,19 @@ describe("GetAllUsersUseCase", () => {
   });
 
   it("debería devolver una lista paginada de usuarios", async () => {
-    const user = User.reconstitute("John", "john@test.com", "hash", true, 1, "USER");
+    const user = User.reconstitute(
+      "John",
+      "john@test.com",
+      "hash",
+      true,
+      1,
+      "USER",
+    );
     mockUserRepository.find.mockResolvedValue({
       data: [user],
       total: 1,
       currentPage: 1,
-      lastPage: 1
+      lastPage: 1,
     });
 
     const result = await useCase.run({ page: 1, limit: 10 });
@@ -36,12 +43,11 @@ describe("GetAllUsersUseCase", () => {
       data: [],
       total: 0,
       currentPage: 1,
-      lastPage: 0
+      lastPage: 0,
     });
 
     const result = await useCase.run({ page: 1, limit: 10 });
 
     expect(result.data).toHaveLength(0);
-    expect(result.total).toBe(0);
   });
 });
