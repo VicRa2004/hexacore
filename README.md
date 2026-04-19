@@ -4,6 +4,10 @@ Boilerplate backend con **Arquitectura Hexagonal**, construido sobre **Bun** y *
 
 ---
 
+## Licencia
+
+Este proyecto está bajo la Licencia MIT - mira el archivo [LICENSE](LICENSE) para detalles.
+
 ## Stack
 
 | Capa                      | Tecnología                                        |
