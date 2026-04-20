@@ -25,6 +25,10 @@ src/modules/<nombre>/
 
 ---
 
+## Nota:
+
+Un modulo puede ir dentro de core si va ser usando por otros modulos o tiene mucha logica compartida.
+
 ## Orden de creación: de adentro hacia afuera
 
 ### 1. Domain
@@ -95,10 +99,7 @@ export class UserRouter {
 
   constructor(private readonly createUserController: CreateUserController) {
     this.router = new Hono();
-    this.router.post(
-      "/",
-      this.createUserController.run,
-    );
+    this.router.post("/", this.createUserController.run);
   }
 }
 ```

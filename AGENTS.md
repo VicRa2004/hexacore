@@ -14,7 +14,7 @@ Antes de instalar cualquier paquete, revisar `package.json` para confirmar si ya
 ## Arquitectura
 
 - `src/` — todo el código
-- `src/core/` — base general
+- `src/core/` — base general y modulos compartidos
 - `src/modules/<nombre>/{domain,application,infrastructure}` — lógica de negocio
 - `/docs` — guías detalladas (p.ej., cómo crear un módulo completo)
 
