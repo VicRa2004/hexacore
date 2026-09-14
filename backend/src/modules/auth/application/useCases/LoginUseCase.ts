@@ -13,62 +13,62 @@ const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 @injectable()
 export class LoginUseCase {
-  constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
-    @inject("PasswordHasher") private readonly passwordHasher: PasswordHasher,
-    @inject("JwtService") private readonly tokenService: TokenService,
-    @inject("RefreshTokenRepository")
-    private readonly refreshTokenRepo: RefreshTokenRepository,
-  ) {}
+	constructor(
+		@inject("UserRepository") private readonly userRepository: UserRepository,
+		@inject("PasswordHasher") private readonly passwordHasher: PasswordHasher,
+		@inject("JwtService") private readonly tokenService: TokenService,
+		@inject("RefreshTokenRepository")
+		private readonly refreshTokenRepo: RefreshTokenRepository,
+	) {}
 
-  async run(
-    dto: LoginDto,
-  ): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
-    const users = await this.userRepository.find({
-      page: 1,
-      limit: 1,
-      email: dto.email,
-    });
+	async run(
+		dto: LoginDto,
+	): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
+		const users = await this.userRepository.find({
+			page: 1,
+			limit: 1,
+			email: dto.email,
+		});
 
-    const [user] = users.data;
+		const [user] = users.data;
 
-    if (!user) {
-      throw new BaseError("Credenciales inválidas", 401);
-    }
+		if (!user) {
+			throw new BaseError("Invalid credentials", 401);
+		}
 
-    const isPasswordValid = await this.passwordHasher.compare(
-      dto.password,
-      user.getPasswordHash(),
-    );
+		const isPasswordValid = await this.passwordHasher.compare(
+			dto.password,
+			user.getPasswordHash(),
+		);
 
-    if (!isPasswordValid) {
-      throw new BaseError("Credenciales inválidas", 401);
-    }
+		if (!isPasswordValid) {
+			throw new BaseError("Invalid credentials", 401);
+		}
 
-    // Access token de corta duración (15 min)
-    const accessToken = this.tokenService.generateToken({
-      id: user.getId(),
-      email: user.getEmail(),
-      role: user.getRole(),
-    });
+		// Access token de corta duración (15 min)
+		const accessToken = this.tokenService.generateToken({
+			id: user.getId(),
+			email: user.getEmail(),
+			role: user.getRole(),
+		});
 
-    // Refresh token opaco, persistido como hash en BD
-    const rawRefreshToken = this.tokenService.generateRefreshToken();
-    const tokenHash = this.tokenService.hashRefreshToken(rawRefreshToken);
+		// Refresh token opaco, persistido como hash en BD
+		const rawRefreshToken = this.tokenService.generateRefreshToken();
+		const tokenHash = this.tokenService.hashRefreshToken(rawRefreshToken);
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
+		const expiresAt = new Date();
+		expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
 
-    await this.refreshTokenRepo.create({
-      tokenHash,
-      userId: user.getId(),
-      expiresAt,
-    });
+		await this.refreshTokenRepo.create({
+			tokenHash,
+			userId: user.getId(),
+			expiresAt,
+		});
 
-    return {
-      accessToken,
-      refreshToken: rawRefreshToken,
-      user: UserMapper.toDto(user),
-    };
-  }
+		return {
+			accessToken,
+			refreshToken: rawRefreshToken,
+			user: UserMapper.toDto(user),
+		};
+	}
 }

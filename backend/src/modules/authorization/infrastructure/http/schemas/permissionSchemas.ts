@@ -1,41 +1,38 @@
 import { z } from "zod";
 
-/** ID numérico desde params de ruta */
+/** Numeric ID from route params */
 export const permissionIdSchema = z.object({
-  id: z
-    .string()
-    .regex(/^\d+$/, "El ID debe ser un número válido")
-    .transform(Number),
+	id: z.string().regex(/^\d+$/, "ID must be a valid number").transform(Number),
 });
 
-/** Cuerpo para crear un permiso */
+/** Body to create a permission */
 export const createPermissionSchema = z.object({
-  resource: z
-    .string()
-    .min(1, "resource no puede estar vacío")
-    .max(100, "resource no puede superar 100 caracteres"),
-  action: z
-    .string()
-    .min(1, "action no puede estar vacío")
-    .max(50, "action no puede superar 50 caracteres"),
+	resource: z
+		.string()
+		.min(1, "resource cannot be empty")
+		.max(100, "resource cannot exceed 100 characters"),
+	action: z
+		.string()
+		.min(1, "action cannot be empty")
+		.max(50, "action cannot exceed 50 characters"),
 });
 
-/** Cuerpo para actualizar un permiso (ambos campos requeridos) */
+/** Body to update a permission */
 export const updatePermissionSchema = z.object({
-  resource: z
-    .string()
-    .min(1, "resource no puede estar vacío")
-    .max(100, "resource no puede superar 100 caracteres"),
-  action: z
-    .string()
-    .min(1, "action no puede estar vacío")
-    .max(50, "action no puede superar 50 caracteres"),
+	resource: z
+		.string()
+		.min(1, "resource cannot be empty")
+		.max(100, "resource cannot exceed 100 characters"),
+	action: z
+		.string()
+		.min(1, "action cannot be empty")
+		.max(50, "action cannot exceed 50 characters"),
 });
 
-/** ID de usuario desde params de ruta (para permisos efectivos) */
+/** User ID from route params */
 export const userIdParamSchema = z.object({
-  userId: z
-    .string()
-    .regex(/^\d+$/, "El userId debe ser un número válido")
-    .transform(Number),
+	userId: z
+		.string()
+		.regex(/^\d+$/, "userId must be a valid number")
+		.transform(Number),
 });

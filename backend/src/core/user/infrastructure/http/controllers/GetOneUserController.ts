@@ -7,17 +7,17 @@ import { validate } from "@/core/shared/infrastructure/libs/validate";
 
 @injectable()
 export class GetOneUserController extends BaseController {
-  constructor(private readonly getOneUserUseCase: GetOneUserUseCase) {
-    super();
-  }
+	constructor(private readonly getOneUserUseCase: GetOneUserUseCase) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const { id } = validate(userIdSchema, c.req.param());
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const { id } = validate(userIdSchema, c.req.param());
 
-      const result = await this.getOneUserUseCase.run({ id });
+			const result = await this.getOneUserUseCase.run({ id });
 
-      return this.ok(c, result);
-    });
-  };
+			return this.ok(c, result);
+		});
+	};
 }

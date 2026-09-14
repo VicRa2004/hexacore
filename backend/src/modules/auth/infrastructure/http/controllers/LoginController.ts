@@ -8,19 +8,19 @@ import { loginSchema } from "../schemas/authSchemas";
 
 @injectable()
 export class LoginController extends BaseController {
-  constructor(
-    @inject(LoginUseCase) private readonly loginUseCase: LoginUseCase,
-  ) {
-    super();
-  }
+	constructor(
+		@inject(LoginUseCase) private readonly loginUseCase: LoginUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const body = await c.req.json();
-      const dto = validate(loginSchema, body);
-      const result = await this.loginUseCase.run(dto);
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const body = await c.req.json();
+			const dto = validate(loginSchema, body);
+			const result = await this.loginUseCase.run(dto);
 
-      return this.ok(c, result);
-    });
-  };
+			return this.ok(c, result);
+		});
+	};
 }

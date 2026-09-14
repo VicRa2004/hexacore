@@ -14,9 +14,9 @@ datasource db {
 model User {
   id        Int       @id @default(autoincrement()) @map("usr_id")
   email     String    @unique @map("usr_email") @db.VarChar(128)
-  name      String    @map("usr_nombre") @db.VarChar(255)
+  name      String    @map("usr_name") @db.VarChar(255)
   password  String    @map("usr_password") @db.VarChar(255)
-  isActive  Boolean   @default(true) @map("estatus")
+  isActive  Boolean   @default(true) @map("is_active")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
@@ -29,26 +29,26 @@ model User {
 }
 
 model Role {
-  id          Int       @id @default(autoincrement()) @map("rol_id")
-  name        String    @unique @map("rol_nombre") @db.VarChar(150) // e.g., 'ADMIN', 'MOD', 'USER'
-  description String?   @map("rol_descripcion") @db.Text
-  isActive    Boolean   @default(true) @map("estatus")
+  id          Int       @id @default(autoincrement()) @map("role_id")
+  name        String    @unique @map("role_name") @db.VarChar(150) // e.g., 'ADMIN', 'MOD', 'USER'
+  description String?   @map("role_description") @db.Text
+  isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @updatedAt @map("updated_at")
 
   users       UserRole[]
   permissions RolePermission[]
 
-  @@map("rol")
+  @@map("role")
 }
 
 /// Permiso atómico: combinación única de recurso + acción.
 /// Ejemplo: resource="turnos", action="create"
 model Permission {
-  id        Int       @id @default(autoincrement()) @map("per_id")
-  resource  String    @map("per_recurso") @db.VarChar(100) // e.g., "turnos", "users"
-  action    String    @map("per_accion") @db.VarChar(50) // e.g., "create", "read", "update", "delete"
-  isActive  Boolean   @default(true) @map("estatus")
+  id        Int       @id @default(autoincrement()) @map("permission_id")
+  resource  String    @map("per_resource") @db.VarChar(100) // e.g., "turnos", "users"
+  action    String    @map("per_action") @db.VarChar(50) // e.g., "create", "read", "update", "delete"
+  isActive  Boolean   @default(true) @map("is_active")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
@@ -56,7 +56,7 @@ model Permission {
   users UserPermission[]
 
   @@unique([resource, action])
-  @@map("permiso")
+  @@map("permission")
 }
 
 // ─────────────────────────────────────────────
@@ -66,40 +66,40 @@ model Permission {
 /// Asigna roles a usuarios
 model UserRole {
   userId    Int      @map("usrrol_fkuser")
-  roleId    Int      @map("usrrol_fkrol")
+  roleId    Int      @map("usrrol_fkrole")
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id])
   role Role @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
-  @@map("user_rol")
+  @@map("user_role")
 }
 
 /// Permisos que posee un rol completo
 model RolePermission {
-  roleId       Int @map("rolper_fkrol")
-  permissionId Int @map("rolper_fkpermiso")
+  roleId       Int @map("rolper_fkrole")
+  permissionId Int @map("rolper_fkpermission")
 
   role       Role       @relation(fields: [roleId], references: [id])
   permission Permission @relation(fields: [permissionId], references: [id])
 
   @@id([roleId, permissionId])
-  @@map("rol_permiso")
+  @@map("role_permission")
 }
 
 /// Permisos directos o excepcionales por usuario (pueden conceder O denegar)
 model UserPermission {
   userId       Int     @map("usrper_fkuser")
-  permissionId Int     @map("usrper_fkpermiso")
+  permissionId Int     @map("usrper_fkpermission")
   /// true = conceder, false = denegar (override sobre el rol)
-  granted      Boolean @default(true) @map("usrper_concedido")
+  granted      Boolean @default(true) @map("usrper_granted")
 
   user       User       @relation(fields: [userId], references: [id])
   permission Permission @relation(fields: [permissionId], references: [id])
 
   @@id([userId, permissionId])
-  @@map("user_permiso")
+  @@map("user_permission")
 }
 
 // ─────────────────────────────────────────────

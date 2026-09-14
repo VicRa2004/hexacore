@@ -5,14 +5,16 @@ import { BaseController } from "@/core/shared/infrastructure/http/base.controlle
 
 @injectable()
 export class GetAllPermissionsController extends BaseController {
-  constructor(private readonly getAllPermissionsUseCase: GetAllPermissionsUseCase) {
-    super();
-  }
+	constructor(
+		private readonly getAllPermissionsUseCase: GetAllPermissionsUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const result = await this.getAllPermissionsUseCase.run();
-      return this.ok(c, result);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const result = await this.getAllPermissionsUseCase.run();
+			return this.ok(c, result);
+		});
+	};
 }

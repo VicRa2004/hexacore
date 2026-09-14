@@ -14,50 +14,50 @@ import { PrismaRefreshTokenRepository } from "@/modules/auth/infrastructure/repo
 
 // Register Tokens
 container.register("UserRepository", {
-  useClass: PrismaUserRepository,
+	useClass: PrismaUserRepository,
 });
 
 container.register("PasswordHasher", {
-  useClass: BcryptPasswordHasherService,
+	useClass: BcryptPasswordHasherService,
 });
 
 container.register("JwtService", {
-  useClass: JwtService,
+	useClass: JwtService,
 });
 
 container.register("AuthorizationRepository", {
-  useClass: PrismaAuthorizationRepository,
+	useClass: PrismaAuthorizationRepository,
 });
 
 container.register("AuthMiddleware", {
-  useClass: AuthMiddleware,
+	useClass: AuthMiddleware,
 });
 
 container.register("RequirePermissionMiddleware", {
-  useClass: RequirePermissionMiddleware,
+	useClass: RequirePermissionMiddleware,
 });
 
 container.register("CheckUserPermissionUseCase", {
-  useClass: CheckUserPermissionUseCase,
+	useClass: CheckUserPermissionUseCase,
 });
 
 container.register("RefreshTokenRepository", {
-  useClass: PrismaRefreshTokenRepository,
+	useClass: PrismaRefreshTokenRepository,
 });
 
 container.register(
-  "EventBus",
-  {
-    useClass: NodeEventBus,
-  },
-  { lifecycle: Lifecycle.Singleton },
+	"EventBus",
+	{
+		useClass: NodeEventBus,
+	},
+	{ lifecycle: Lifecycle.Singleton },
 );
 
 function bootstrapSubscribers() {
-  const welcomeEmailSubscriber = container.resolve(SendWelcomeEmail);
-  welcomeEmailSubscriber.setupSubscription();
+	const welcomeEmailSubscriber = container.resolve(SendWelcomeEmail);
+	welcomeEmailSubscriber.setupSubscription();
 
-  console.log("✅ Suscriptores de eventos inicializados");
+	console.log("✅ Suscriptores de eventos inicializados");
 }
 
 bootstrapSubscribers();

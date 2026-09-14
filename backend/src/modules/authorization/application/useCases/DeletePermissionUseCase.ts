@@ -9,12 +9,12 @@ import type { AuthorizationRepository } from "../../domain/repository/Authorizat
  */
 @injectable()
 export class DeletePermissionUseCase {
-  constructor(
-    @inject("AuthorizationRepository")
-    private readonly authorizationRepository: AuthorizationRepository,
-  ) {}
+	constructor(
+		@inject("AuthorizationRepository")
+		private readonly authorizationRepository: AuthorizationRepository,
+	) {}
 
-  async run(id: number): Promise<void> {
-    await this.authorizationRepository.delete(id);
-  }
+	async run(id: number): Promise<void> {
+		await this.authorizationRepository.delete(id);
+	}
 }

@@ -12,17 +12,17 @@ import { PermissionMapper } from "../mappers/PermissionMapper";
  */
 @injectable()
 export class CreatePermissionUseCase {
-  constructor(
-    @inject("AuthorizationRepository")
-    private readonly authorizationRepository: AuthorizationRepository,
-  ) {}
+	constructor(
+		@inject("AuthorizationRepository")
+		private readonly authorizationRepository: AuthorizationRepository,
+	) {}
 
-  async run(dto: CreatePermissionDto): Promise<PermissionDto> {
-    const permission = await this.authorizationRepository.create(
-      dto.resource,
-      dto.action,
-    );
+	async run(dto: CreatePermissionDto): Promise<PermissionDto> {
+		const permission = await this.authorizationRepository.create(
+			dto.resource,
+			dto.action,
+		);
 
-    return PermissionMapper.toDto(permission);
-  }
+		return PermissionMapper.toDto(permission);
+	}
 }

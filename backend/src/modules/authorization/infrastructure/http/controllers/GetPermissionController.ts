@@ -7,15 +7,15 @@ import { permissionIdSchema } from "../schemas/permissionSchemas";
 
 @injectable()
 export class GetPermissionController extends BaseController {
-  constructor(private readonly getPermissionUseCase: GetPermissionUseCase) {
-    super();
-  }
+	constructor(private readonly getPermissionUseCase: GetPermissionUseCase) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const { id } = validate(permissionIdSchema, c.req.param());
-      const result = await this.getPermissionUseCase.run(id);
-      return this.ok(c, result);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const { id } = validate(permissionIdSchema, c.req.param());
+			const result = await this.getPermissionUseCase.run(id);
+			return this.ok(c, result);
+		});
+	};
 }

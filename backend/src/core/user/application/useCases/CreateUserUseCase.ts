@@ -10,34 +10,31 @@ import type { EventBus } from "@/core/shared/domain/events/EventBus";
 
 @injectable()
 export class CreateUserUseCase {
-  constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
-    @inject("PasswordHasher")
-    private readonly passwordHasherService: PasswordHasher,
-    @inject("EventBus") private readonly eventBus: EventBus,
-  ) {}
+	constructor(
+		@inject("UserRepository") private readonly userRepository: UserRepository,
+		@inject("PasswordHasher")
+		private readonly passwordHasherService: PasswordHasher,
+		@inject("EventBus") private readonly eventBus: EventBus,
+	) {}
 
-  async run(dto: CreateUserDto): Promise<UserDto> {
-    const existingUsers = await this.userRepository.find({
-      page: 1,
-      limit: 1,
-      email: dto.email,
-    });
-    if (existingUsers?.data?.length > 0) {
-      throw new BaseError(
-        "El usuario con este correo electrónico ya existe",
-        400,
-      );
-    }
+	async run(dto: CreateUserDto): Promise<UserDto> {
+		const existingUsers = await this.userRepository.find({
+			page: 1,
+			limit: 1,
+			email: dto.email,
+		});
+		if (existingUsers?.data?.length > 0) {
+			throw new BaseError("User with this email already exists", 400);
+		}
 
-    const passwordHash = await this.passwordHasherService.hash(dto.password);
-    const user = User.create(dto.name || "", dto.email, passwordHash);
-    const createdUser = await this.userRepository.create(user);
+		const passwordHash = await this.passwordHasherService.hash(dto.password);
+		const user = User.create(dto.name || "", dto.email, passwordHash);
+		const createdUser = await this.userRepository.create(user);
 
-    createdUser.addCreateEvent();
+		createdUser.addCreateEvent();
 
-    this.eventBus.publishAll(createdUser.pullDomainEvents());
+		this.eventBus.publishAll(createdUser.pullDomainEvents());
 
-    return UserMapper.toDto(createdUser);
-  }
+		return UserMapper.toDto(createdUser);
+	}
 }

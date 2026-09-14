@@ -6,21 +6,21 @@ import crypto from "node:crypto";
 
 @injectable()
 export class JwtService implements TokenService {
-  private secret = env.JWT_SECRET;
+	private secret = env.JWT_SECRET;
 
-  generateToken(payload: object, expiresIn: string = "15m"): string {
-    return jwt.sign(payload, this.secret, { expiresIn: expiresIn as any });
-  }
+	generateToken(payload: object, expiresIn: string = "15m"): string {
+		return jwt.sign(payload, this.secret, { expiresIn: expiresIn as any });
+	}
 
-  verifyToken(token: string): object | string {
-    return jwt.verify(token, this.secret);
-  }
+	verifyToken(token: string): object | string {
+		return jwt.verify(token, this.secret);
+	}
 
-  generateRefreshToken(): string {
-    return crypto.randomBytes(48).toString("hex");
-  }
+	generateRefreshToken(): string {
+		return crypto.randomBytes(48).toString("hex");
+	}
 
-  hashRefreshToken(token: string): string {
-    return crypto.createHash("sha256").update(token).digest("hex");
-  }
+	hashRefreshToken(token: string): string {
+		return crypto.createHash("sha256").update(token).digest("hex");
+	}
 }

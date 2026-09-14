@@ -5,10 +5,10 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
  * resource+action ya existe en el sistema.
  */
 export class PermissionAlreadyExistsError extends BaseError {
-  constructor(resource: string, action: string) {
-    super(
-      `Ya existe un permiso para el recurso "${resource}" con la acción "${action}".`,
-      409,
-    );
-  }
+	constructor(resource: string, action: string) {
+		super(
+			`Permission for resource "${resource}" with action "${action}" already exists.`,
+			409,
+		);
+	}
 }

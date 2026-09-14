@@ -7,15 +7,17 @@ import { permissionIdSchema } from "../schemas/permissionSchemas";
 
 @injectable()
 export class DeletePermissionController extends BaseController {
-  constructor(private readonly deletePermissionUseCase: DeletePermissionUseCase) {
-    super();
-  }
+	constructor(
+		private readonly deletePermissionUseCase: DeletePermissionUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const { id } = validate(permissionIdSchema, c.req.param());
-      await this.deletePermissionUseCase.run(id);
-      return c.body(null, 204);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const { id } = validate(permissionIdSchema, c.req.param());
+			await this.deletePermissionUseCase.run(id);
+			return c.body(null, 204);
+		});
+	};
 }

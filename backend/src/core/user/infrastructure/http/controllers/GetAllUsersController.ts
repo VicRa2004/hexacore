@@ -7,15 +7,15 @@ import { validate } from "@/core/shared/infrastructure/libs/validate";
 
 @injectable()
 export class GetAllUsersController extends BaseController {
-  constructor(private readonly getAllUsersUseCase: GetAllUsersUseCase) {
-    super();
-  }
+	constructor(private readonly getAllUsersUseCase: GetAllUsersUseCase) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const dto = validate(getAllUsersSchema, c.req.query());
-      const result = await this.getAllUsersUseCase.run(dto);
-      return this.ok(c, result);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const dto = validate(getAllUsersSchema, c.req.query());
+			const result = await this.getAllUsersUseCase.run(dto);
+			return this.ok(c, result);
+		});
+	};
 }

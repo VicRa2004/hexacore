@@ -7,15 +7,15 @@ import { UserMapper } from "../mappers/UserMapper";
 
 @injectable()
 export class GetOneUserUseCase {
-  constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
-  ) {}
+	constructor(
+		@inject("UserRepository") private readonly userRepository: UserRepository,
+	) {}
 
-  async run(dto: GetOneUserDto): Promise<UserDto> {
-    const user = await this.userRepository.findById(dto.id);
-    if (!user) {
-      throw new UserNotFoundError();
-    }
-    return UserMapper.toDto(user);
-  }
+	async run(dto: GetOneUserDto): Promise<UserDto> {
+		const user = await this.userRepository.findById(dto.id);
+		if (!user) {
+			throw new UserNotFoundError();
+		}
+		return UserMapper.toDto(user);
+	}
 }

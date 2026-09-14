@@ -7,15 +7,15 @@ import { validate } from "@/core/shared/infrastructure/libs/validate";
 
 @injectable()
 export class DeleteUserController extends BaseController {
-  constructor(private readonly deleteUserUseCase: DeleteUserUseCase) {
-    super();
-  }
+	constructor(private readonly deleteUserUseCase: DeleteUserUseCase) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const { id } = validate(userIdSchema, c.req.param());
-      await this.deleteUserUseCase.run(id);
-      return c.body(null, 204);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const { id } = validate(userIdSchema, c.req.param());
+			await this.deleteUserUseCase.run(id);
+			return c.body(null, 204);
+		});
+	};
 }

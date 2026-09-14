@@ -13,15 +13,15 @@ import { PermissionMapper } from "../mappers/PermissionMapper";
  */
 @injectable()
 export class GetUserPermissionsUseCase {
-  constructor(
-    @inject("AuthorizationRepository")
-    private readonly authorizationRepository: AuthorizationRepository,
-  ) {}
+	constructor(
+		@inject("AuthorizationRepository")
+		private readonly authorizationRepository: AuthorizationRepository,
+	) {}
 
-  async run(userId: number): Promise<PermissionDto[]> {
-    const permissions =
-      await this.authorizationRepository.getEffectivePermissions(userId);
+	async run(userId: number): Promise<PermissionDto[]> {
+		const permissions =
+			await this.authorizationRepository.getEffectivePermissions(userId);
 
-    return PermissionMapper.toDtoList(permissions);
-  }
+		return PermissionMapper.toDtoList(permissions);
+	}
 }

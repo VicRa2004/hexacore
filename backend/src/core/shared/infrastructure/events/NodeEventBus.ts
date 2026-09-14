@@ -5,17 +5,19 @@ import { singleton } from "tsyringe";
 
 @singleton()
 export class NodeEventBus implements EventBus {
-  private emitter = new EventEmitter();
+	private emitter = new EventEmitter();
 
-  publish(event: DomainEvent): void {
-    this.emitter.emit(event.eventName, event);
-  }
+	publish(event: DomainEvent): void {
+		this.emitter.emit(event.eventName, event);
+	}
 
-  subscribe(eventName: string, handler: (event: DomainEvent) => void): void {
-    this.emitter.on(eventName, handler);
-  }
+	subscribe(eventName: string, handler: (event: DomainEvent) => void): void {
+		this.emitter.on(eventName, handler);
+	}
 
-  publishAll(events: DomainEvent[]): void {
-    events.forEach((event) => this.publish(event));
-  }
+	publishAll(events: DomainEvent[]): void {
+		events.forEach((event) => {
+			this.publish(event);
+		});
+	}
 }

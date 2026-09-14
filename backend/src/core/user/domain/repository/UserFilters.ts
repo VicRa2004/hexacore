@@ -1,5 +1,5 @@
 export interface UserFilters {
-  page: number;
-  limit: number;
-  email?: string;
+	page: number;
+	limit: number;
+	email?: string;
 }

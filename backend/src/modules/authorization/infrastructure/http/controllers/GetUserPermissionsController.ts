@@ -7,17 +7,19 @@ import { userIdParamSchema } from "../schemas/permissionSchemas";
 
 @injectable()
 export class GetUserPermissionsController extends BaseController {
-  constructor(
-    private readonly getUserPermissionsUseCase: GetUserPermissionsUseCase,
-  ) {
-    super();
-  }
+	constructor(
+		private readonly getUserPermissionsUseCase: GetUserPermissionsUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const { userId } = validate(userIdParamSchema, { userId: c.req.param("userId") });
-      const result = await this.getUserPermissionsUseCase.run(userId);
-      return this.ok(c, result);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const { userId } = validate(userIdParamSchema, {
+				userId: c.req.param("userId"),
+			});
+			const result = await this.getUserPermissionsUseCase.run(userId);
+			return this.ok(c, result);
+		});
+	};
 }

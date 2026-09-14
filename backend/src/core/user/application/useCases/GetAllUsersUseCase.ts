@@ -7,22 +7,22 @@ import { UserMapper } from "../mappers/UserMapper";
 
 @injectable()
 export class GetAllUsersUseCase {
-  constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
-  ) {}
+	constructor(
+		@inject("UserRepository") private readonly userRepository: UserRepository,
+	) {}
 
-  async run(dto: GetAllUsersDto): Promise<Pagination<UserDto>> {
-    const filters = {
-      page: dto.page,
-      limit: dto.limit,
-      email: dto.email,
-    };
+	async run(dto: GetAllUsersDto): Promise<Pagination<UserDto>> {
+		const filters = {
+			page: dto.page,
+			limit: dto.limit,
+			email: dto.email,
+		};
 
-    const paginatedResult = await this.userRepository.find(filters);
+		const paginatedResult = await this.userRepository.find(filters);
 
-    return {
-      ...paginatedResult,
-      data: paginatedResult.data.map((user) => UserMapper.toDto(user)),
-    };
-  }
+		return {
+			...paginatedResult,
+			data: paginatedResult.data.map((user) => UserMapper.toDto(user)),
+		};
+	}
 }

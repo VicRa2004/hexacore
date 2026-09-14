@@ -12,18 +12,18 @@ import { PermissionNotFoundError } from "../../domain/error/PermissionNotFoundEr
  */
 @injectable()
 export class GetPermissionUseCase {
-  constructor(
-    @inject("AuthorizationRepository")
-    private readonly authorizationRepository: AuthorizationRepository,
-  ) {}
+	constructor(
+		@inject("AuthorizationRepository")
+		private readonly authorizationRepository: AuthorizationRepository,
+	) {}
 
-  async run(id: number): Promise<PermissionDto> {
-    const permission = await this.authorizationRepository.findById(id);
+	async run(id: number): Promise<PermissionDto> {
+		const permission = await this.authorizationRepository.findById(id);
 
-    if (!permission) {
-      throw new PermissionNotFoundError(id);
-    }
+		if (!permission) {
+			throw new PermissionNotFoundError(id);
+		}
 
-    return PermissionMapper.toDto(permission);
-  }
+		return PermissionMapper.toDto(permission);
+	}
 }

@@ -7,16 +7,18 @@ import { createPermissionSchema } from "../schemas/permissionSchemas";
 
 @injectable()
 export class CreatePermissionController extends BaseController {
-  constructor(private readonly createPermissionUseCase: CreatePermissionUseCase) {
-    super();
-  }
+	constructor(
+		private readonly createPermissionUseCase: CreatePermissionUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const body = await c.req.json();
-      const dto = validate(createPermissionSchema, body);
-      const result = await this.createPermissionUseCase.run(dto);
-      return this.created(c, result);
-    });
-  };
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const body = await c.req.json();
+			const dto = validate(createPermissionSchema, body);
+			const result = await this.createPermissionUseCase.run(dto);
+			return this.created(c, result);
+		});
+	};
 }

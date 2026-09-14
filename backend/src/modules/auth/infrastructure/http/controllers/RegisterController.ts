@@ -8,19 +8,19 @@ import { registerSchema } from "../schemas/authSchemas";
 
 @injectable()
 export class RegisterController extends BaseController {
-  constructor(
-    @inject(RegisterUseCase) private readonly registerUseCase: RegisterUseCase,
-  ) {
-    super();
-  }
+	constructor(
+		@inject(RegisterUseCase) private readonly registerUseCase: RegisterUseCase,
+	) {
+		super();
+	}
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const body = await c.req.json();
-      const dto = validate(registerSchema, body);
-      const result = await this.registerUseCase.run(dto);
+	run = async (c: Context): Promise<Response> => {
+		return this.executeSafely(c, async () => {
+			const body = await c.req.json();
+			const dto = validate(registerSchema, body);
+			const result = await this.registerUseCase.run(dto);
 
-      return this.created(c, result);
-    });
-  };
+			return this.created(c, result);
+		});
+	};
 }

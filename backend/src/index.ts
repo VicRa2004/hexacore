@@ -3,8 +3,8 @@ import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
 
 const server = Bun.serve({
-  port: env.PORT,
-  fetch: app.fetch,
+	port: env.PORT,
+	fetch: app.fetch,
 });
 
 console.log("-----------------------------------------");

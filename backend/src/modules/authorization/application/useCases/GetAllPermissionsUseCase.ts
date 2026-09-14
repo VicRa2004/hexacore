@@ -10,13 +10,13 @@ import { PermissionMapper } from "../mappers/PermissionMapper";
  */
 @injectable()
 export class GetAllPermissionsUseCase {
-  constructor(
-    @inject("AuthorizationRepository")
-    private readonly authorizationRepository: AuthorizationRepository,
-  ) {}
+	constructor(
+		@inject("AuthorizationRepository")
+		private readonly authorizationRepository: AuthorizationRepository,
+	) {}
 
-  async run(): Promise<PermissionDto[]> {
-    const permissions = await this.authorizationRepository.findAll();
-    return PermissionMapper.toDtoList(permissions);
-  }
+	async run(): Promise<PermissionDto[]> {
+		const permissions = await this.authorizationRepository.findAll();
+		return PermissionMapper.toDtoList(permissions);
+	}
 }

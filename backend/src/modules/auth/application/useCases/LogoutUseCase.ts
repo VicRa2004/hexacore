@@ -5,26 +5,25 @@ import type { RefreshTokenRepository } from "../../domain/repository/RefreshToke
 
 @injectable()
 export class LogoutUseCase {
-  constructor(
-    @inject("JwtService") private readonly tokenService: TokenService,
-    @inject("RefreshTokenRepository")
-    private readonly refreshTokenRepo: RefreshTokenRepository,
-  ) {}
+	constructor(
+		@inject("JwtService") private readonly tokenService: TokenService,
+		@inject("RefreshTokenRepository")
+		private readonly refreshTokenRepo: RefreshTokenRepository,
+	) {}
 
-  /**
-   * Revoca el refresh token proporcionado para invalidar la sesión.
-   * El access token seguirá siendo válido hasta que expire (máx 15 min),
-   * pero no se podrá obtener uno nuevo sin un refresh token válido.
-   */
-  async run(refreshToken: string): Promise<void> {
-    const tokenHash = this.tokenService.hashRefreshToken(refreshToken);
-    const storedToken =
-      await this.refreshTokenRepo.findValidByHash(tokenHash);
+	/**
+	 * Revoca el refresh token proporcionado para invalidar la sesión.
+	 * El access token seguirá siendo válido hasta que expire (máx 15 min),
+	 * pero no se podrá obtener uno nuevo sin un refresh token válido.
+	 */
+	async run(refreshToken: string): Promise<void> {
+		const tokenHash = this.tokenService.hashRefreshToken(refreshToken);
+		const storedToken = await this.refreshTokenRepo.findValidByHash(tokenHash);
 
-    if (!storedToken) {
-      throw new BaseError("Refresh token inválido", 400);
-    }
+		if (!storedToken) {
+			throw new BaseError("Invalid refresh token", 400);
+		}
 
-    await this.refreshTokenRepo.revokeById(storedToken.id);
-  }
+		await this.refreshTokenRepo.revokeById(storedToken.id);
+	}
 }

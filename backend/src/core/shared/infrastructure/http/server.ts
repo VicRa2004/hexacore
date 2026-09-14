@@ -37,15 +37,15 @@ app.route("/api/permissions", permissionRouter.router);
 
 // 5. Global Error Handler
 app.onError((err, c) => {
-  console.error(err);
+	console.error(err);
 
-  // Extraemos el status (forzando tipo de manera segura para Hono)
-  const status = (err as any).status || 500;
+	// Extraemos el status (forzando tipo de manera segura para Hono)
+	const status = (err as any).status || 500;
 
-  return c.json(
-    { error: err.message || "Internal Server Error" },
-    status as any, // Casteo necesario porque Hono es muy estricto con los códigos HTTP (StatusCode)
-  );
+	return c.json(
+		{ error: err.message || "Internal Server Error" },
+		status as any, // Casteo necesario porque Hono es muy estricto con los códigos HTTP (StatusCode)
+	);
 });
 
 export { app };

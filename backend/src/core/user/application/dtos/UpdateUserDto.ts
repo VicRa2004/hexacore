@@ -1,4 +1,4 @@
 export interface UpdateUserDto {
-  email?: string;
-  name?: string;
+	email?: string;
+	name?: string;
 }
