@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+    },
     "prisma-cli": {
       "source": "prisma/skills",
       "sourceType": "github",
@@ -16,10 +22,46 @@
       "sourceType": "github",
       "computedHash": "0d6f44ac34b1ed3f8ed2970ecf90483d0f658fd1d204458f62bfefa28f31b095"
     },
+    "tailwind-4-docs": {
+      "source": "lombiq/tailwind-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tailwind-4-docs/SKILL.md",
+      "computedHash": "de756f5f03cc20a029983875b00b9dfef9d0ba8567d242c5cbb0262037d0a134"
+    },
+    "tanstack-form": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-form/skills/tanstack-form/SKILL.md",
+      "computedHash": "1eb9f9fc43ab2777f586f916b2234c5340ed98f296a98b22c75cbbafcbd29b86"
+    },
+    "tanstack-query": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-query/skills/tanstack-query/SKILL.md",
+      "computedHash": "b8a0477cd4d7bf8fa54d27f8e64d82388402f0d502591db50a357df5b9995c75"
+    },
+    "tanstack-router": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-router/skills/tanstack-router/SKILL.md",
+      "computedHash": "24beccc4016f91bab65547209cfd849ea5e66f3d5d92820683a9dd84669ced56"
+    },
+    "tanstack-table": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-table/skills/tanstack-table/SKILL.md",
+      "computedHash": "d5ac71bd795696cd3310165c3ea0e435c310a0ac3c4e9dd45b39ed91b8dbcbb1"
+    },
     "typescript-advanced-types": {
       "source": "wshobson/agents",
       "sourceType": "github",
       "computedHash": "ee8377c523a911be41c31037b477805773ca5ab5ade181e44ca7dd3cd8df6692"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
     }
   }
 }

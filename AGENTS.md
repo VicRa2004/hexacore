@@ -6,7 +6,7 @@ Monorepo simple con dos carpetas: `backend/` y `frontend/`. Sin `apps/` ni `pack
 
 - **Gestor del monorepo e instalación:** pnpm (v11+). El `pnpm-lock.yaml` de la raíz es la única fuente de verdad.
 - **Backend:** Bun + Hono + Prisma 7 + PostgreSQL. Se **ejecuta** con Bun, ver `backend/AGENTS.md`.
-- **Frontend:** Vite + React 19 + TypeScript + TanStack Suite (Query, Router, Form) + Tailwind CSS v4. Se ejecuta con Vite en dev (`pnpm dev:frontend`), ver `frontend/README.md`.
+- **Frontend:** Vite + React 19 + TypeScript + TanStack Suite (Query, Router, Form) + Tailwind CSS v4. Se ejecuta con Vite en dev (`pnpm dev:frontend`), ver `frontend/AGENTS.md`.
 - **Linter/formatter:** Biome en la raíz (`biome.json`). Sin configs locales.
 - **Idioma de respuesta:** Español
 
@@ -54,5 +54,6 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 ```
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
+- `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
 - Docker vive en la raíz: `docker compose up`.
 - Variables: `cp backend/.env.example backend/.env`.

@@ -23,9 +23,9 @@ Antes de instalar cualquier paquete, revisar `package.json` para confirmar si ya
 ## Arquitectura
 
 - `src/` — todo el código
-- `src/core/` — base general y modulos compartidos
-- `src/modules/<nombre>/{domain,application,infrastructure}` — lógica de negocio
-- `/docs` — guías detalladas (p.ej., cómo crear un módulo completo)
+- `src/core/` — base general, utilidades compartidas, configuración y módulos de dominio transversales (ej. `src/core/user`)
+- `src/modules/<nombre>/{domain,application,infrastructure}` — módulos de características delimitadas (ej. `auth`, `authorization`)
+- `/docs` — guías detalladas (p.ej., cómo crear un módulo completo, guía de testing y autenticación)
 
 ## Capas
 
@@ -44,20 +44,21 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 
 **Controladores** — uno por caso de uso en `http/controllers/`:
 
-- Heredan de `BaseController`, usan `this.executeSafely()`
-- Método: `run(req, res)`
+- Heredan de `BaseController`, usan `this.executeSafely(c, async () => { ... })`
+- Método: `run = async (c: Context): Promise<Response>` (Hono usa `Context`, nunca `req, res`)
 
 **Rutas** — clases en `http/routes/` decoradas con `@injectable()`:
 
-- Inyectar controladores por constructor
-- `this.router = Router()` interno
-- Bind de métodos: `this.router.get("/", this.ctrl.run.bind(this.ctrl))`
+- Inyectar controladores y middlewares por constructor
+- `public readonly router: Hono = new Hono()` interno (nunca `Router()` de Express)
+- Registro de endpoints: `this.router.get("/", this.ctrl.run)` o `this.router.post("/", middleware.handle(...), this.ctrl.run)`
 - Prohibido usar `container.resolve()` en la declaración de rutas
+- Montaje en el servidor: `src/core/shared/infrastructure/http/server.ts` con `app.route("/api/...", router.router)`
 
 ## Inyección de dependencias (TSyringe)
 
 - `@injectable()` obligatorio en: Casos de Uso, Controladores, Repos, Mappers
-- Prohibido instanciar con `new`
+- Prohibido instanciar con `new` en código productivo (permitido solo en tests unitarios para aislamiento)
 - Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` e inyectar con `@inject("TokenName")`
 - `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
 - `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
