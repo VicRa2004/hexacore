@@ -1,0 +1,11 @@
+{
+	"name": "frontend",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"description": "Placeholder del frontend de Hexacore. Reservado para después.",
+	"scripts": {},
+	"keywords": [],
+	"author": "",
+	"license": "MIT"
+}

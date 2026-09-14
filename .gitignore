@@ -1,6 +1,13 @@
 node_modules
 .env
+.env.local
+backend/build
+backend/dist
+backend/src/generated/prisma
+frontend/dist
+frontend/build
+frontend/.vite
+dist
 build
-/src/generated/prisma
-/dist
-/src/generated/prisma
+*.tsbuildinfo
+pnpm-debug.log*

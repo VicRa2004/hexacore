@@ -1,0 +1,52 @@
+{
+	"name": "backend",
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "Victor Raúl",
+	"license": "MIT",
+	"scripts": {
+		"postinstall": "DATABASE_URL=${DATABASE_URL:-postgresql://user:password@localhost:5432/hexacore_db?schema=public} prisma generate",
+		"start": "bun build/index.js",
+		"dev": "bun --hot src/index.ts",
+		"test": "bun test",
+		"test:coverage": "bun test --coverage",
+		"test:e2e": "bun test '**/*.e2e.spec.ts'",
+		"test:watch": "bun test --watch",
+		"create:admin": "bun scripts/create-admin.ts"
+	},
+	"prisma": {
+		"seed": "bun prisma/seed.ts"
+	},
+	"keywords": [],
+	"description": "",
+	"dependencies": {
+		"@hono/swagger-ui": "0.6.1",
+		"@prisma/adapter-pg": "7.10.0",
+		"@prisma/client": "7.10.0",
+		"bcrypt": "6.0.0",
+		"cookie-parser": "1.4.7",
+		"dotenv": "17.4.2",
+		"express-rate-limit": "8.7.0",
+		"hono": "4.13.7",
+		"jsonwebtoken": "9.0.3",
+		"pg": "8.23.0",
+		"reflect-metadata": "0.2.2",
+		"swagger-jsdoc": "6.3.0",
+		"tsyringe": "4.10.0",
+		"zod": "4.6.5"
+	},
+	"devDependencies": {
+		"@types/bcrypt": "6.0.0",
+		"@types/bun": "1.4.2",
+		"@types/jsonwebtoken": "9.0.10",
+		"@types/node": "26.5.1",
+		"@types/pg": "8.23.1",
+		"@types/supertest": "7.2.1",
+		"@types/swagger-jsdoc": "6.0.4",
+		"@types/swagger-ui-express": "4.1.8",
+		"prisma": "7.10.0",
+		"supertest": "7.2.2",
+		"tsc-alias": "1.9.5",
+		"typescript": "7.0.2"
+	}
+}

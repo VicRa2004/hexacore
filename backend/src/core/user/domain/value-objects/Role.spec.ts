@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { describe, expect, it } from "bun:test";
 import { Role } from "./Role";
 import { BaseError } from "@/core/shared/domain/error/BaseError";

@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { GetAllUsersUseCase } from "./GetAllUsersUseCase";
 import { User } from "../../domain/User";

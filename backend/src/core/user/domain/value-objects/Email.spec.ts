@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { describe, expect, it } from "bun:test";
 import { Email } from "./Email";
 import { UserValidationError } from "../error/UserValidationError";

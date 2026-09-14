@@ -2,16 +2,16 @@
 FROM oven/bun:1.1 AS base
 WORKDIR /app
 
-# Instalar dependencias
+# Instalar dependencias (el lockfile vive en la raíz del monorepo)
 FROM base AS install
 RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+COPY package.json /temp/dev/
+RUN cd /temp/dev && bun install
 
 # Instalar dependencias de producción
 RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+COPY package.json /temp/prod/
+RUN cd /temp/prod && bun install --production
 
 # Crear imagen final
 FROM base AS release

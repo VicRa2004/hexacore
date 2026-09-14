@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { describe, expect, it } from "bun:test";
 import { User } from "./User";
 import { CreateUserEvent } from "./event/CreateUserEvent";
