@@ -41,7 +41,7 @@ backend/
 ├── prisma/                  # Esquemas y migraciones
 ├── scripts/                 # create-admin.ts, ...
 ├── docs/                    # guías (crear módulo, auth, testing)
-├── Dockerfile / docker-compose.yml / .env.example
+├── Dockerfile / .env.example
 └── AGENTS.md                # reglas específicas del backend
 frontend/                    # placeholder (package.json mínimo, sin código)
 ```
@@ -102,7 +102,7 @@ pnpm lint:fix   # corrige automáticamente
 ## Docker
 
 ```bash
-docker compose -f backend/docker-compose.yml up
+docker compose up
 ```
 
 ---

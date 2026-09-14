@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hexacore_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://user:password@localhost:5432/hexacore_db?schema=public"
+      JWT_SECRET: "development_secret_key_123"
+      PORT: 3000
+      NODE_ENV: dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hexacore_frontend
+    restart: always
+    ports:
+      - "5173:5173"

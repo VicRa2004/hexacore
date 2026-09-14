@@ -12,6 +12,7 @@
 		"format": "biome format ./backend ./frontend",
 		"format:fix": "biome format --write ./backend ./frontend",
 		"ci": "biome ci ./backend ./frontend",
+		"dev": "pnpm --filter backend dev",
 		"dev:backend": "pnpm --filter backend dev",
 		"test:backend": "pnpm --filter backend test",
 		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://user:password@localhost:5432/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",

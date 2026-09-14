@@ -49,5 +49,5 @@ frontend/  # placeholder vacío hasta definir el stack
 ```
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
-- Docker vive en `backend/`: `docker compose -f backend/docker-compose.yml up`.
+- Docker vive en la raíz: `docker compose up`.
 - Variables: `cp backend/.env.example backend/.env`.
