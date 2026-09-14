@@ -37,16 +37,35 @@ export class AuthRouter {
 		 *         application/json:
 		 *           schema:
 		 *             type: object
+		 *             required: [email, password]
 		 *             properties:
 		 *               email:
 		 *                 type: string
+		 *                 format: email
+		 *                 example: user@example.com
 		 *               password:
 		 *                 type: string
+		 *                 format: password
+		 *                 example: SecurePass123!
 		 *     responses:
 		 *       200:
-		 *         description: Login exitoso, devuelve accessToken y refreshToken
+		 *         description: Login exitoso, retorna par de tokens y datos del usuario
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/AuthResponse'
+		 *       400:
+		 *         description: Datos inválidos
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       401:
 		 *         description: Credenciales inválidas
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.post("/login", this.loginController.run);
 
@@ -62,16 +81,33 @@ export class AuthRouter {
 		 *         application/json:
 		 *           schema:
 		 *             type: object
+		 *             required: [name, email, password]
 		 *             properties:
-		 *               email:
-		 *                 type: string
-		 *               password:
-		 *                 type: string
 		 *               name:
 		 *                 type: string
+		 *                 example: John Doe
+		 *               email:
+		 *                 type: string
+		 *                 format: email
+		 *                 example: user@example.com
+		 *               password:
+		 *                 type: string
+		 *                 format: password
+		 *                 description: Mínimo 12 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial
+		 *                 example: SecurePass123!
 		 *     responses:
 		 *       201:
-		 *         description: Usuario registrado exitosamente
+		 *         description: Usuario registrado exitosamente y sesión iniciada
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/AuthResponse'
+		 *       400:
+		 *         description: Validación fallida o correo ya registrado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.post("/register", this.registerController.run);
 
@@ -90,14 +126,37 @@ export class AuthRouter {
 		 *         application/json:
 		 *           schema:
 		 *             type: object
+		 *             required: [refreshToken]
 		 *             properties:
 		 *               refreshToken:
 		 *                 type: string
+		 *                 example: 550e8400-e29b-41d4-a716-446655440000
 		 *     responses:
 		 *       200:
 		 *         description: Tokens renovados exitosamente
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 accessToken:
+		 *                   type: string
+		 *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+		 *                 refreshToken:
+		 *                   type: string
+		 *                   example: 550e8400-e29b-41d4-a716-446655440000
+		 *       400:
+		 *         description: Token no provisto o formato inválido
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       401:
 		 *         description: Refresh token inválido o expirado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.post("/refresh", this.refreshTokenController.run);
 
@@ -117,14 +176,28 @@ export class AuthRouter {
 		 *         application/json:
 		 *           schema:
 		 *             type: object
+		 *             required: [refreshToken]
 		 *             properties:
 		 *               refreshToken:
 		 *                 type: string
+		 *                 example: 550e8400-e29b-41d4-a716-446655440000
 		 *     responses:
 		 *       200:
 		 *         description: Sesión cerrada correctamente
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 message:
+		 *                   type: string
+		 *                   example: Sesión cerrada correctamente
 		 *       400:
 		 *         description: Refresh token inválido
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.post("/logout", this.logoutController.run);
 	}

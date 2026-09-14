@@ -8,7 +8,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
 			title: "Hexacore API",
 			version: "1.0.0",
 			description:
-				"Documentación de la API de Hexacore - Arquitectura Hexagonal con Bun y Express",
+				"Documentación interactiva de la API de Hexacore generada con Scalar. Arquitectura hexagonal construida con Bun, Hono y PostgreSQL.",
 			contact: {
 				name: "Soporte",
 			},
@@ -25,6 +25,64 @@ const swaggerOptions: swaggerJsDoc.Options = {
 					type: "http",
 					scheme: "bearer",
 					bearerFormat: "JWT",
+					description: "Introduce el token JWT con formato Bearer <token>",
+				},
+			},
+			schemas: {
+				UserDto: {
+					type: "object",
+					properties: {
+						id: { type: "integer", example: 1 },
+						name: { type: "string", example: "John Doe" },
+						email: {
+							type: "string",
+							format: "email",
+							example: "user@example.com",
+						},
+						isActive: { type: "boolean", example: true },
+						role: { type: "string", example: "USER" },
+					},
+					required: ["id", "name", "email", "isActive", "role"],
+				},
+				PermissionDto: {
+					type: "object",
+					properties: {
+						id: { type: "integer", example: 1 },
+						resource: { type: "string", example: "users" },
+						action: { type: "string", example: "read" },
+					},
+					required: ["id", "resource", "action"],
+				},
+				AuthResponse: {
+					type: "object",
+					properties: {
+						accessToken: {
+							type: "string",
+							example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+						},
+						refreshToken: {
+							type: "string",
+							example: "550e8400-e29b-41d4-a716-446655440000",
+						},
+						user: {
+							$ref: "#/components/schemas/UserDto",
+						},
+					},
+					required: ["accessToken", "refreshToken", "user"],
+				},
+				ErrorResponse: {
+					type: "object",
+					properties: {
+						error: {
+							type: "string",
+							example: "Mensaje descriptivo del error",
+						},
+						details: {
+							type: "string",
+							example: "Detalles adicionales de validación",
+						},
+					},
+					required: ["error"],
 				},
 			},
 		},
@@ -34,7 +92,6 @@ const swaggerOptions: swaggerJsDoc.Options = {
 			},
 		],
 	},
-	// Rutas donde se encuentran las anotaciones (puedes añadir más a medida que crees módulos)
 	apis: [
 		"./src/core/*/infrastructure/http/routes/*.ts",
 		"./src/modules/*/infrastructure/http/routes/*.ts",
@@ -43,4 +100,5 @@ const swaggerOptions: swaggerJsDoc.Options = {
 	],
 };
 
-export const swaggerSpec = swaggerJsDoc(swaggerOptions);
+export const openApiSpec = swaggerJsDoc(swaggerOptions);
+export const swaggerSpec = openApiSpec;

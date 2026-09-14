@@ -41,32 +41,51 @@ export class UserRouter {
 		 *     tags: [Users]
 		 *     summary: Crear un nuevo usuario
 		 *     security:
-		 *       - BearerAuth: []
+		 *       - bearerAuth: []
 		 *     requestBody:
 		 *       required: true
 		 *       content:
 		 *         application/json:
 		 *           schema:
 		 *             type: object
+		 *             required: [email, name, password]
 		 *             properties:
 		 *               email:
 		 *                 type: string
+		 *                 format: email
 		 *                 example: user@example.com
 		 *               name:
 		 *                 type: string
 		 *                 example: John Doe
 		 *               password:
 		 *                 type: string
+		 *                 format: password
 		 *                 example: SecurePass123!
 		 *     responses:
 		 *       201:
 		 *         description: Usuario creado exitosamente
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/UserDto'
 		 *       400:
-		 *         description: Validación fallida
+		 *         description: Validación fallida o usuario existente
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       401:
 		 *         description: No autorizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       403:
-		 *         description: Permiso denegado
+		 *         description: Permiso denegado (requiere users:create)
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		// Cada ruta verifica dinámicamente en la BD si el usuario tiene
 		// el permiso exacto para el recurso "users" y la acción requerida.
@@ -83,7 +102,7 @@ export class UserRouter {
 		 *     tags: [Users]
 		 *     summary: Listar todos los usuarios
 		 *     security:
-		 *       - BearerAuth: []
+		 *       - bearerAuth: []
 		 *     parameters:
 		 *       - in: query
 		 *         name: page
@@ -104,11 +123,40 @@ export class UserRouter {
 		 *         description: Filtrar por email
 		 *     responses:
 		 *       200:
-		 *         description: Lista de usuarios
+		 *         description: Lista paginada de usuarios
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 data:
+		 *                   type: array
+		 *                   items:
+		 *                     $ref: '#/components/schemas/UserDto'
+		 *                 total:
+		 *                   type: integer
+		 *                   example: 10
+		 *                 page:
+		 *                   type: integer
+		 *                   example: 1
+		 *                 limit:
+		 *                   type: integer
+		 *                   example: 10
+		 *                 totalPages:
+		 *                   type: integer
+		 *                   example: 1
 		 *       401:
 		 *         description: No autorizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       403:
-		 *         description: Permiso denegado
+		 *         description: Permiso denegado (requiere users:read)
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.get(
 			"/",
@@ -123,7 +171,7 @@ export class UserRouter {
 		 *     tags: [Users]
 		 *     summary: Obtener un usuario por ID
 		 *     security:
-		 *       - BearerAuth: []
+		 *       - bearerAuth: []
 		 *     parameters:
 		 *       - in: path
 		 *         name: id
@@ -133,13 +181,29 @@ export class UserRouter {
 		 *         description: ID del usuario
 		 *     responses:
 		 *       200:
-		 *         description: Datos del usuario
+		 *         description: Datos del usuario encontrado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/UserDto'
 		 *       401:
 		 *         description: No autorizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       403:
-		 *         description: Permiso denegado
+		 *         description: Permiso denegado (requiere users:read)
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       404:
 		 *         description: Usuario no encontrado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.get(
 			"/:id",
@@ -154,7 +218,7 @@ export class UserRouter {
 		 *     tags: [Users]
 		 *     summary: Actualizar un usuario
 		 *     security:
-		 *       - BearerAuth: []
+		 *       - bearerAuth: []
 		 *     parameters:
 		 *       - in: path
 		 *         name: id
@@ -171,24 +235,46 @@ export class UserRouter {
 		 *             properties:
 		 *               email:
 		 *                 type: string
+		 *                 format: email
 		 *                 example: newemail@example.com
 		 *               name:
 		 *                 type: string
 		 *                 example: Jane Doe
 		 *               password:
 		 *                 type: string
+		 *                 format: password
 		 *                 example: NewSecurePass123!
 		 *     responses:
 		 *       200:
 		 *         description: Usuario actualizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/UserDto'
 		 *       400:
 		 *         description: Validación fallida
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       401:
 		 *         description: No autorizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       403:
-		 *         description: Permiso denegado
+		 *         description: Permiso denegado (requiere users:update)
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       404:
 		 *         description: Usuario no encontrado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.put(
 			"/:id",
@@ -203,7 +289,7 @@ export class UserRouter {
 		 *     tags: [Users]
 		 *     summary: Eliminar un usuario
 		 *     security:
-		 *       - BearerAuth: []
+		 *       - bearerAuth: []
 		 *     parameters:
 		 *       - in: path
 		 *         name: id
@@ -213,13 +299,25 @@ export class UserRouter {
 		 *         description: ID del usuario a eliminar
 		 *     responses:
 		 *       204:
-		 *         description: Usuario eliminado
+		 *         description: Usuario eliminado correctamente
 		 *       401:
 		 *         description: No autorizado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       403:
-		 *         description: Permiso denegado
+		 *         description: Permiso denegado (requiere users:delete)
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 *       404:
 		 *         description: Usuario no encontrado
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: '#/components/schemas/ErrorResponse'
 		 */
 		this.router.delete(
 			"/:id",

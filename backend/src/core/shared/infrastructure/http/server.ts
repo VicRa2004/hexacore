@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
-import { swaggerUI } from "@hono/swagger-ui";
-import { swaggerSpec } from "@/core/config/swagger";
+import { Scalar } from "@scalar/hono-api-reference";
+import { openApiSpec } from "@/core/config/swagger";
 
 import { container } from "@/core/shared/infrastructure/di/container";
 import { UserRouter } from "@/core/user/infrastructure/http/routes/UserRouter";
@@ -19,10 +19,18 @@ app.use("*", logger());
 // Nota: express.json() desaparece. Hono procesa el JSON automáticamente
 // cuando llamas a c.req.json() en tus controladores.
 
-// 2. Documentación de la API (Swagger)
-// Hono necesita que expongas el JSON y luego le digas a la UI dónde leerlo
-app.get("/api-docs.json", (c) => c.json(swaggerSpec));
-app.get("/api-docs", swaggerUI({ url: "/api-docs.json" }));
+// 2. Documentación de la API (Scalar)
+app.get("/openapi.json", (c) => c.json(openApiSpec));
+app.get("/api-docs.json", (c) => c.json(openApiSpec));
+app.get(
+	"/docs",
+	Scalar({
+		url: "/openapi.json",
+		pageTitle: "Hexacore API Reference",
+		theme: "purple",
+	}),
+);
+app.get("/api-docs", (c) => c.redirect("/docs"));
 
 // 3. Resolución de dependencias (TSyringe sigue intacto)
 const userRouter = container.resolve(UserRouter);
@@ -32,6 +40,7 @@ const permissionRouter = container.resolve(PermissionRouter);
 // 4. Registro de rutas
 // En Hono se usa .route() en lugar de .use() para anidar otros routers
 app.route("/api/user", userRouter.router);
+app.route("/api/users", userRouter.router);
 app.route("/api/auth", authRouter.router);
 app.route("/api/permissions", permissionRouter.router);
 
