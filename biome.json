@@ -16,7 +16,8 @@
 			"!**/generated/prisma/**",
 			"!**/dist/**",
 			"!**/build/**",
-			"!**/node_modules/**"
+			"!**/node_modules/**",
+			"!**/routeTree.gen.ts"
 		]
 	},
 	"linter": {
@@ -32,7 +33,8 @@
 			"!**/generated/prisma/**",
 			"!**/dist/**",
 			"!**/build/**",
-			"!**/node_modules/**"
+			"!**/node_modules/**",
+			"!**/routeTree.gen.ts"
 		]
 	},
 	"javascript": {

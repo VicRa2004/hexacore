@@ -1,8 +1,14 @@
-# Dockerfile placeholder para el frontend de Hexacore
-FROM alpine:3.20
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json README.md ./
+RUN npm install -g pnpm@11.25.0
 
-CMD ["echo", "Frontend placeholder service is running"]
+COPY package.json ./
+RUN pnpm install
+
+COPY . .
+
+EXPOSE 5173
+
+CMD ["pnpm", "dev", "--host"]

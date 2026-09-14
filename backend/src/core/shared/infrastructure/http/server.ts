@@ -4,6 +4,11 @@ import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { Scalar } from "@scalar/hono-api-reference";
 import { openApiSpec } from "@/core/config/swagger";
+import { env } from "@/core/config/env";
+import { serveStatic } from "hono/bun";
+import type { StatusCode } from "hono/utils/http-status";
+import { existsSync } from "node:fs";
+import path from "node:path";
 
 import { container } from "@/core/shared/infrastructure/di/container";
 import { UserRouter } from "@/core/user/infrastructure/http/routes/UserRouter";
@@ -48,13 +53,61 @@ app.route("/api/permissions", permissionRouter.router);
 app.onError((err, c) => {
 	console.error(err);
 
-	// Extraemos el status (forzando tipo de manera segura para Hono)
-	const status = (err as any).status || 500;
+	let status: StatusCode = 500;
+	if (
+		typeof err === "object" &&
+		err !== null &&
+		"status" in err &&
+		typeof (err as { status: unknown }).status === "number"
+	) {
+		const parsedStatus = (err as { status: number }).status;
+		if (parsedStatus >= 400 && parsedStatus <= 599) {
+			status = parsedStatus as StatusCode;
+		}
+	}
 
-	return c.json(
-		{ error: err.message || "Internal Server Error" },
-		status as any, // Casteo necesario porque Hono es muy estricto con los códigos HTTP (StatusCode)
-	);
+	return c.json({ error: err.message || "Internal Server Error" }, status);
 });
+
+// 6. Servir Frontend en Producción (SPA)
+const frontendDistPath = existsSync(
+	path.resolve(process.cwd(), "frontend/dist"),
+)
+	? path.resolve(process.cwd(), "frontend/dist")
+	: path.resolve(process.cwd(), "../frontend/dist");
+
+if (
+	(env.NODE_ENV === "prod" || process.env.SERVE_FRONTEND === "true") &&
+	existsSync(frontendDistPath)
+) {
+	const relativeDist = path.relative(process.cwd(), frontendDistPath);
+
+	// Servir archivos estáticos generados por Vite (assets, imágenes, etc.)
+	app.use("/*", serveStatic({ root: relativeDist }));
+
+	// Fallback para navegación SPA en rutas cliente
+	app.get("*", async (c) => {
+		const reqPath = c.req.path;
+		if (
+			reqPath.startsWith("/api") ||
+			reqPath.startsWith("/docs") ||
+			reqPath.startsWith("/openapi") ||
+			reqPath.startsWith("/api-docs")
+		) {
+			return c.notFound();
+		}
+
+		const indexPath = path.join(frontendDistPath, "index.html");
+		if (existsSync(indexPath)) {
+			return new Response(Bun.file(indexPath), {
+				headers: {
+					"Content-Type": "text/html; charset=utf-8",
+				},
+			});
+		}
+
+		return c.notFound();
+	});
+}
 
 export { app };

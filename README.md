@@ -42,8 +42,7 @@ backend/
 ├── scripts/                 # create-admin.ts, ...
 ├── docs/                    # guías (crear módulo, auth, testing)
 ├── Dockerfile / .env.example
-└── AGENTS.md                # reglas específicas del backend
-frontend/                    # placeholder (package.json mínimo, sin código)
+frontend/                    # Vite + React 19 + TypeScript + TanStack Suite + Tailwind v4
 ```
 
 ---
@@ -87,7 +86,9 @@ pnpm db:migrate
 **4. Desarrollo**
 
 ```bash
-pnpm dev:backend   # hot reload nativo con Bun
+pnpm dev           # corre backend y frontend concurrentemente en paralelo
+pnpm dev:backend   # solo backend con Bun (hot reload)
+pnpm dev:frontend  # solo frontend con Vite (puerto 5173)
 ```
 
 **5. Lint (Biome, desde la raíz)**

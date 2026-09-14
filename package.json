@@ -12,15 +12,18 @@
 		"format": "biome format ./backend ./frontend",
 		"format:fix": "biome format --write ./backend ./frontend",
 		"ci": "biome ci ./backend ./frontend",
-		"dev": "pnpm --filter backend dev",
+		"dev": "pnpm --filter backend --filter frontend --parallel dev",
 		"dev:backend": "pnpm --filter backend dev",
+		"dev:frontend": "pnpm --filter frontend dev",
+		"build": "pnpm --filter frontend build",
+		"build:frontend": "pnpm --filter frontend build",
 		"test:backend": "pnpm --filter backend test",
 		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://user:password@localhost:5432/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",
 		"db:push": "pnpm --filter backend exec prisma db push",
 		"db:migrate": "pnpm --filter backend exec prisma migrate dev"
 	},
 	"keywords": [],
-	"description": "Monorepo Hexacore: backend (Bun + Hono + Prisma) y frontend (reservado).",
+	"description": "Monorepo Hexacore: backend (Bun + Hono + Prisma) y frontend (Vite + React + TanStack).",
 	"devDependencies": {
 		"@biomejs/biome": "2.5.13"
 	}
