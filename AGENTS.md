@@ -45,6 +45,11 @@ pnpm db:migrate         # prisma migrate dev (backend)
 
 Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`. Nunca instala.
 
+## Skills y docs para IA
+
+- `AGENTS.md` es la guía real; cada `CLAUDE.md` contiene solo `@AGENTS.md`.
+- Skills por paquete en `<paquete>/.agents/skills/` (`backend/`, `frontend/`) y transversales en `.agents/skills/`. Claude Code las lee vía symlinks en `.claude/skills/`: ejecutar `link-skills` desde la raíz tras instalar o eliminar una skill. `skills-lock.json` registra su origen.
+
 ## Estructura
 
 ```text
@@ -55,5 +60,5 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
 - `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
-- Docker vive en la raíz: `docker compose up`.
+- Docker vive en la raíz: `docker compose up --build`.
 - Variables: `cp backend/.env.example backend/.env`.

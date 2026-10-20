@@ -68,8 +68,8 @@ frontend/src/
 │   ├── index.tsx                   # Redirección inteligente
 │   ├── login.tsx                   # Ruta pública de login
 │   ├── register.tsx                # Ruta pública de registro
-│   └── _authenticated/             # Layout protegido por autenticación
-│       ├── route.tsx               # Guardián de sesión
+│   ├── _authenticated.tsx          # Layout protegido: guardián de sesión
+│   └── _authenticated/             # Rutas hijas protegidas
 │       ├── dashboard.tsx           # Vista /dashboard
 │       ├── users.tsx               # Vista /users
 │       └── profile.tsx             # Vista /profile
@@ -78,6 +78,12 @@ frontend/src/
 ├── index.css                       # Directivas y tema base de Tailwind CSS v4
 └── main.tsx                        # Punto de entrada de la aplicación React
 ```
+
+---
+
+## Skills
+
+Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind v4, diseño y guías web). Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
 
 ---
 
@@ -101,7 +107,7 @@ frontend/src/
 - **Validación con Zod:** Todo formulario y entrada de datos debe validarse con esquemas Zod antes de ser enviada al backend.
 - **Tipado Estricto:** Prohibido el uso de `any`. Usar `unknown`, interfaces explícitas y guards de tipo.
 - **Notificaciones al Usuario:** Usar `sonner` (`toast.error(...)`, `toast.success(...)`) para retroalimentación clara y no intrusiva.
-- **Interceptores de Axios:** El refresco del token de acceso vía refresh token vive de forma transparente en `core/api/client.ts`. Si la renovación falla, se limpia la sesión y se redirige a `/login`.
+- **Interceptores de Axios:** El refresco del token de acceso vía refresh token vive de forma transparente en `core/api/client.ts` y es de una sola petición en vuelo (el backend rota el refresh token; reenviarlo en paralelo revoca la sesión). Si la renovación falla, se limpia la sesión y se redirige a `/login`.
 
 ### 4. Estilos y Componentes de UI
 - Usar Tailwind CSS v4 y la utilidad `cn(...)` para combinar clases condicionales.

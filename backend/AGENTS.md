@@ -16,6 +16,10 @@
 - **DB:** Solo Prisma v7 con PostgreSQL (pinnado a `7.x`, prohibido v8)
 - **Idioma de respuesta:** Español
 
+## Skills
+
+Viven en `backend/.agents/skills/` (arquitectura hexagonal y Prisma). Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
+
 ## Dependencias
 
 Antes de instalar cualquier paquete, revisar `package.json` para confirmar si ya existe.
@@ -41,6 +45,8 @@ Interfaces, errores (extendiendo `BaseError`) y modelos. Sin dependencias de fra
 ### Infrastructure — HTTP
 
 Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
+
+**Middlewares** — llamar `await next()` fuera de cualquier `try/catch` propio, para no capturar errores de los handlers siguientes. Para códigos HTTP usar `ContentfulStatusCode` (`hono/utils/http-status`), nunca `as any`.
 
 **Controladores** — uno por caso de uso en `http/controllers/`:
 

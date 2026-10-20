@@ -1,6 +1,6 @@
 # Hexacore (monorepo)
 
-Monorepo con **backend** hexagonal (Bun + Hono + Prisma 7 + PostgreSQL) y **frontend** reservado. Solo dos carpetas: `backend/` y `frontend/` (sin `apps/` ni `packages/`).
+Monorepo con **backend** hexagonal (Bun + Hono + Prisma 7 + PostgreSQL) y **frontend** (Vite + React 19 + TanStack). Solo dos carpetas: `backend/` y `frontend/` (sin `apps/` ni `packages/`).
 
 - Gestión e instalación: **pnpm** desde la raíz (única fuente de verdad: `pnpm-lock.yaml`).
 - Ejecución del backend: **Bun**.
@@ -26,7 +26,7 @@ Este proyecto está bajo la Licencia MIT - mira el archivo [LICENCE.md](LICENCE.
 | Validación                | Zod                                               |
 | Auth & Seguridad          | JWT · Bcrypt · CORS                               |
 | Linter / Formatter        | Biome (raíz)                                      |
-| Frontend                  | Reservado (`frontend/`, sin stack aún)            |
+| Frontend                  | Vite · React 19 · TanStack Suite · Tailwind v4    |
 
 ---
 
@@ -50,7 +50,7 @@ frontend/                    # Vite + React 19 + TypeScript + TanStack Suite + T
 ## Requisitos
 
 - pnpm v11+
-- Bun v1.0+
+- Bun v1.4+
 - PostgreSQL (local o Docker)
 
 ---
@@ -71,7 +71,7 @@ pnpm install
 cp backend/.env.example backend/.env
 ```
 
-Ajusta `DATABASE_URL` para tu instancia de PostgreSQL. Bun carga `.env` automáticamente, sin librerías externas.
+Ajusta `DATABASE_URL` para tu instancia de PostgreSQL. El backend lee `.env` con `dotenv`.
 
 **3. Sincronizar base de datos**
 
@@ -103,7 +103,7 @@ pnpm lint:fix   # corrige automáticamente
 ## Docker
 
 ```bash
-docker compose up
+docker compose up --build   # db + backend (migraciones automáticas) + frontend
 ```
 
 ---
@@ -111,10 +111,10 @@ docker compose up
 ## Producción
 
 ```bash
-pnpm --filter backend start   # ejecuta build/index.js con Bun
+pnpm --filter backend start   # ejecuta src/index.ts con Bun
 ```
 
-> Bun puede correr `.ts` directamente, el build es opcional según el entorno de deploy.
+> Bun ejecuta `.ts` directamente; no hay paso de build para el backend.
 
 ---
 
