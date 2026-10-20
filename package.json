@@ -25,6 +25,6 @@
 	"keywords": [],
 	"description": "Monorepo Hexacore: backend (Bun + Hono + Prisma) y frontend (Vite + React + TanStack).",
 	"devDependencies": {
-		"@biomejs/biome": "2.5.13"
+		"@biomejs/biome": "2.5.15"
 	}
 }
