@@ -1,0 +1,11 @@
+**/node_modules
+**/.env
+**/dist
+**/build
+**/.vite
+**/*.tsbuildinfo
+.git
+.claude
+**/.claude
+**/.agents
+backend/src/generated

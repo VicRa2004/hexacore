@@ -1,28 +1,25 @@
-# Usar la imagen oficial de Bun
-FROM oven/bun:1.1 AS base
+# Contexto de build: la raíz del monorepo (el lockfile de pnpm vive allí).
+# pnpm instala; Bun solo ejecuta. Node se mantiene para el CLI de Prisma.
+FROM node:24-slim
 WORKDIR /app
 
-# Instalar dependencias (el lockfile vive en la raíz del monorepo)
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY package.json /temp/dev/
-RUN cd /temp/dev && bun install
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends openssl ca-certificates \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& npm install -g pnpm@11.25.0 bun@1.4.3
 
-# Instalar dependencias de producción
-RUN mkdir -p /temp/prod
-COPY package.json /temp/prod/
-RUN cd /temp/prod && bun install --production
+# Dependencias: solo lo necesario para resolver el workspace del backend
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json backend/
+COPY frontend/package.json frontend/
+COPY backend/prisma backend/prisma
+COPY backend/prisma.config.ts backend/
+RUN pnpm install --frozen-lockfile --filter backend...
 
-# Crear imagen final
-FROM base AS release
-COPY --from=install /temp/dev/node_modules node_modules
-COPY . .
+COPY backend backend
 
-# Generar cliente de Prisma
-RUN bunx prisma generate
-
-# Exponer el puerto
+ENV NODE_ENV=prod
+WORKDIR /app/backend
 EXPOSE 3000
 
-# Comando para arrancar la aplicación
-ENTRYPOINT [ "bun", "run", "dev" ]
+CMD ["bun", "src/index.ts"]

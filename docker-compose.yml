@@ -1,23 +1,52 @@
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: hexacore_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hexacore_db
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d hexacore_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: hexacore_backend
-    restart: always
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: "postgresql://user:password@localhost:5432/hexacore_db?schema=public"
-      JWT_SECRET: "development_secret_key_123"
+      DATABASE_URL: "postgresql://user:password@db:5432/hexacore_db?schema=public"
+      JWT_SECRET: "${JWT_SECRET:-development_secret_key_123}"
       PORT: 3000
       NODE_ENV: dev
+    command: sh -c "pnpm exec prisma migrate deploy && bun src/index.ts"
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: hexacore_frontend
-    restart: always
+    restart: unless-stopped
+    depends_on:
+      - backend
     ports:
       - "5173:5173"
+    environment:
+      VITE_API_URL: "http://backend:3000"
+
+volumes:
+  pgdata:
