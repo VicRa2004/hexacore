@@ -17,6 +17,29 @@ export const apiClient = axios.create({
 	},
 });
 
+// Una sola renovación en vuelo: el backend rota el refresh token, así que
+// peticiones 401 simultáneas que lo reenvíen invalidarían la sesión.
+let refreshPromise: Promise<string> | null = null;
+
+function refreshAccessToken(refreshToken: string): Promise<string> {
+	refreshPromise ??= (async () => {
+		// Llamada directa sin interceptores para evitar bucles
+		const { data } = await axios.post<{
+			accessToken: string;
+			refreshToken: string;
+		}>("/api/auth/refresh", { refreshToken });
+
+		useAuthStore.getState().setTokens({
+			accessToken: data.accessToken,
+			refreshToken: data.refreshToken,
+		});
+		return data.accessToken;
+	})().finally(() => {
+		refreshPromise = null;
+	});
+	return refreshPromise;
+}
+
 // Request Interceptor: Inyectar token de autenticación
 apiClient.interceptors.request.use(
 	(config: InternalAxiosRequestConfig) => {
@@ -43,7 +66,7 @@ apiClient.interceptors.response.use(
 
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
-			const { refreshToken, logout, setTokens } = useAuthStore.getState();
+			const { refreshToken, logout } = useAuthStore.getState();
 
 			if (!refreshToken) {
 				logout();
@@ -51,19 +74,7 @@ apiClient.interceptors.response.use(
 			}
 
 			try {
-				// Llamada directa sin interceptores para evitar bucles
-				const response = await axios.post<{
-					accessToken: string;
-					refreshToken: string;
-				}>("/api/auth/refresh", { refreshToken });
-
-				const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-					response.data;
-
-				setTokens({
-					accessToken: newAccessToken,
-					refreshToken: newRefreshToken,
-				});
+				const newAccessToken = await refreshAccessToken(refreshToken);
 
 				if (originalRequest.headers) {
 					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
