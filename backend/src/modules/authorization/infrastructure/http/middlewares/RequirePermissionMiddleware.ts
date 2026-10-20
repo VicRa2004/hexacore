@@ -1,7 +1,7 @@
 import type { Context, Next } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { injectable, inject } from "tsyringe";
 import type { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
-import { ForbiddenError } from "@/modules/authorization/domain/error/ForbiddenError";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 
 /**
@@ -50,16 +50,16 @@ export class RequirePermissionMiddleware {
 				);
 			}
 
+			// next() queda fuera del try: un error del controlador no debe
+			// confundirse con un fallo de verificación de permisos.
 			try {
 				await this.checkUserPermissionUseCase.run(userId, resource, action);
-				await next(); // Hono requiere el await en el next()
 			} catch (error) {
-				if (error instanceof ForbiddenError || error instanceof BaseError) {
-					// El 'as any' o 'as Context["var"]' suele ser necesario aquí si error.code es un number genérico,
-					// ya que Hono tipa de forma estricta los HTTP Status Codes (ej. 200 | 401 | 403 | 500).
+				if (error instanceof BaseError) {
+					// ForbiddenError extiende BaseError; Hono tipa estrictamente los status.
 					return c.json(
 						{ success: false, error: error.message },
-						error.code as any,
+						error.code as ContentfulStatusCode,
 					);
 				}
 
@@ -71,6 +71,8 @@ export class RequirePermissionMiddleware {
 					500,
 				);
 			}
+
+			await next(); // Hono requiere el await en el next()
 		};
 	};
 }

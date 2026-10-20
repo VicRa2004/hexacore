@@ -6,7 +6,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { openApiSpec } from "@/core/config/swagger";
 import { env } from "@/core/config/env";
 import { serveStatic } from "hono/bun";
-import type { StatusCode } from "hono/utils/http-status";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
@@ -53,7 +53,7 @@ app.route("/api/permissions", permissionRouter.router);
 app.onError((err, c) => {
 	console.error(err);
 
-	let status: StatusCode = 500;
+	let status: ContentfulStatusCode = 500;
 	if (
 		typeof err === "object" &&
 		err !== null &&
@@ -62,7 +62,7 @@ app.onError((err, c) => {
 	) {
 		const parsedStatus = (err as { status: number }).status;
 		if (parsedStatus >= 400 && parsedStatus <= 599) {
-			status = parsedStatus as StatusCode;
+			status = parsedStatus as ContentfulStatusCode;
 		}
 	}
 

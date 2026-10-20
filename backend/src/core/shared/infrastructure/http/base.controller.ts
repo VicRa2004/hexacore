@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 // Si no, Zod nativo usa error.flatten() o error.format()
 import z from "zod";
 import { BaseError } from "../../domain/error/BaseError";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 /**
  * Controlador base para Hono.
@@ -30,9 +31,8 @@ export abstract class BaseController {
 		if (error instanceof BaseError) {
 			return c.json(
 				{ error: error.message },
-				// Hono tipa estrictamente los HTTP status codes. Usamos 'as any'
-				// para evitar conflictos si error.code es de tipo 'number' genérico.
-				error.code as any,
+				// Hono tipa estrictamente los HTTP status codes.
+				error.code as ContentfulStatusCode,
 			);
 		}
 
