@@ -21,6 +21,14 @@ export interface RefreshTokenRepository {
 	): Promise<{ id: number; userId: number; expiresAt: Date } | null>;
 
 	/**
+	 * Busca un refresh token por su hash sin importar si está revocado o expirado.
+	 * Permite detectar la reutilización de tokens ya rotados.
+	 */
+	findByHash(
+		tokenHash: string,
+	): Promise<{ id: number; userId: number; revoked: boolean } | null>;
+
+	/**
 	 * Revoca un token específico por su ID.
 	 */
 	revokeById(id: number): Promise<void>;

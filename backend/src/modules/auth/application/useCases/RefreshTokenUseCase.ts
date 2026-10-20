@@ -31,8 +31,12 @@ export class RefreshTokenUseCase {
 		const storedToken = await this.refreshTokenRepo.findValidByHash(tokenHash);
 
 		if (!storedToken) {
-			// El token no existe o ya fue revocado → posible robo
-			// Intentamos detectar a quién pertenecía para revocar toda la familia
+			// Si el token existe pero ya estaba revocado, fue reutilizado → posible
+			// robo: se revocan todas las sesiones del usuario.
+			const reused = await this.refreshTokenRepo.findByHash(tokenHash);
+			if (reused?.revoked) {
+				await this.refreshTokenRepo.revokeAllByUserId(reused.userId);
+			}
 			throw new BaseError("Invalid or expired refresh token", 401);
 		}
 

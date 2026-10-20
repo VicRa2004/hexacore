@@ -38,6 +38,17 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 		};
 	}
 
+	async findByHash(
+		tokenHash: string,
+	): Promise<{ id: number; userId: number; revoked: boolean } | null> {
+		const record = await prisma.refreshToken.findUnique({
+			where: { tokenHash },
+			select: { id: true, userId: true, revoked: true },
+		});
+
+		return record;
+	}
+
 	async revokeById(id: number): Promise<void> {
 		await prisma.refreshToken.update({
 			where: { id },
