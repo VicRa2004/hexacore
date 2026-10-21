@@ -15,6 +15,7 @@
 - **Chequeo de Tipos:** `pnpm --filter frontend exec tsc --noEmit`.
 - **Desarrollo:** `pnpm dev:frontend` (Vite en puerto 5173).
 - **Compilación de Producción:** `pnpm build:frontend` (genera `frontend/dist`).
+- **Código sin uso (Knip):** `pnpm knip` desde la raíz (config en `../knip.json`). Detecta archivos, exports y dependencias sin uso o no listadas. Entradas: `src/routes/**` más las que knip detecta solo (`src/main.tsx`, `routeTree.gen.ts`). Ejecutarlo al añadir, mover o eliminar archivos, exports o dependencias.
 
 ---
 

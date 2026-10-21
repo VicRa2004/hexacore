@@ -38,12 +38,16 @@ pnpm dev:backend        # corre el backend con Bun (hot reload)
 pnpm dev:frontend       # corre el frontend con Vite (puerto 5173)
 pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
+pnpm knip               # archivos, exports y dependencias sin uso (knip.json)
+pnpm check:architecture # reglas de capas/módulos del backend (dependency-cruiser)
 pnpm db:generate        # prisma generate (backend)
 pnpm db:push            # prisma db push (backend)
 pnpm db:migrate         # prisma migrate dev (backend)
 ```
 
 Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`. Nunca instala.
+
+- **Cierre de tarea:** `pnpm lint && pnpm test:backend` (y `pnpm --filter frontend exec tsc --noEmit` si tocaste el frontend), más `pnpm knip` y `pnpm check:architecture` si añadiste, moviste o eliminaste archivos, exports, dependencias o imports entre capas/módulos.
 
 ## Skills y docs para IA
 

@@ -1,0 +1,30 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"rules": {
+		"files": "warn",
+		"dependencies": "error",
+		"unlisted": "error",
+		"exports": "warn",
+		"types": "off",
+		"nsExports": "off",
+		"nsTypes": "off",
+		"duplicates": "off",
+		"enumMembers": "off"
+	},
+	"ignoreExportsUsedInFile": true,
+	"workspaces": {
+		".": {
+			"entry": []
+		},
+		"backend": {
+			"entry": ["scripts/**/*.ts", "src/**/*.spec.ts"],
+			"project": ["src/**/*.ts", "scripts/**/*.ts", "prisma/**/*.ts"],
+			"ignoreDependencies": ["@prisma/client", "@swc/core"]
+		},
+		"frontend": {
+			"entry": ["src/routes/**/!(*.test|*.spec).{ts,tsx}"],
+			"project": ["src/**/*.{ts,tsx}"],
+			"ignoreDependencies": ["tailwindcss"]
+		}
+	}
+}

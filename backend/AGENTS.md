@@ -68,3 +68,15 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 - Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` e inyectar con `@inject("TokenName")`
 - `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
 - `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
+
+## Verificación de arquitectura y código sin uso
+
+- **Dependency-Cruiser (`pnpm check:architecture`, config en `.dependency-cruiser.cjs`):** valida el grafo de imports de `src/`:
+  1. **Domain → Infrastructure ❌** y **Domain → Application ❌**.
+  2. **Application → Infrastructure ❌**.
+  3. **Dependencias circulares ❌**.
+  4. **Módulo A → internals de Módulo B ❌:** entre módulos (`src/modules/*`, `src/core/*`) sólo se importa vía `index.ts` público o desde `src/core/shared/` y `src/core/config/`.
+  5. **`domain/` y `application/` sin librerías de infraestructura:** prohibido Node I/O (`fs`, `node:http`, `net`, …; se permiten `node:crypto` y `node:util`), Hono, Prisma/cliente generado, librerías HTTP y drivers de BD (`pg`).
+  - Los `*.spec.ts` / `*.test.ts` están exentos de las reglas de capas.
+- **Knip (`pnpm knip`, desde la raíz):** detecta archivos, exports y dependencias sin uso, y dependencias no listadas en `package.json`.
+- Ejecutar ambos al añadir, mover o eliminar archivos, exports, dependencias o imports entre capas/módulos.
