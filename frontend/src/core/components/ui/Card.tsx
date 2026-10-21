@@ -72,15 +72,3 @@ export function CardContent({
 		</div>
 	);
 }
-
-export function CardFooter({
-	className,
-	children,
-	...props
-}: HTMLAttributes<HTMLDivElement>) {
-	return (
-		<div className={cn("flex items-center pt-4", className)} {...props}>
-			{children}
-		</div>
-	);
-}

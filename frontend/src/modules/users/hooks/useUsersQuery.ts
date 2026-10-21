@@ -15,11 +15,3 @@ export function useUsersQuery(params: GetUsersParams = {}) {
 		queryFn: () => usersApi.getUsers(params),
 	});
 }
-
-export function useUserQuery(id: number, enabled = true) {
-	return useQuery({
-		queryKey: usersKeys.detail(id),
-		queryFn: () => usersApi.getUserById(id),
-		enabled: enabled && id > 0,
-	});
-}

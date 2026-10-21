@@ -42,7 +42,7 @@ frontend/
 │   │   └── users/                      # Módulo de Usuarios
 │   │       ├── api/                    # usersApi (getUsers, getUserById)
 │   │       ├── components/             # UsersTable, UserProfileCard
-│   │       ├── hooks/                  # useUsersQuery, useUserQuery (TanStack Query)
+│   │       ├── hooks/                  # useUsersQuery (TanStack Query)
 │   │       └── pages/                  # DashboardPage, UsersPage, ProfilePage
 │   │
 │   ├── routes/                         # Árbol de rutas tipadas por archivos

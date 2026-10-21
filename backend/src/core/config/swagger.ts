@@ -101,4 +101,3 @@ const swaggerOptions: swaggerJsDoc.Options = {
 };
 
 export const openApiSpec = swaggerJsDoc(swaggerOptions);
-export const swaggerSpec = openApiSpec;
