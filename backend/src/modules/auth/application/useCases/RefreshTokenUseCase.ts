@@ -1,6 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/core/user/domain/repository/UserRepository";
+import type { UserRepository } from "@/core/user";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 

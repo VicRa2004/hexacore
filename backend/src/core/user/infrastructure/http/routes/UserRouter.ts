@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { injectable, inject } from "tsyringe";
 
-import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
+import type { AuthMiddleware } from "@/modules/auth";
+import type { RequirePermissionMiddleware } from "@/modules/authorization";
 
 // Controladores
 import { CreateUserController } from "../controllers/CreateUserController";

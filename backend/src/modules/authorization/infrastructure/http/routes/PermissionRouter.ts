@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { injectable, inject } from "tsyringe";
 
-import type { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
+import type { AuthMiddleware } from "@/modules/auth";
 import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
 
 // Controladores CRUD de permisos

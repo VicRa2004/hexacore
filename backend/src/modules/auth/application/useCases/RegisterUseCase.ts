@@ -1,13 +1,13 @@
 import { injectable, inject } from "tsyringe";
 import type { RegisterDto } from "../dtos/RegisterDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/core/user/domain/repository/UserRepository";
-import type { PasswordHasher } from "@/core/user/domain/service/PasswordHasher";
-import { User } from "@/core/user/domain/User";
+import type { UserRepository } from "@/core/user";
+import type { PasswordHasher } from "@/core/user";
+import { User } from "@/core/user";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
-import type { UserDto } from "@/core/user/application/dtos/UserDto";
-import { UserMapper } from "@/core/user/application/mappers/UserMapper";
+import type { UserDto } from "@/core/user";
+import { UserMapper } from "@/core/user";
 
 /** Duración del refresh token: 7 días */
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
