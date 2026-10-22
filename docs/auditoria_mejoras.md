@@ -53,25 +53,25 @@
 
 ## 🔵 Configuración, dependencias y Docker
 
-- [ ] **Dependencias sin uso o incompatibles:** `cookie-parser`, `express-rate-limit`, `supertest`, `@types/supertest` y `tsc-alias` no se usan o no sirven con Hono. `dotenv` sobra con Bun, salvo para `prisma.config.ts`.
-- [ ] **`backend/tsconfig.json`:**
+- [x] **Dependencias sin uso o incompatibles:** `cookie-parser`, `express-rate-limit`, `supertest`, `@types/supertest` y `tsc-alias` no se usan o no sirven con Hono. `dotenv` sobra con Bun, salvo para `prisma.config.ts`.
+- [x] **`backend/tsconfig.json`:**
   - El alias `@shared/*` apunta a una carpeta inexistente.
   - `typeRoots` apunta a `src/types` (no existe).
   - `jsx: hono/jsx` no se usa.
   - `main: index.js` en `backend/package.json`.
-- [ ] **`env.ts` y `prisma.ts`:** `env.ts` usa `z.string().url()`, deprecado en Zod 4 (usar `z.url()`), y `prisma.ts` lee `process.env` en lugar del `env` validado.
-- [ ] **Puertos incoherentes:** compose expone la BD en `5433`, mientras `.env.example` y `db:generate` asumen `5432` con otras credenciales. Un `cp .env.example .env` no conecta a la BD de Docker.
-- [ ] **Docker hacia producción:** el frontend corre `vite dev` y el backend tiene `NODE_ENV=prod` en la imagen, pero compose lo sobrescribe a `dev`. Para producción hace falta:
+- [x] **`env.ts` y `prisma.ts`:** `env.ts` usa `z.string().url()`, deprecado en Zod 4 (usar `z.url()`), y `prisma.ts` lee `process.env` en lugar del `env` validado.
+- [x] **Puertos incoherentes:** compose expone la BD en `5433`, mientras `.env.example` y `db:generate` asumen `5432` con otras credenciales. Un `cp .env.example .env` no conecta a la BD de Docker.
+- [x] **Docker hacia producción:** el frontend corre `vite dev` y el backend tiene `NODE_ENV=prod` en la imagen, pero compose lo sobrescribe a `dev`. Para producción hace falta:
   - Un build multi-stage.
   - Servir `frontend/dist` (el backend ya lo soporta).
   - Imagen `oven/bun`.
-- [ ] **`biome.json`:** el `$schema` (2.5.13) no coincide con la versión instalada (2.5.15).
-- [ ] **Infraestructura de desarrollo que falta:**
+- [x] **`biome.json`:** el `$schema` (2.5.13) no coincide con la versión instalada (2.5.15).
+- [x] **Infraestructura de desarrollo que falta:**
   - CI con GitHub Actions (`pnpm ci`, tests y typecheck).
   - Script `typecheck` en la raíz.
   - Endpoint `/health`.
-- [ ] **Tests que faltan:** frontend y auth/autorización, justo donde están los bugs críticos.
-- [ ] **Warnings de Biome:** resolver los 17 (`noExplicitAny`, `noConfusingVoidType`, `useNodejsImportProtocol`, `noStaticOnlyClass`).
+- [x] **Tests que faltan:** frontend y auth/autorización, justo donde están los bugs críticos.
+- [x] **Warnings de Biome:** resolver los 17 (`noExplicitAny`, `noConfusingVoidType`, `useNodejsImportProtocol`, `noStaticOnlyClass`).
 
 ## Prioridad sugerida
 
