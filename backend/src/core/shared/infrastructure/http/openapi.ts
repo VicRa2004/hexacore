@@ -6,6 +6,9 @@ const errorResponseSchema = z
 		details: z.unknown().optional().openapi({
 			description: "Detalle de validación (sólo en errores 400 de Zod)",
 		}),
+		requestId: z.string().optional().openapi({
+			description: "Id de la petición (sólo en errores 5xx), para reportarlo",
+		}),
 	})
 	.openapi("ErrorResponse");
 

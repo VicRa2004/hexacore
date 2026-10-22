@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
+import { prisma } from "@/core/config/prisma";
 import { container } from "@/core/shared/infrastructure/di/container";
 import { modules } from "@/modules";
 
@@ -16,4 +17,16 @@ console.log(`🚀 Server ready at: ${server.url}`);
 console.log(`📡 Environment: ${env.NODE_ENV}`);
 console.log("-----------------------------------------");
 
-for (const module of modules) module.onStart?.(container);
+const stopTasks = modules.map((module) => module.onStart?.(container));
+
+// Apagado ordenado (Dokploy manda SIGTERM en cada deploy): deja de aceptar
+// conexiones, espera a las peticiones en vuelo y cierra la BD.
+const shutdown = async (signal: string) => {
+	console.log(`${signal} recibido, apagando...`);
+	await server.stop();
+	for (const stop of stopTasks) stop?.();
+	await prisma.$disconnect();
+	process.exit(0);
+};
+process.once("SIGTERM", shutdown);
+process.once("SIGINT", shutdown);

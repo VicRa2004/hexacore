@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
 import { Prisma } from "@/generated/prisma/client";
 import { BaseController } from "./base.controller";
@@ -21,12 +21,14 @@ const request = (error: unknown) => {
 };
 
 describe("BaseController.handleError", () => {
-	it("no debería exponer el mensaje de un error interno", async () => {
-		spyOn(console, "error").mockImplementation(() => {});
-		const res = await request(new Error("connect ECONNREFUSED db:5432"));
+	it("debería propagar los errores inesperados al onError global", async () => {
+		const app = new Hono();
+		app.get("/", new ThrowingController(new Error("boom")).run);
+		app.onError((err, c) => c.json({ error: err.message }, 500));
 
-		expect(res.status).toBe(500);
-		expect(await res.json()).toEqual({ error: "Internal server error" });
+		const res = await app.request("/");
+
+		expect(await res.json()).toEqual({ error: "boom" });
 	});
 
 	it("debería responder 409 ante una violación de clave foránea de Prisma", async () => {

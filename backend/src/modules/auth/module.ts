@@ -24,9 +24,10 @@ export const authModule: AppModule = {
 		const refreshTokenRepo = container.resolve<RefreshTokenRepository>(
 			AUTH_TOKENS.RefreshTokenRepository,
 		);
-		setInterval(
+		const interval = setInterval(
 			() => refreshTokenRepo.deleteExpired().catch(console.error),
 			60 * 60 * 1000,
 		);
+		return () => clearInterval(interval);
 	},
 };

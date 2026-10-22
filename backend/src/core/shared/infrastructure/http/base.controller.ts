@@ -47,9 +47,8 @@ export abstract class BaseController {
 			return c.json({ error: "Conflict with existing data" }, 409);
 		}
 
-		// El detalle (p.ej. errores de Prisma) sólo va al log, nunca al cliente.
-		console.error(error);
-		return c.json({ error: "Internal server error" }, 500);
+		// Lo inesperado sube al `onError` global: log con request id y 500 genérico.
+		throw error;
 	}
 
 	/**

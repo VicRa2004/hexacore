@@ -7,6 +7,9 @@ export interface AppModule {
 	register(container: DependencyContainer): void;
 	/** Monta sus rutas en la app. */
 	mount(app: OpenAPIHono, container: DependencyContainer): void;
-	/** Tareas al arrancar el servidor (no se ejecuta al exportar el OpenAPI). */
-	onStart?(container: DependencyContainer): void;
+	/**
+	 * Tareas al arrancar el servidor (no se ejecuta al exportar el OpenAPI).
+	 * Puede devolver una función que las detiene en el apagado ordenado.
+	 */
+	onStart?(container: DependencyContainer): (() => void) | undefined;
 }

@@ -936,6 +936,8 @@ export interface components {
             error: string;
             /** @description Detalle de validación (sólo en errores 400 de Zod) */
             details?: unknown;
+            /** @description Id de la petición (sólo en errores 5xx), para reportarlo */
+            requestId?: string;
         };
         AuthResponse: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
