@@ -33,7 +33,7 @@ pnpm lint:unsafe        # incluye fixes inseguros (revisar el diff)
 pnpm format             # solo revisa formato
 pnpm format:fix         # aplica formato
 pnpm ci                 # chequeo tipo CI (falla si hay desvíos)
-pnpm verify             # verificación completa: ci + typecheck + tests + knip + arquitectura + build (lo mismo que el CI)
+pnpm verify             # verificación completa: ci + check:api + typecheck + tests + knip + arquitectura + build (lo mismo que el CI)
 pnpm dev                # corre frontend y backend concurrentemente en paralelo
 pnpm dev:backend        # corre el backend con Bun (hot reload)
 pnpm dev:frontend       # corre el frontend con Vite (puerto 5173)
@@ -41,6 +41,8 @@ pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
 pnpm test:frontend      # tests del frontend con Vitest
 pnpm typecheck          # tsc --noEmit en backend y frontend
+pnpm gen:api            # regenera frontend/src/core/api/schema.gen.ts desde el OpenAPI del backend
+pnpm check:api          # gen:api + falla si schema.gen.ts no estaba al día
 pnpm knip               # archivos, exports y dependencias sin uso (knip.json)
 pnpm check:architecture # reglas de capas/módulos del backend (dependency-cruiser)
 pnpm db:generate        # prisma generate (backend)

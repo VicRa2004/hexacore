@@ -1,5 +1,5 @@
 import { apiClient } from "@/core/api/client";
-import type { PaginatedResponse } from "@/core/api/types";
+import type { paths } from "@/core/api/schema.gen";
 import type { User } from "@/core/auth/types";
 
 export interface GetUsersParams {
@@ -8,11 +8,12 @@ export interface GetUsersParams {
 	email?: string;
 }
 
+type UsersPage =
+	paths["/api/users"]["get"]["responses"][200]["content"]["application/json"];
+
 export const usersApi = {
-	async getUsers(
-		params: GetUsersParams = {},
-	): Promise<PaginatedResponse<User>> {
-		const response = await apiClient.get<PaginatedResponse<User>>("/users", {
+	async getUsers(params: GetUsersParams = {}): Promise<UsersPage> {
+		const response = await apiClient.get<UsersPage>("/users", {
 			params,
 		});
 		return response.data;

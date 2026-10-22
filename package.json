@@ -12,7 +12,7 @@
 		"format": "biome format ./backend ./frontend",
 		"format:fix": "biome format --write ./backend ./frontend",
 		"ci": "biome ci ./backend ./frontend",
-		"verify": "pnpm ci && pnpm typecheck && pnpm test:backend && pnpm test:frontend && pnpm knip && pnpm check:architecture && pnpm build:frontend",
+		"verify": "pnpm ci && pnpm check:api && pnpm typecheck && pnpm test:backend && pnpm test:frontend && pnpm knip && pnpm check:architecture && pnpm build:frontend",
 		"dev": "pnpm --filter backend --filter frontend --parallel dev",
 		"dev:backend": "pnpm --filter backend dev",
 		"dev:frontend": "pnpm --filter frontend dev",
@@ -25,12 +25,16 @@
 		"check:architecture": "pnpm --filter backend check:architecture",
 		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",
 		"db:push": "pnpm --filter backend exec prisma db push",
-		"db:migrate": "pnpm --filter backend exec prisma migrate dev"
+		"db:migrate": "pnpm --filter backend exec prisma migrate dev",
+		"gen:api": "pnpm --filter backend exec bun scripts/export-openapi.ts ../node_modules/.cache/openapi.json && openapi-typescript node_modules/.cache/openapi.json --root-types --root-types-no-schema-prefix -o frontend/src/core/api/schema.gen.ts",
+		"check:api": "pnpm gen:api && git diff --exit-code frontend/src/core/api/schema.gen.ts"
 	},
 	"keywords": [],
 	"description": "Monorepo Hexacore: backend (Bun + Hono + Prisma) y frontend (Vite + React + TanStack).",
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
-		"knip": "6.42.1"
+		"knip": "6.42.1",
+		"openapi-typescript": "7.13.0",
+		"typescript": "5.9.3"
 	}
 }

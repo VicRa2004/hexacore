@@ -17,7 +17,7 @@
 			"!**/dist/**",
 			"!**/build/**",
 			"!**/node_modules/**",
-			"!**/routeTree.gen.ts"
+			"!**/*.gen.ts"
 		]
 	},
 	"linter": {
@@ -34,7 +34,7 @@
 			"!**/dist/**",
 			"!**/build/**",
 			"!**/node_modules/**",
-			"!**/routeTree.gen.ts"
+			"!**/*.gen.ts"
 		]
 	},
 	"javascript": {

@@ -5,7 +5,7 @@ import axios, {
 } from "axios";
 import { useAuthStore } from "@/core/auth/store";
 import type { AuthTokens } from "@/core/auth/types";
-import type { ApiErrorResponse } from "./types";
+import type { ErrorResponse } from "./schema.gen";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 	_retry?: boolean;
@@ -54,7 +54,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
 	(response: AxiosResponse) => response,
 	async (error: unknown) => {
-		if (!isAxiosError<ApiErrorResponse>(error) || !error.config) {
+		if (!isAxiosError<ErrorResponse>(error) || !error.config) {
 			return Promise.reject(error);
 		}
 
@@ -89,12 +89,9 @@ apiClient.interceptors.response.use(
 );
 
 export function getErrorMessage(error: unknown): string {
-	if (isAxiosError<ApiErrorResponse>(error)) {
+	if (isAxiosError<ErrorResponse>(error)) {
 		if (error.response?.data?.error) {
 			return error.response.data.error;
-		}
-		if (error.response?.data?.message) {
-			return error.response.data.message;
 		}
 		if (error.message) {
 			return error.message;

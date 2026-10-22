@@ -15,6 +15,7 @@
 - **Chequeo de Tipos:** `pnpm --filter frontend exec tsc --noEmit`.
 - **Desarrollo:** `pnpm dev:frontend` (Vite en puerto 5173).
 - **Compilación de Producción:** `pnpm build:frontend` (genera `frontend/dist`).
+- **Contrato con el backend:** los tipos de la API salen de `src/core/api/schema.gen.ts`, generado desde el OpenAPI del backend (nunca editarlo ni duplicar DTOs a mano). Tras cambiar un DTO o un schema del backend, ejecutar `pnpm gen:api` desde la raíz y commitear el resultado; `pnpm verify` falla si está desactualizado.
 - **Código sin uso (Knip):** `pnpm knip` desde la raíz (config en `../knip.json`). Detecta archivos, exports y dependencias sin uso o no listadas. Entradas: `src/routes/**` más las que knip detecta solo (`src/main.tsx`, `routeTree.gen.ts`). Ejecutarlo al añadir, mover o eliminar archivos, exports o dependencias.
 
 ---
@@ -43,7 +44,7 @@ Separación estricta entre la infraestructura compartida (`core`), las funcional
 ```text
 frontend/src/
 ├── core/                           # Base transversal y compartida
-│   ├── api/                        # Cliente Axios (client.ts) y contratos de respuesta (types.ts)
+│   ├── api/                        # Cliente Axios (client.ts) y tipos generados del OpenAPI (schema.gen.ts)
 │   ├── auth/                       # Store de sesión Zustand (store.ts) y tipos de usuario
 │   ├── components/
 │   │   ├── layout/                 # Layouts principales (MainLayout.tsx, AuthLayout.tsx)
