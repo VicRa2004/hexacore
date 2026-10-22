@@ -6,19 +6,19 @@
 
 ## 🔴 Bugs críticos
 
-- [ ] **Login y registro buscan el email con `contains`.** `LoginUseCase`, `RegisterUseCase` y `CreateUserUseCase` usan `userRepository.find({ email })`, y `PrismaUserRepository.find` filtra con `contains` + `insensitive`.
+- [x] **Login y registro buscan el email con `contains`.** `LoginUseCase`, `RegisterUseCase` y `CreateUserUseCase` usan `userRepository.find({ email })`, y `PrismaUserRepository.find` filtra con `contains` + `insensitive`.
   - Si existen `ba@x.com` (id 2) y `a@x.com` (id 5), al loguearse `a@x.com` el repositorio devuelve primero `ba@x.com` y la contraseña no coincide. Ese usuario no puede entrar nunca.
   - No se puede registrar `min@dev.com` porque "ya existe" (`admin@dev.com` lo contiene).
   - **Corrección:** añadir `findByEmail(email)` con `findUnique` al puerto `UserRepository` y usarlo en esos casos de uso.
-- [ ] **`DELETE /api/users/:id` falla siempre.** La migración `20260417031336_quita_delete_cascada` dejó `user_role` y `user_permission` con `ON DELETE RESTRICT`. Como todo usuario tiene rol, el borrado lanza P2003 y responde 500. Lo mismo pasa al borrar un permiso asignado a un rol.
+- [x] **`DELETE /api/users/:id` falla siempre.** La migración `20260417031336_quita_delete_cascada` dejó `user_role` y `user_permission` con `ON DELETE RESTRICT`. Como todo usuario tiene rol, el borrado lanza P2003 y responde 500. Lo mismo pasa al borrar un permiso asignado a un rol.
   - **Corrección:** decidir entre cascada en las tablas intermedias o borrado lógico (`isActive`), y mapear los errores de Prisma P2002/P2003 a 409.
-- [ ] **`UpdateUserUseCase` ignora el DTO.** Hace `update(user)` con la entidad sin modificar, así que `PUT /users/:id` no cambia nada. Biome ya lo avisa (`noUnusedFunctionParameters`). Además, si se aplicara, la contraseña llegaría sin hashear.
-- [ ] **`isActive` no se respeta en ningún sitio.** Un usuario desactivado puede hacer login y refresh, y conserva sus permisos. El comentario de `RefreshTokenUseCase` dice "Verificar que el usuario exista y esté activo", pero sólo comprueba que exista. Tampoco se filtran `Role.isActive` ni `Permission.isActive` en `getEffectivePermissions`.
-- [ ] **Nadie puede usar `/api/permissions`.** `prisma/seed.ts` sólo crea permisos `users:*`, ni siquiera ADMIN tiene `permissions:read`.
+- [x] **`UpdateUserUseCase` ignora el DTO.** Hace `update(user)` con la entidad sin modificar, así que `PUT /users/:id` no cambia nada. Biome ya lo avisa (`noUnusedFunctionParameters`). Además, si se aplicara, la contraseña llegaría sin hashear.
+- [x] **`isActive` no se respeta en ningún sitio.** Un usuario desactivado puede hacer login y refresh, y conserva sus permisos. El comentario de `RefreshTokenUseCase` dice "Verificar que el usuario exista y esté activo", pero sólo comprueba que exista. Tampoco se filtran `Role.isActive` ni `Permission.isActive` en `getEffectivePermissions`.
+- [x] **Nadie puede usar `/api/permissions`.** `prisma/seed.ts` sólo crea permisos `users:*`, ni siquiera ADMIN tiene `permissions:read`.
   - **Corrección:** añadir `permissions:{create,read,update,delete}` al seed y asignarlos a ADMIN.
-- [ ] **La rotación de refresh tokens no es atómica.** Dos peticiones simultáneas con el mismo token pasan ambas `findValidByHash` y generan dos sesiones.
+- [x] **La rotación de refresh tokens no es atómica.** Dos peticiones simultáneas con el mismo token pasan ambas `findValidByHash` y generan dos sesiones.
   - **Corrección:** `updateMany({ where: { id, revoked: false } })` comprobando `count === 1`, o hacerlo en una transacción.
-- [ ] **Se filtran mensajes internos.** `BaseController.handleError` y `app.onError` devuelven `error.message` en los 500, lo que expone los errores de Prisma al cliente.
+- [x] **Se filtran mensajes internos.** `BaseController.handleError` y `app.onError` devuelven `error.message` en los 500, lo que expone los errores de Prisma al cliente.
   - **Corrección:** en producción, un mensaje genérico y loguear el detalle.
 
 ## 🟠 Seguridad

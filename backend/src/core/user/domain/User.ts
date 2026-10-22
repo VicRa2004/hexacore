@@ -84,6 +84,17 @@ export class User extends Entity {
 	}
 
 	// Comportamiento de dominio
+	public update(changes: {
+		name?: string;
+		email?: string;
+		passwordHash?: string;
+	}): void {
+		if (changes.name !== undefined) this.name = changes.name;
+		if (changes.email !== undefined) this.email = new Email(changes.email);
+		if (changes.passwordHash !== undefined)
+			this.passwordHash = changes.passwordHash;
+	}
+
 	public deactivate(): void {
 		this.isActive = false;
 	}

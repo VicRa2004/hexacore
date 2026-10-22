@@ -7,6 +7,7 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 // Mocks
 const mockUserRepository = {
 	find: mock(),
+	findByEmail: mock(),
 	create: mock(),
 	findById: mock(),
 	update: mock(),
@@ -27,7 +28,7 @@ describe("CreateUserUseCase", () => {
 	let useCase: CreateUserUseCase;
 
 	beforeEach(() => {
-		mockUserRepository.find.mockClear();
+		mockUserRepository.findByEmail.mockClear();
 		mockUserRepository.create.mockClear();
 		mockPasswordHasher.hash.mockClear();
 		mockEventBus.publishAll.mockClear();
@@ -50,12 +51,7 @@ describe("CreateUserUseCase", () => {
 			isActive: true,
 		};
 
-		mockUserRepository.find.mockResolvedValue({
-			data: [],
-			total: 0,
-			lastPage: 0,
-			currentPage: 1,
-		});
+		mockUserRepository.findByEmail.mockResolvedValue(null);
 		mockPasswordHasher.hash.mockResolvedValue("hashed_password");
 
 		const fakeUser = User.reconstitute(
@@ -72,7 +68,7 @@ describe("CreateUserUseCase", () => {
 		const result = await useCase.run(dto);
 
 		// Assert
-		expect(mockUserRepository.find).toHaveBeenCalled();
+		expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(dto.email);
 		expect(mockPasswordHasher.hash).toHaveBeenCalledWith(dto.password);
 		expect(mockUserRepository.create).toHaveBeenCalled();
 		expect(mockEventBus.publishAll).toHaveBeenCalled();
@@ -89,10 +85,7 @@ describe("CreateUserUseCase", () => {
 		};
 
 		const existingUser = User.create("Existing", dto.email, "hash");
-		mockUserRepository.find.mockResolvedValue({
-			data: [existingUser],
-			total: 1,
-		});
+		mockUserRepository.findByEmail.mockResolvedValue(existingUser);
 
 		// Act & Assert
 		expect(useCase.run(dto)).rejects.toThrow(BaseError);

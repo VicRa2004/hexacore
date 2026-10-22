@@ -25,13 +25,8 @@ export class RegisterUseCase {
 	async run(
 		dto: RegisterDto,
 	): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
-		const existingUsers = await this.userRepository.find({
-			page: 1,
-			limit: 1,
-			email: dto.email,
-		});
-
-		if (existingUsers?.data?.length > 0) {
+		const existingUser = await this.userRepository.findByEmail(dto.email);
+		if (existingUser) {
 			throw new BaseError("User with this email already exists", 400);
 		}
 

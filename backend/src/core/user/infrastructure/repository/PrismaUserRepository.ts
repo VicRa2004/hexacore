@@ -91,6 +91,20 @@ export class PrismaUserRepository implements UserRepository {
 	}
 
 	/**
+	 * Busca un usuario por email exacto (login, registro, unicidad).
+	 */
+	async findByEmail(email: string): Promise<User | null> {
+		const record = await prisma.user.findUnique({
+			where: { email },
+			include: { roles: { include: { role: true } } },
+		});
+
+		if (!record) return null;
+
+		return this.toDomain(record);
+	}
+
+	/**
 	 * Persiste un nuevo usuario en la base de datos.
 	 * Los datos se extraen de la entidad de dominio para respetar la separación de capas.
 	 */

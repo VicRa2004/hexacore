@@ -9,13 +9,22 @@ const mockUserRepository = {
 	update: mock(),
 };
 
+const mockPasswordHasher = {
+	hash: mock(),
+	compare: mock(),
+};
+
 describe("UpdateUserUseCase", () => {
 	let useCase: UpdateUserUseCase;
 
 	beforeEach(() => {
 		mockUserRepository.findById.mockClear();
 		mockUserRepository.update.mockClear();
-		useCase = new UpdateUserUseCase(mockUserRepository as any);
+		mockPasswordHasher.hash.mockClear();
+		useCase = new UpdateUserUseCase(
+			mockUserRepository as any,
+			mockPasswordHasher as any,
+		);
 	});
 
 	it("debería actualizar el usuario si existe", async () => {
@@ -28,13 +37,35 @@ describe("UpdateUserUseCase", () => {
 			"USER",
 		);
 		mockUserRepository.findById.mockResolvedValue(user);
-		mockUserRepository.update.mockResolvedValue(user);
+		mockUserRepository.update.mockImplementation(async (u: User) => u);
 
 		const result = await useCase.run(1, { name: "John Updated" });
 
 		expect(mockUserRepository.findById).toHaveBeenCalledWith(1);
-		expect(mockUserRepository.update).toHaveBeenCalled();
 		expect(result.id).toBe(1);
+		expect(result.name).toBe("John Updated");
+		expect(result.email).toBe("john@test.com");
+		expect(mockPasswordHasher.hash).not.toHaveBeenCalled();
+	});
+
+	it("debería hashear la contraseña antes de guardarla", async () => {
+		const user = User.reconstitute(
+			"John",
+			"john@test.com",
+			"old_hash",
+			true,
+			1,
+			"USER",
+		);
+		mockUserRepository.findById.mockResolvedValue(user);
+		mockUserRepository.update.mockImplementation(async (u: User) => u);
+		mockPasswordHasher.hash.mockResolvedValue("new_hash");
+
+		await useCase.run(1, { password: "NewPassword123!" });
+
+		const saved = mockUserRepository.update.mock.calls[0]?.[0] as User;
+		expect(mockPasswordHasher.hash).toHaveBeenCalledWith("NewPassword123!");
+		expect(saved.getPasswordHash()).toBe("new_hash");
 	});
 
 	it("debería lanzar UserNotFoundError si el usuario a actualizar no existe", async () => {

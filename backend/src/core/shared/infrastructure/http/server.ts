@@ -66,7 +66,11 @@ app.onError((err, c) => {
 		}
 	}
 
-	return c.json({ error: err.message || "Internal Server Error" }, status);
+	// En los 5xx no se expone el mensaje interno (ya queda en el log).
+	return c.json(
+		{ error: status >= 500 ? "Internal Server Error" : err.message },
+		status,
+	);
 });
 
 // 6. Servir Frontend en Producción (SPA)

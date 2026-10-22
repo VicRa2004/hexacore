@@ -26,6 +26,10 @@ async function main() {
 		{ resource: "users", action: "read" },
 		{ resource: "users", action: "update" },
 		{ resource: "users", action: "delete" },
+		{ resource: "permissions", action: "create" },
+		{ resource: "permissions", action: "read" },
+		{ resource: "permissions", action: "update" },
+		{ resource: "permissions", action: "delete" },
 	];
 
 	for (const perm of permissionsData) {
@@ -120,7 +124,9 @@ async function main() {
 	console.log(
 		"✅ Usuarios de prueba creados (CONTRASEÑA PARA TODOS: SecurePass123!)",
 	);
-	console.log("   - admin@dev.com (ADMIN) → todos los permisos");
+	console.log(
+		"   - admin@dev.com (ADMIN) → todos los permisos (users y permissions)",
+	);
 	console.log("   - mod@dev.com   (MOD)   → crear, leer, actualizar");
 	console.log("   - user@dev.com  (USER)  → solo leer");
 }

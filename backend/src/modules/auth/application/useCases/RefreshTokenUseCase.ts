@@ -40,14 +40,19 @@ export class RefreshTokenUseCase {
 			throw new BaseError("Invalid or expired refresh token", 401);
 		}
 
-		// Revocar el token usado (rotación)
-		await this.refreshTokenRepo.revokeById(storedToken.id);
+		// Revocar el token usado (rotación). Si otra petición concurrente ya lo
+		// revocó, ésta pierde la carrera y no emite una segunda sesión.
+		const revoked = await this.refreshTokenRepo.revokeById(storedToken.id);
+
+		if (!revoked) {
+			throw new BaseError("Invalid or expired refresh token", 401);
+		}
 
 		// Verificar que el usuario exista y esté activo
 		const user = await this.userRepository.findById(storedToken.userId);
 
-		if (!user) {
-			throw new BaseError("User not found", 401);
+		if (!user?.getIsActive()) {
+			throw new BaseError("User not found or inactive", 401);
 		}
 
 		// Generar nuevo par de tokens

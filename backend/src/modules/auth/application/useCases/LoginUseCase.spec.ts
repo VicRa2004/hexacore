@@ -1,0 +1,71 @@
+import "reflect-metadata";
+import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { LoginUseCase } from "./LoginUseCase";
+import { User } from "@/core/user";
+
+const mockUserRepository = {
+	findByEmail: mock(),
+};
+
+const mockPasswordHasher = {
+	hash: mock(),
+	compare: mock(),
+};
+
+const mockTokenService = {
+	generateToken: mock(() => "access"),
+	generateRefreshToken: mock(() => "refresh"),
+	hashRefreshToken: mock(() => "refresh_hash"),
+};
+
+const mockRefreshTokenRepo = {
+	create: mock(),
+};
+
+const buildUser = (isActive: boolean) =>
+	User.reconstitute("Ana", "a@x.com", "hash", isActive, 5, "USER");
+
+describe("LoginUseCase", () => {
+	let useCase: LoginUseCase;
+
+	beforeEach(() => {
+		mockUserRepository.findByEmail.mockReset();
+		mockPasswordHasher.compare.mockReset();
+		mockRefreshTokenRepo.create.mockClear();
+		useCase = new LoginUseCase(
+			mockUserRepository as any,
+			mockPasswordHasher as any,
+			mockTokenService as any,
+			mockRefreshTokenRepo as any,
+		);
+	});
+
+	it("debería buscar el usuario por email exacto y emitir la sesión", async () => {
+		mockUserRepository.findByEmail.mockResolvedValue(buildUser(true));
+		mockPasswordHasher.compare.mockResolvedValue(true);
+
+		const result = await useCase.run({ email: "a@x.com", password: "pass" });
+
+		expect(mockUserRepository.findByEmail).toHaveBeenCalledWith("a@x.com");
+		expect(result.user.id).toBe(5);
+		expect(mockRefreshTokenRepo.create).toHaveBeenCalled();
+	});
+
+	it("debería lanzar 401 si el email no existe", async () => {
+		mockUserRepository.findByEmail.mockResolvedValue(null);
+
+		expect(useCase.run({ email: "a@x.com", password: "pass" })).rejects.toThrow(
+			"Invalid credentials",
+		);
+	});
+
+	it("debería rechazar a un usuario desactivado", async () => {
+		mockUserRepository.findByEmail.mockResolvedValue(buildUser(false));
+		mockPasswordHasher.compare.mockResolvedValue(true);
+
+		expect(useCase.run({ email: "a@x.com", password: "pass" })).rejects.toThrow(
+			"User is inactive",
+		);
+		expect(mockRefreshTokenRepo.create).not.toHaveBeenCalled();
+	});
+});

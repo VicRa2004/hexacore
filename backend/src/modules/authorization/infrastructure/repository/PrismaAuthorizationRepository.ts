@@ -21,39 +21,31 @@ export class PrismaAuthorizationRepository implements AuthorizationRepository {
 	// ── Permisos efectivos ──────────────────────────────────────────────────────
 
 	async getEffectivePermissions(userId: number): Promise<Permission[]> {
-		// 1. Permisos heredados por roles
-		const userWithRoles = await prisma.user.findUnique({
-			where: { id: userId },
+		// Roles y permisos directos en una sola query; sólo cuenta lo activo.
+		const user = await prisma.user.findUnique({
+			where: { id: userId, isActive: true },
 			include: {
 				roles: {
+					where: { role: { isActive: true } },
 					include: {
 						role: {
 							include: {
 								permissions: {
-									include: {
-										permission: true,
-									},
+									where: { permission: { isActive: true } },
+									include: { permission: true },
 								},
 							},
 						},
 					},
 				},
-			},
-		});
-
-		// 2. Permisos directos del usuario (excepciones)
-		const userWithDirectPerms = await prisma.user.findUnique({
-			where: { id: userId },
-			include: {
 				directPermissions: {
-					include: {
-						permission: true,
-					},
+					where: { permission: { isActive: true } },
+					include: { permission: true },
 				},
 			},
 		});
 
-		if (!userWithRoles || !userWithDirectPerms) {
+		if (!user) {
 			return [];
 		}
 
@@ -61,7 +53,7 @@ export class PrismaAuthorizationRepository implements AuthorizationRepository {
 		const permissionMap = new Map<string, Permission>();
 
 		// Agregar los permisos que vienen de todos los roles del usuario
-		for (const userRole of userWithRoles.roles) {
+		for (const userRole of user.roles) {
 			for (const rolePermission of userRole.role.permissions) {
 				const p = rolePermission.permission;
 				const key = `${p.resource}:${p.action}`;
@@ -73,7 +65,7 @@ export class PrismaAuthorizationRepository implements AuthorizationRepository {
 		}
 
 		// Aplicar las excepciones directas del usuario
-		for (const userPerm of userWithDirectPerms.directPermissions) {
+		for (const userPerm of user.directPermissions) {
 			const p = userPerm.permission;
 			const key = `${p.resource}:${p.action}`;
 

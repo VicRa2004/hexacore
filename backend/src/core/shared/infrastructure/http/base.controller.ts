@@ -5,6 +5,10 @@ import { ZodError } from "zod";
 import z from "zod";
 import { BaseError } from "../../domain/error/BaseError";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { Prisma } from "@/generated/prisma/client";
+
+/** Violaciones de unicidad (P2002) y de clave foránea (P2003) → 409 Conflict. */
+const CONFLICT_CODES = new Set(["P2002", "P2003"]);
 
 /**
  * Controlador base para Hono.
@@ -36,12 +40,16 @@ export abstract class BaseController {
 			);
 		}
 
-		return c.json(
-			{
-				error: (error as Error)?.message || "Internal server error",
-			},
-			500,
-		);
+		if (
+			error instanceof Prisma.PrismaClientKnownRequestError &&
+			CONFLICT_CODES.has(error.code)
+		) {
+			return c.json({ error: "Conflict with existing data" }, 409);
+		}
+
+		// El detalle (p.ej. errores de Prisma) sólo va al log, nunca al cliente.
+		console.error(error);
+		return c.json({ error: "Internal server error" }, 500);
 	}
 
 	/**

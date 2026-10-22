@@ -29,9 +29,10 @@ export interface RefreshTokenRepository {
 	): Promise<{ id: number; userId: number; revoked: boolean } | null>;
 
 	/**
-	 * Revoca un token específico por su ID.
+	 * Revoca un token específico por su ID de forma atómica.
+	 * @returns `false` si ya estaba revocado (otra petición lo usó antes).
 	 */
-	revokeById(id: number): Promise<void>;
+	revokeById(id: number): Promise<boolean>;
 
 	/**
 	 * Revoca todos los refresh tokens de un usuario (logout global / compromiso de cuenta).

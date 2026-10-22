@@ -69,7 +69,7 @@ model UserRole {
   roleId    Int      @map("usrrol_fkrole")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   role Role @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
@@ -81,8 +81,8 @@ model RolePermission {
   roleId       Int @map("rolper_fkrole")
   permissionId Int @map("rolper_fkpermission")
 
-  role       Role       @relation(fields: [roleId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@map("role_permission")
@@ -95,8 +95,8 @@ model UserPermission {
   /// true = conceder, false = denegar (override sobre el rol)
   granted      Boolean @default(true) @map("usrper_granted")
 
-  user       User       @relation(fields: [userId], references: [id])
-  permission Permission @relation(fields: [permissionId], references: [id])
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   @@id([userId, permissionId])
   @@map("user_permission")
