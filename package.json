@@ -26,6 +26,7 @@
 		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",
 		"db:push": "pnpm --filter backend exec prisma db push",
 		"db:migrate": "pnpm --filter backend exec prisma migrate dev",
+		"gen:module": "pnpm --filter backend exec bun scripts/gen-module.ts",
 		"gen:api": "pnpm --filter backend exec bun scripts/export-openapi.ts ../node_modules/.cache/openapi.json && openapi-typescript node_modules/.cache/openapi.json --root-types --root-types-no-schema-prefix -o frontend/src/core/api/schema.gen.ts",
 		"check:api": "pnpm gen:api && git diff --exit-code frontend/src/core/api/schema.gen.ts"
 	},
