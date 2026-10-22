@@ -4,6 +4,10 @@ import { BaseController } from "@/core/shared/infrastructure/http/base.controlle
 import { RefreshTokenUseCase } from "../../../application/useCases/RefreshTokenUseCase";
 
 import { validate } from "@/core/shared/infrastructure/libs/validate";
+import {
+	getRefreshTokenCookie,
+	setRefreshTokenCookie,
+} from "../refreshTokenCookie";
 import { refreshTokenSchema } from "../schemas/authSchemas";
 
 @injectable()
@@ -17,11 +21,15 @@ export class RefreshTokenController extends BaseController {
 
 	run = async (c: Context): Promise<Response> => {
 		return this.executeSafely(c, async () => {
-			const body = await c.req.json();
-			const dto = validate(refreshTokenSchema, body);
-			const result = await this.refreshTokenUseCase.run(dto.refreshToken);
+			const dto = validate(refreshTokenSchema, {
+				refreshToken: getRefreshTokenCookie(c),
+			});
+			const { refreshToken, accessToken } = await this.refreshTokenUseCase.run(
+				dto.refreshToken,
+			);
 
-			return this.ok(c, result);
+			setRefreshTokenCookie(c, refreshToken);
+			return this.ok(c, { accessToken });
 		});
 	};
 }

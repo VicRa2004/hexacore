@@ -8,12 +8,16 @@ import crypto from "node:crypto";
 export class JwtService implements TokenService {
 	private secret = env.JWT_SECRET;
 
-	generateToken(payload: object, expiresIn: string = "15m"): string {
-		return jwt.sign(payload, this.secret, { expiresIn: expiresIn as any });
+	generateToken(payload: object): string {
+		return jwt.sign(payload, this.secret, {
+			algorithm: "HS256",
+			expiresIn: "15m",
+		});
 	}
 
 	verifyToken(token: string): object | string {
-		return jwt.verify(token, this.secret);
+		// Fijar el algoritmo evita aceptar tokens firmados con otro (p.ej. "none").
+		return jwt.verify(token, this.secret, { algorithms: ["HS256"] });
 	}
 
 	generateRefreshToken(): string {

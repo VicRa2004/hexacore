@@ -64,5 +64,5 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
 - `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
-- Docker vive en la raíz: `docker compose up --build`.
+- Docker vive en la raíz: `cp .env.example .env` y `docker compose up --build`.
 - Variables: `cp backend/.env.example backend/.env`.

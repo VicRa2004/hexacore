@@ -4,6 +4,7 @@ import { BaseController } from "@/core/shared/infrastructure/http/base.controlle
 import { LoginUseCase } from "../../../application/useCases/LoginUseCase";
 
 import { validate } from "@/core/shared/infrastructure/libs/validate";
+import { setRefreshTokenCookie } from "../refreshTokenCookie";
 import { loginSchema } from "../schemas/authSchemas";
 
 @injectable()
@@ -18,9 +19,10 @@ export class LoginController extends BaseController {
 		return this.executeSafely(c, async () => {
 			const body = await c.req.json();
 			const dto = validate(loginSchema, body);
-			const result = await this.loginUseCase.run(dto);
+			const { refreshToken, ...session } = await this.loginUseCase.run(dto);
 
-			return this.ok(c, result);
+			setRefreshTokenCookie(c, refreshToken);
+			return this.ok(c, session);
 		});
 	};
 }

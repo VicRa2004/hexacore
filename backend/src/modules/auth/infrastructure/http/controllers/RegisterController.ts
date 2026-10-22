@@ -4,6 +4,7 @@ import { BaseController } from "@/core/shared/infrastructure/http/base.controlle
 import { RegisterUseCase } from "../../../application/useCases/RegisterUseCase";
 
 import { validate } from "@/core/shared/infrastructure/libs/validate";
+import { setRefreshTokenCookie } from "../refreshTokenCookie";
 import { registerSchema } from "../schemas/authSchemas";
 
 @injectable()
@@ -18,9 +19,10 @@ export class RegisterController extends BaseController {
 		return this.executeSafely(c, async () => {
 			const body = await c.req.json();
 			const dto = validate(registerSchema, body);
-			const result = await this.registerUseCase.run(dto);
+			const { refreshToken, ...session } = await this.registerUseCase.run(dto);
 
-			return this.created(c, result);
+			setRefreshTokenCookie(c, refreshToken);
+			return this.created(c, session);
 		});
 	};
 }

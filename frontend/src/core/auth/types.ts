@@ -6,21 +6,19 @@ export interface User {
 	isActive: boolean;
 }
 
+// El refresh token vive en una cookie httpOnly que gestiona el backend.
 export interface AuthTokens {
 	accessToken: string;
-	refreshToken: string;
 }
 
 export interface AuthResponse {
 	accessToken: string;
-	refreshToken: string;
 	user: User;
 }
 
 export interface AuthState {
 	user: User | null;
 	accessToken: string | null;
-	refreshToken: string | null;
 	isAuthenticated: boolean;
 	login: (payload: AuthResponse) => void;
 	setTokens: (tokens: AuthTokens) => void;

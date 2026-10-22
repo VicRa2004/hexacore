@@ -8,6 +8,13 @@ import type { RefreshTokenRepository } from "../../domain/repository/RefreshToke
 import type { UserDto } from "@/core/user";
 import { UserMapper } from "@/core/user";
 
+/**
+ * Hash bcrypt de una contraseña aleatoria: si el email no existe se compara
+ * igualmente contra él, para que la respuesta tarde lo mismo.
+ */
+const DUMMY_PASSWORD_HASH =
+	"$2b$10$UZQKZ7yo9nGiqhSbmYdj4eV9jrthslRlUx4lX.r5eMN.sW4Pb.boi";
+
 /** Duración del refresh token: 7 días */
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
@@ -26,16 +33,12 @@ export class LoginUseCase {
 	): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
 		const user = await this.userRepository.findByEmail(dto.email);
 
-		if (!user) {
-			throw new BaseError("Invalid credentials", 401);
-		}
-
 		const isPasswordValid = await this.passwordHasher.compare(
 			dto.password,
-			user.getPasswordHash(),
+			user?.getPasswordHash() ?? DUMMY_PASSWORD_HASH,
 		);
 
-		if (!isPasswordValid) {
+		if (!user || !isPasswordValid) {
 			throw new BaseError("Invalid credentials", 401);
 		}
 

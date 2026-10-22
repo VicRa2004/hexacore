@@ -4,10 +4,17 @@
 
 | Método | Ruta | Body | Respuesta |
 |--------|------|------|-----------|
-| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, refreshToken, user }` |
-| POST | `/api/auth/register` | `{ name, email, password }` | `{ accessToken, refreshToken, user }` |
-| POST | `/api/auth/refresh` | `{ refreshToken }` | `{ accessToken, refreshToken }` |
-| POST | `/api/auth/logout` | `{ refreshToken }` | `{ message }` |
+| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, user }` + cookie |
+| POST | `/api/auth/register` | `{ name, email, password }` | `{ accessToken, user }` + cookie |
+| POST | `/api/auth/refresh` | — (lee la cookie) | `{ accessToken }` + cookie nueva |
+| POST | `/api/auth/logout` | — (lee la cookie) | `{ message }` y borra la cookie |
+
+El refresh token **nunca** viaja en el body: el servidor lo fija en la cookie
+`refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/auth`, `Secure` en
+producción). El navegador la envía sola a las rutas de auth y JavaScript no
+puede leerla.
+
+Límites por IP: login 5 intentos / 15 min, registro 4 / hora (responden `429`).
 
 ---
 
@@ -35,16 +42,19 @@ Se puede revocar en cualquier momento haciendo `revoked = true` en la BD.
 ## Almacenamiento en el frontend
 
 ```text
-accessToken   → en memoria (variable / estado reactivo)
-                NUNCA en localStorage ni sessionStorage.
+accessToken   → idealmente en memoria (variable / estado reactivo).
+                El frontend de la plantilla lo persiste en localStorage para
+                sobrevivir a recargas; dura 15 min, así que el riesgo es acotado.
 
-refreshToken  → idealmente en una cookie httpOnly.
-                Si no es posible, en memoria junto al access token.
+refreshToken  → cookie httpOnly gestionada por el servidor.
+                El front no lo ve ni lo guarda.
 ```
 
-¿Por qué en memoria? Porque `localStorage` es accesible desde cualquier
-script JS. Un ataque XSS podría leerlo. En memoria desaparece al cerrar la
-pestaña, que es el comportamiento deseado.
+¿Por qué no en `localStorage`? Porque es accesible desde cualquier script JS:
+un ataque XSS podría leerlo. La cookie httpOnly no es legible desde JS.
+
+> La cookie usa `Path=/api/auth`, así que el front debe llamar a la API en el
+> **mismo origen** (en desarrollo, el proxy `/api` de Vite).
 
 ---
 
@@ -59,11 +69,10 @@ const res = await fetch("/api/auth/login", {
   body: JSON.stringify({ email, password }),
 });
 
-const { accessToken, refreshToken, user } = await res.json();
+// El refresh token llega en la cookie httpOnly; aquí sólo el access token
+const { accessToken, user } = await res.json();
 
-// Guardar en memoria (ejemplo con variables simples)
 let currentAccessToken = accessToken;
-let currentRefreshToken = refreshToken;
 ```
 
 ---
@@ -99,7 +108,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
   let res = await fetch(url, options);
 
   // Si el access token expiró, intentar renovar
-  if (res.status === 401 && currentRefreshToken) {
+  if (res.status === 401 && currentAccessToken) {
     const refreshed = await refreshTokens();
 
     if (refreshed) {
@@ -126,17 +135,13 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 ```typescript
 async function refreshTokens(): Promise<boolean> {
   try {
-    const res = await fetch("/api/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: currentRefreshToken }),
-    });
+    // La cookie viaja sola (mismo origen); no hace falta body
+    const res = await fetch("/api/auth/refresh", { method: "POST" });
 
     if (!res.ok) return false;
 
     const data = await res.json();
     currentAccessToken = data.accessToken;
-    currentRefreshToken = data.refreshToken;
 
     return true;
   } catch {
@@ -145,9 +150,9 @@ async function refreshTokens(): Promise<boolean> {
 }
 ```
 
-> **Importante:** cada llamada a `/refresh` devuelve un refresh token
-> **nuevo** y revoca el anterior. El front debe guardar siempre el último
-> token recibido. No reutilizar tokens viejos.
+> **Importante:** cada llamada a `/refresh` revoca el refresh token anterior
+> y fija uno **nuevo** en la cookie. Dos llamadas simultáneas con la misma
+> cookie: sólo una gana, la otra recibe `401`. Serializa las renovaciones.
 
 ---
 
@@ -155,14 +160,10 @@ async function refreshTokens(): Promise<boolean> {
 
 ```typescript
 async function logout() {
-  await fetch("/api/auth/logout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken: currentRefreshToken }),
-  });
+  // Revoca el refresh token de la cookie y la borra
+  await fetch("/api/auth/logout", { method: "POST" });
 
   currentAccessToken = null;
-  currentRefreshToken = null;
   redirectToLogin();
 }
 ```
@@ -246,15 +247,14 @@ api.interceptors.response.use(
 
 | Token | Duración | Configurable en |
 |-------|----------|-----------------|
-| Access Token | 15 min | `JwtService.ts` → parámetro `expiresIn` |
-| Refresh Token | 7 días | `REFRESH_TOKEN_EXPIRY_DAYS` en cada Use Case |
+| Access Token | 15 min | `JwtService.ts` → opción `expiresIn` |
+| Refresh Token | 7 días | `REFRESH_TOKEN_EXPIRY_DAYS` en cada Use Case y `maxAge` en `refreshTokenCookie.ts` |
 
 ---
 
 ## Reglas
 
-- Guardar tokens en **memoria**, nunca en `localStorage`
-- Siempre **reemplazar** el refresh token tras cada `/refresh`
+- El refresh token vive sólo en la cookie httpOnly; nunca en `localStorage`
 - Si `/refresh` devuelve `401` → el refresh token fue revocado → redirigir al login
 - En logout, **siempre** llamar a `/api/auth/logout` antes de limpiar el estado local
 - Si el front maneja múltiples pestañas, sincronizar tokens vía `BroadcastChannel`

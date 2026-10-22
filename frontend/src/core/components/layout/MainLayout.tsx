@@ -19,13 +19,11 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
 	const navigate = useNavigate();
-	const { user, refreshToken, logout } = useAuthStore();
+	const { user, logout } = useAuthStore();
 
 	const handleLogout = async () => {
 		try {
-			if (refreshToken) {
-				await authApi.logout(refreshToken);
-			}
+			await authApi.logout();
 		} catch {
 			// Ignoramos error en logout para asegurar limpieza local
 		} finally {

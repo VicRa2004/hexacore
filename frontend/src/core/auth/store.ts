@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { queryClient } from "@/core/router";
 import type { AuthResponse, AuthState, AuthTokens, User } from "./types";
 
 export const useAuthStore = create<AuthState>()(
@@ -7,14 +8,12 @@ export const useAuthStore = create<AuthState>()(
 		(set) => ({
 			user: null,
 			accessToken: null,
-			refreshToken: null,
 			isAuthenticated: false,
 
 			login: (payload: AuthResponse) => {
 				set({
 					user: payload.user,
 					accessToken: payload.accessToken,
-					refreshToken: payload.refreshToken,
 					isAuthenticated: true,
 				});
 			},
@@ -22,7 +21,6 @@ export const useAuthStore = create<AuthState>()(
 			setTokens: (tokens: AuthTokens) => {
 				set({
 					accessToken: tokens.accessToken,
-					refreshToken: tokens.refreshToken,
 					isAuthenticated: true,
 				});
 			},
@@ -31,9 +29,10 @@ export const useAuthStore = create<AuthState>()(
 				set({
 					user: null,
 					accessToken: null,
-					refreshToken: null,
 					isAuthenticated: false,
 				});
+				// Evita que el siguiente usuario vea datos cacheados del anterior.
+				queryClient.clear();
 			},
 
 			updateUser: (userData: Partial<User>) => {
@@ -44,6 +43,12 @@ export const useAuthStore = create<AuthState>()(
 		}),
 		{
 			name: "hexacore-auth-storage",
+			// Persistir sólo la sesión (descarta el refreshToken de versiones previas).
+			partialize: ({ user, accessToken, isAuthenticated }) => ({
+				user,
+				accessToken,
+				isAuthenticated,
+			}),
 		},
 	),
 );

@@ -4,6 +4,7 @@ import axios, {
 	isAxiosError,
 } from "axios";
 import { useAuthStore } from "@/core/auth/store";
+import type { AuthTokens } from "@/core/auth/types";
 import type { ApiErrorResponse } from "./types";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -21,18 +22,13 @@ export const apiClient = axios.create({
 // peticiones 401 simultáneas que lo reenvíen invalidarían la sesión.
 let refreshPromise: Promise<string> | null = null;
 
-function refreshAccessToken(refreshToken: string): Promise<string> {
+function refreshAccessToken(): Promise<string> {
 	refreshPromise ??= (async () => {
-		// Llamada directa sin interceptores para evitar bucles
-		const { data } = await axios.post<{
-			accessToken: string;
-			refreshToken: string;
-		}>("/api/auth/refresh", { refreshToken });
+		// Llamada directa sin interceptores para evitar bucles. El refresh token
+		// viaja solo en la cookie httpOnly (mismo origen vía el proxy /api).
+		const { data } = await axios.post<AuthTokens>("/api/auth/refresh");
 
-		useAuthStore.getState().setTokens({
-			accessToken: data.accessToken,
-			refreshToken: data.refreshToken,
-		});
+		useAuthStore.getState().setTokens({ accessToken: data.accessToken });
 		return data.accessToken;
 	})().finally(() => {
 		refreshPromise = null;
@@ -66,15 +62,16 @@ apiClient.interceptors.response.use(
 
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			originalRequest._retry = true;
-			const { refreshToken, logout } = useAuthStore.getState();
+			const { isAuthenticated, logout } = useAuthStore.getState();
 
-			if (!refreshToken) {
+			// Sin sesión (p.ej. credenciales inválidas en el login) no hay qué renovar.
+			if (!isAuthenticated) {
 				logout();
 				return Promise.reject(error);
 			}
 
 			try {
-				const newAccessToken = await refreshAccessToken(refreshToken);
+				const newAccessToken = await refreshAccessToken();
 
 				if (originalRequest.headers) {
 					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

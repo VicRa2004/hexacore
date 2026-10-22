@@ -51,12 +51,15 @@ describe("LoginUseCase", () => {
 		expect(mockRefreshTokenRepo.create).toHaveBeenCalled();
 	});
 
-	it("debería lanzar 401 si el email no existe", async () => {
+	it("debería lanzar 401 si el email no existe, comparando igualmente el hash", async () => {
 		mockUserRepository.findByEmail.mockResolvedValue(null);
+		mockPasswordHasher.compare.mockResolvedValue(false);
 
-		expect(useCase.run({ email: "a@x.com", password: "pass" })).rejects.toThrow(
-			"Invalid credentials",
-		);
+		await expect(
+			useCase.run({ email: "a@x.com", password: "pass" }),
+		).rejects.toThrow("Invalid credentials");
+		// bcrypt corre aunque el email no exista: misma latencia que un fallo de contraseña
+		expect(mockPasswordHasher.compare).toHaveBeenCalledTimes(1);
 	});
 
 	it("debería rechazar a un usuario desactivado", async () => {

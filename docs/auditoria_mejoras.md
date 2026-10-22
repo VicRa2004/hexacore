@@ -23,16 +23,16 @@
 
 ## 🟠 Seguridad
 
-- [ ] **Enumeración de usuarios por tiempo:** si el email no existe no se ejecuta bcrypt, y esa respuesta es más rápida. Comparar contra un hash ficticio.
-- [ ] **Rate limiting pendiente:** sigue el TODO en `AuthRouter`, y `express-rate-limit` está instalado pero no funciona con Hono. Usar `hono-rate-limiter` o un middleware propio.
-- [ ] **`cors()` sin `origin`:** acepta cualquier origen. Configurarlo desde una variable de entorno.
-- [ ] **JWT:**
+- [x] **Enumeración de usuarios por tiempo:** si el email no existe no se ejecuta bcrypt, y esa respuesta es más rápida. Comparar contra un hash ficticio.
+- [x] **Rate limiting pendiente:** sigue el TODO en `AuthRouter`, y `express-rate-limit` está instalado pero no funciona con Hono. Usar `hono-rate-limiter` o un middleware propio.
+- [x] **`cors()` sin `origin`:** acepta cualquier origen. Configurarlo desde una variable de entorno.
+- [x] **JWT:**
   - `verify` no fija `algorithms: ["HS256"]`.
   - Se usa `expiresIn as any`.
   - `JWT_SECRET` sólo exige `min(1)`. Pedir al menos 32 caracteres y fallar en `prod` con el secreto de ejemplo.
-- [ ] **Tokens en `localStorage`:** el store de Zustand guarda el refresh token ahí (vulnerable a XSS). Si es asumible, al menos documentarlo; si no, pasarlo a una cookie httpOnly.
-- [ ] **Caché del logout:** al cerrar sesión no se hace `queryClient.clear()`, así que el siguiente usuario puede ver datos cacheados del anterior (`staleTime` de 5 min).
-- [ ] **Credenciales fijas en `docker-compose.yml`:** `user/password` y `JWT_SECRET` por defecto. Sacarlas a un `.env` de la raíz.
+- [x] **Tokens en `localStorage`:** el store de Zustand guarda el refresh token ahí (vulnerable a XSS). Si es asumible, al menos documentarlo; si no, pasarlo a una cookie httpOnly.
+- [x] **Caché del logout:** al cerrar sesión no se hace `queryClient.clear()`, así que el siguiente usuario puede ver datos cacheados del anterior (`staleTime` de 5 min).
+- [x] **Credenciales fijas en `docker-compose.yml`:** `user/password` y `JWT_SECRET` por defecto. Sacarlas a un `.env` de la raíz.
 
 ## 🟡 Arquitectura y diseño
 

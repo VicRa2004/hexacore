@@ -1,5 +1,5 @@
 import { apiClient } from "@/core/api/client";
-import type { AuthResponse, AuthTokens } from "@/core/auth/types";
+import type { AuthResponse } from "@/core/auth/types";
 import type { LoginInput, RegisterInput } from "../schemas/authSchemas";
 
 export const authApi = {
@@ -16,17 +16,9 @@ export const authApi = {
 		return response.data;
 	},
 
-	async logout(refreshToken: string): Promise<{ message: string }> {
-		const response = await apiClient.post<{ message: string }>("/auth/logout", {
-			refreshToken,
-		});
-		return response.data;
-	},
-
-	async refresh(refreshToken: string): Promise<AuthTokens> {
-		const response = await apiClient.post<AuthTokens>("/auth/refresh", {
-			refreshToken,
-		});
+	// Revoca el refresh token de la cookie httpOnly y la borra.
+	async logout(): Promise<{ message: string }> {
+		const response = await apiClient.post<{ message: string }>("/auth/logout");
 		return response.data;
 	},
 };

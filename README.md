@@ -103,6 +103,7 @@ pnpm lint:fix   # corrige automáticamente
 ## Docker
 
 ```bash
+cp .env.example .env        # credenciales de la BD y JWT_SECRET (obligatorias)
 docker compose up --build   # db + backend (migraciones automáticas) + frontend
 ```
 

@@ -5,6 +5,9 @@ import { LoginController } from "../controllers/LoginController";
 import { RegisterController } from "../controllers/RegisterController";
 import { RefreshTokenController } from "../controllers/RefreshTokenController";
 import { LogoutController } from "../controllers/LogoutController";
+import { rateLimit } from "@/core/shared/infrastructure/http/rateLimit";
+
+const MINUTE = 60 * 1000;
 
 @injectable()
 export class AuthRouter {
@@ -21,9 +24,9 @@ export class AuthRouter {
 	}
 
 	private initRoutes() {
-		// TODO: Implement rate limiting for Hono (e.g., using a custom middleware or a package)
-		// - Rate limiting: máx 5 intentos por IP en 15 minutos para login
-		// - Rate limiting: máx 4 registros por IP en 1 hora
+		// Freno a fuerza bruta y altas masivas: límites por IP.
+		const loginLimit = rateLimit({ windowMs: 15 * MINUTE, limit: 5 });
+		const registerLimit = rateLimit({ windowMs: 60 * MINUTE, limit: 4 });
 
 		/**
 		 * @openapi
@@ -66,8 +69,10 @@ export class AuthRouter {
 		 *           application/json:
 		 *             schema:
 		 *               $ref: '#/components/schemas/ErrorResponse'
+		 *       429:
+		 *         description: Demasiados intentos (máx. 5 por IP cada 15 minutos)
 		 */
-		this.router.post("/login", this.loginController.run);
+		this.router.post("/login", loginLimit, this.loginController.run);
 
 		/**
 		 * @openapi
@@ -108,8 +113,10 @@ export class AuthRouter {
 		 *           application/json:
 		 *             schema:
 		 *               $ref: '#/components/schemas/ErrorResponse'
+		 *       429:
+		 *         description: Demasiados registros (máx. 4 por IP cada hora)
 		 */
-		this.router.post("/register", this.registerController.run);
+		this.router.post("/register", registerLimit, this.registerController.run);
 
 		/**
 		 * @openapi
@@ -118,22 +125,12 @@ export class AuthRouter {
 		 *     tags: [Auth]
 		 *     summary: Renovar tokens usando un refresh token válido
 		 *     description: >
-		 *       Rota el refresh token: el token enviado se revoca y se genera
-		 *       un nuevo par accessToken + refreshToken (Refresh Token Rotation).
-		 *     requestBody:
-		 *       required: true
-		 *       content:
-		 *         application/json:
-		 *           schema:
-		 *             type: object
-		 *             required: [refreshToken]
-		 *             properties:
-		 *               refreshToken:
-		 *                 type: string
-		 *                 example: 550e8400-e29b-41d4-a716-446655440000
+		 *       Lee el refresh token de la cookie httpOnly `refresh_token`, lo revoca
+		 *       y emite un nuevo access token junto con una cookie nueva
+		 *       (Refresh Token Rotation).
 		 *     responses:
 		 *       200:
-		 *         description: Tokens renovados exitosamente
+		 *         description: Tokens renovados exitosamente (cookie `refresh_token` renovada)
 		 *         content:
 		 *           application/json:
 		 *             schema:
@@ -142,11 +139,8 @@ export class AuthRouter {
 		 *                 accessToken:
 		 *                   type: string
 		 *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-		 *                 refreshToken:
-		 *                   type: string
-		 *                   example: 550e8400-e29b-41d4-a716-446655440000
 		 *       400:
-		 *         description: Token no provisto o formato inválido
+		 *         description: Cookie `refresh_token` ausente
 		 *         content:
 		 *           application/json:
 		 *             schema:
@@ -167,20 +161,9 @@ export class AuthRouter {
 		 *     tags: [Auth]
 		 *     summary: Cerrar sesión (revocar refresh token)
 		 *     description: >
-		 *       Revoca el refresh token proporcionado. El access token seguirá
-		 *       siendo válido hasta que expire (máx 15 min), pero no se podrá
-		 *       obtener uno nuevo.
-		 *     requestBody:
-		 *       required: true
-		 *       content:
-		 *         application/json:
-		 *           schema:
-		 *             type: object
-		 *             required: [refreshToken]
-		 *             properties:
-		 *               refreshToken:
-		 *                 type: string
-		 *                 example: 550e8400-e29b-41d4-a716-446655440000
+		 *       Revoca el refresh token de la cookie httpOnly `refresh_token` y la
+		 *       borra. El access token seguirá siendo válido hasta que expire
+		 *       (máx 15 min), pero no se podrá obtener uno nuevo.
 		 *     responses:
 		 *       200:
 		 *         description: Sesión cerrada correctamente
