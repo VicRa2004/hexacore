@@ -33,4 +33,5 @@ ENV NODE_ENV=prod
 WORKDIR /app/backend
 EXPOSE 3000
 
-CMD ["sh", "-c", "bun --bun node_modules/prisma/build/index.js migrate deploy && bun src/index.ts"]
+# Las migraciones las aplica el servicio `migrate` del docker-compose.
+CMD ["bun", "src/index.ts"]

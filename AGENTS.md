@@ -66,5 +66,5 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
 - `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
-- Docker vive en la raíz: `cp .env.example .env` y `docker compose up --build` (imagen de producción en `:3000`). En desarrollo: `docker compose up db` + `pnpm dev`.
+- Docker vive en la raíz y está pensado para Dokploy: un único servicio `app` (backend que también sirve `frontend/dist`, un solo dominio, puerto `3000`). La BD **no** va en el compose: es un servicio aparte de Dokploy y llega por `DATABASE_URL`. El servicio `migrate` ejecuta `prisma migrate deploy` antes de cada arranque de `app`. En desarrollo: `pnpm dev` con PostgreSQL local.
 - Variables: `cp backend/.env.example backend/.env`.

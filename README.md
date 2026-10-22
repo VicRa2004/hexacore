@@ -102,12 +102,15 @@ pnpm lint:fix   # corrige automáticamente
 
 ## Docker
 
-```bash
-cp .env.example .env        # credenciales de la BD y JWT_SECRET propio (obligatorias)
-docker compose up --build   # db + backend en modo prod sirviendo el frontend en http://localhost:3000
-```
+Pensado para desplegar en **Dokploy** como servicio *Docker Compose*:
 
-La imagen aplica las migraciones al arrancar y rechaza el `JWT_SECRET` de ejemplo. Para desarrollo, levanta sólo la BD (`docker compose up db`) y usa `pnpm dev`: `backend/.env.example` ya apunta a ella (puerto `5433`).
+1. Crea la BD PostgreSQL como servicio de Dokploy y copia su *Internal Connection URL*.
+2. En la pestaña *Environment* define `DATABASE_URL` y `JWT_SECRET` (ver `.env.example`).
+3. Asigna un dominio al servicio `app`, puerto `3000`.
+
+Un solo contenedor sirve la API (`/api`), la documentación (`/docs`) y el frontend compilado, así que basta un dominio. En cada deploy el servicio `migrate` aplica las migraciones pendientes (`prisma migrate deploy`, nunca borra datos) antes de arrancar `app`. La imagen rechaza el `JWT_SECRET` de ejemplo.
+
+En local: `cp .env.example .env` y `docker compose up --build` (necesita una BD accesible desde el contenedor). Para desarrollo usa `pnpm dev` con tu PostgreSQL local (`backend/.env`).
 
 ---
 
