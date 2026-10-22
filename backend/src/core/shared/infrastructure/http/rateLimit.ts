@@ -9,6 +9,12 @@ interface RateLimitOptions {
 }
 
 function clientIp(c: Context): string {
+	// Detrás de Traefik (Dokploy) la IP real es la última de X-Forwarded-For:
+	// la añade el proxy y el cliente no puede falsearla.
+	if (process.env.TRUST_PROXY === "true") {
+		const forwarded = c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim();
+		if (forwarded) return forwarded;
+	}
 	try {
 		return getConnInfo(c).remote.address ?? "unknown";
 	} catch {
@@ -20,8 +26,10 @@ function clientIp(c: Context): string {
 /**
  * Limita las peticiones por IP con una ventana fija.
  *
- * shortcut: contador en memoria por proceso y por IP directa; con varias
- * réplicas o detrás de un proxy, pasar a Redis y leer la IP del proxy.
+ * Con `TRUST_PROXY=true` usa la IP que reporta el proxy; sin ella, la directa.
+ *
+ * shortcut: contador en memoria por proceso; con varias réplicas, pasar a
+ * Redis (ver docs/escalado.md).
  */
 export function rateLimit({
 	windowMs,

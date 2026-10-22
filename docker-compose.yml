@@ -8,6 +8,8 @@ x-app: &app
     DATABASE_URL: ${DATABASE_URL:?Define DATABASE_URL}
     JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (mínimo 32 caracteres)}
     PORT: 3000
+    # Solo se llega a `app` a través de Traefik: el rate limit usa su X-Forwarded-For.
+    TRUST_PROXY: ${TRUST_PROXY:-true}
 
 services:
   # Aplica las migraciones pendientes en cada deploy y termina. `migrate deploy`
