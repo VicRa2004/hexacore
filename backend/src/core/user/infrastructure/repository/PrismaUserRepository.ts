@@ -27,18 +27,13 @@ export class PrismaUserRepository implements UserRepository {
 	 * Se utiliza `reconstitute` porque el usuario ya existe en la base de datos.
 	 */
 	private toDomain(raw: PrismaUserRecord): User {
-		// Con el esquema N-a-N un usuario puede tener varios roles.
-		// Tomamos el primero como "rol principal" para mantener compatibilidad
-		// con la entidad de dominio User que actualmente modela un único rol.
-		const primaryRole = raw.roles[0]?.role.name ?? "USER";
-
 		return User.reconstitute(
 			raw.name,
 			raw.email,
 			raw.password,
 			raw.isActive,
 			raw.id,
-			primaryRole,
+			raw.roles.map(({ role }) => role.name),
 		);
 	}
 
@@ -115,11 +110,11 @@ export class PrismaUserRepository implements UserRepository {
 				email: data.getEmail(),
 				password: data.getPasswordHash(),
 				isActive: data.getIsActive(),
-				// Asignar el rol inicial del usuario via la tabla intermedia UserRole
+				// Asignar los roles iniciales vía la tabla intermedia UserRole
 				roles: {
-					create: {
-						role: { connect: { name: data.getRole() } },
-					},
+					create: data
+						.getRoles()
+						.map((name) => ({ role: { connect: { name } } })),
 				},
 			},
 			include: { roles: { include: { role: true } } },

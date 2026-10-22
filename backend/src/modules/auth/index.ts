@@ -1,1 +1,4 @@
-export type { AuthMiddleware } from "./infrastructure/http/middlewares/authMiddleware";
+export type {
+	AuthEnv,
+	AuthMiddleware,
+} from "./infrastructure/http/middlewares/authMiddleware";

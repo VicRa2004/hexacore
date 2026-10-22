@@ -1,9 +1,9 @@
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { Scalar } from "@scalar/hono-api-reference";
-import { openApiSpec } from "@/core/config/swagger";
+import { openApiConfig } from "@/core/config/openapi";
 import { env } from "@/core/config/env";
 import { serveStatic } from "hono/bun";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
@@ -15,7 +15,7 @@ import { UserRouter } from "@/core/user/infrastructure/http/routes/UserRouter";
 import { AuthRouter } from "@/modules/auth/infrastructure/http/routes/AuthRouter";
 import { PermissionRouter } from "@/modules/authorization/infrastructure/http/routes/PermissionRouter";
 
-const app = new Hono();
+const app = new OpenAPIHono();
 
 // 1. Middlewares Nativos (Reemplazan a helmet, morgan y cors)
 app.use("*", secureHeaders());
@@ -25,8 +25,15 @@ app.use("*", logger());
 // cuando llamas a c.req.json() en tus controladores.
 
 // 2. Documentación de la API (Scalar)
-app.get("/openapi.json", (c) => c.json(openApiSpec));
-app.get("/api-docs.json", (c) => c.json(openApiSpec));
+// El documento se genera al pedirlo, con las rutas ya montadas en el paso 4.
+app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
+	type: "http",
+	scheme: "bearer",
+	bearerFormat: "JWT",
+	description: "Introduce el token JWT con formato Bearer <token>",
+});
+app.doc("/openapi.json", openApiConfig);
+app.get("/api-docs.json", (c) => c.redirect("/openapi.json"));
 app.get(
 	"/docs",
 	Scalar({
@@ -44,7 +51,6 @@ const permissionRouter = container.resolve(PermissionRouter);
 
 // 4. Registro de rutas
 // En Hono se usa .route() en lugar de .use() para anidar otros routers
-app.route("/api/user", userRouter.router);
 app.route("/api/users", userRouter.router);
 app.route("/api/auth", authRouter.router);
 app.route("/api/permissions", permissionRouter.router);

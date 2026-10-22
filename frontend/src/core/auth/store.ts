@@ -43,6 +43,13 @@ export const useAuthStore = create<AuthState>()(
 		}),
 		{
 			name: "hexacore-auth-storage",
+			// v1: `user.role` pasó a `user.roles`; las sesiones anteriores se descartan.
+			version: 1,
+			migrate: () => ({
+				user: null,
+				accessToken: null,
+				isAuthenticated: false,
+			}),
 			// Persistir sólo la sesión (descarta el refreshToken de versiones previas).
 			partialize: ({ user, accessToken, isAuthenticated }) => ({
 				user,

@@ -22,12 +22,11 @@ export function UserProfileCard() {
 		);
 	}
 
-	const roleVariant =
-		user.role === "ADMIN"
-			? "purple"
-			: user.role === "MOD"
-				? "warning"
-				: "default";
+	const roleVariant = user.roles.includes("ADMIN")
+		? "purple"
+		: user.roles.includes("MOD")
+			? "warning"
+			: "default";
 
 	return (
 		<Card className="max-w-2xl mx-auto">
@@ -39,7 +38,7 @@ export function UserProfileCard() {
 					<div>
 						<CardTitle>{user.name}</CardTitle>
 						<CardDescription className="flex items-center gap-2 mt-1">
-							<Badge variant={roleVariant}>{user.role}</Badge>
+							<Badge variant={roleVariant}>{user.roles.join(", ")}</Badge>
 							<Badge variant={user.isActive ? "success" : "danger"}>
 								{user.isActive ? "Cuenta Activa" : "Cuenta Inactiva"}
 							</Badge>
@@ -75,7 +74,7 @@ export function UserProfileCard() {
 							Nivel de Autorización
 						</div>
 						<p className="mt-1 text-sm font-semibold text-slate-100">
-							{user.role} (Control Basado en Permisos)
+							{user.roles.join(", ")} (Control Basado en Permisos)
 						</p>
 					</div>
 

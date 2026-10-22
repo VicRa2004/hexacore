@@ -42,13 +42,13 @@ Un modulo puede ir dentro de core si va ser usando por otros modulos o tiene muc
 
 - **DTOs** — definen qué datos entran y salen de cada caso de uso
 - **Mappers** — transforman Entidad → DTO. Decorados con `@injectable()`
-- **Use Cases** — método obligatorio `run`. Inyectan interfaces del dominio vía `@inject("Token")`
+- **Use Cases** — método obligatorio `run`. Inyectan interfaces del dominio vía `@inject(TOKENS.Token)`
 
 ```typescript
 @injectable()
 export class CreateUserUseCase {
   constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
+    @inject(TOKENS.UserRepository) private readonly userRepository: UserRepository,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -95,10 +95,18 @@ export class CreateUserController extends BaseController {
 ```typescript
 @injectable()
 export class UserRouter {
-  public readonly router: Hono;
+  public readonly router = new OpenAPIHono();
 
   constructor(private readonly createUserController: CreateUserController) {
-    this.router = new Hono();
+    // Documentación OpenAPI generada desde los mismos schemas Zod del controlador
+    this.router.openAPIRegistry.registerPath({
+      method: "post",
+      path: "/",
+      tags: ["Users"],
+      summary: "Crear un nuevo usuario",
+      request: { body: { content: { "application/json": { schema: createUserSchema } } } },
+      responses: { 201: jsonResponse(userDtoSchema, "Usuario creado") },
+    });
     this.router.post("/", this.createUserController.run);
   }
 }
@@ -114,7 +122,7 @@ Las interfaces desaparecen en runtime. Registrar implementaciones manualmente en
 ```typescript
 import { PrismaUserRepository } from "@/modules/user/infrastructure/repository/PrismaUserRepository";
 
-container.register("UserRepository", { useClass: PrismaUserRepository });
+container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
 ```
 
 ---

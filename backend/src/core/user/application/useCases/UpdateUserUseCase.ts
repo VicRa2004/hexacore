@@ -1,4 +1,5 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import type { UpdateUserDto } from "../dtos/UpdateUserDto";
 import type { UserDto } from "../dtos/UserDto";
 import type { UserRepository } from "../../domain/repository/UserRepository";
@@ -9,8 +10,10 @@ import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 @injectable()
 export class UpdateUserUseCase {
 	constructor(
-		@inject("UserRepository") private readonly userRepository: UserRepository,
-		@inject("PasswordHasher") private readonly passwordHasher: PasswordHasher,
+		@inject(TOKENS.UserRepository)
+		private readonly userRepository: UserRepository,
+		@inject(TOKENS.PasswordHasher)
+		private readonly passwordHasher: PasswordHasher,
 	) {}
 
 	async run(id: number, dto: UpdateUserDto): Promise<UserDto> {

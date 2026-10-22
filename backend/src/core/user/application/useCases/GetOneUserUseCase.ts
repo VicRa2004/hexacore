@@ -1,4 +1,5 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 import type { UserRepository } from "../../domain/repository/UserRepository";
 import type { GetOneUserDto } from "../dtos/GetOneUserDto";
@@ -8,7 +9,8 @@ import { UserMapper } from "../mappers/UserMapper";
 @injectable()
 export class GetOneUserUseCase {
 	constructor(
-		@inject("UserRepository") private readonly userRepository: UserRepository,
+		@inject(TOKENS.UserRepository)
+		private readonly userRepository: UserRepository,
 	) {}
 
 	async run(dto: GetOneUserDto): Promise<UserDto> {

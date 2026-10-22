@@ -56,7 +56,8 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 **Rutas** — clases en `http/routes/` decoradas con `@injectable()`:
 
 - Inyectar controladores y middlewares por constructor
-- `public readonly router: Hono = new Hono()` interno (nunca `Router()` de Express)
+- `public readonly router = new OpenAPIHono()` interno (`@hono/zod-openapi`; nunca `Router()` de Express)
+- Documentación: antes de cada endpoint, `this.router.openAPIRegistry.registerPath({...})` con los mismos schemas Zod que valida el controlador (helpers en `core/shared/infrastructure/http/openapi.ts`). Nada de JSDoc `@openapi`
 - Registro de endpoints: `this.router.get("/", this.ctrl.run)` o `this.router.post("/", middleware.handle(...), this.ctrl.run)`
 - Prohibido usar `container.resolve()` en la declaración de rutas
 - Montaje en el servidor: `src/core/shared/infrastructure/http/server.ts` con `app.route("/api/...", router.router)`
@@ -65,7 +66,7 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 
 - `@injectable()` obligatorio en: Casos de Uso, Controladores, Repos, Mappers
 - Prohibido instanciar con `new` en código productivo (permitido solo en tests unitarios para aislamiento)
-- Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` e inyectar con `@inject("TokenName")`
+- Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` con un `Symbol` de `TOKENS` (`src/core/shared/application/tokens.ts`) e inyectar con `@inject(TOKENS.Nombre)`
 - `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
 - `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
 

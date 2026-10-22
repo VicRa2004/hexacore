@@ -33,12 +33,11 @@ export function MainLayout({ children }: MainLayoutProps) {
 		}
 	};
 
-	const roleVariant =
-		user?.role === "ADMIN"
-			? "purple"
-			: user?.role === "MOD"
-				? "warning"
-				: "default";
+	const roleVariant = user?.roles.includes("ADMIN")
+		? "purple"
+		: user?.roles.includes("MOD")
+			? "warning"
+			: "default";
 
 	return (
 		<div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
@@ -90,7 +89,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 										</p>
 										<p className="text-[11px] text-slate-400">{user.email}</p>
 									</div>
-									<Badge variant={roleVariant}>{user.role}</Badge>
+									<Badge variant={roleVariant}>{user.roles.join(", ")}</Badge>
 								</div>
 							)}
 

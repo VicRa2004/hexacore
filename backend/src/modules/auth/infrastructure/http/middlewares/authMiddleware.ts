@@ -1,6 +1,13 @@
 import type { Context, Next } from "hono";
 import { injectable, inject } from "tsyringe";
-import type { JwtService } from "../../service/JwtService";
+import { TOKENS } from "@/core/shared/application/tokens";
+import type {
+	AccessTokenPayload,
+	TokenService,
+} from "../../../domain/service/TokenService";
+
+/** Variables de contexto que publica este middleware para los siguientes handlers. */
+export type AuthEnv = { Variables: { user: AccessTokenPayload } };
 
 /**
  * Middleware de autenticación mediante JWT.
@@ -14,8 +21,8 @@ import type { JwtService } from "../../service/JwtService";
 @injectable()
 export class AuthMiddleware {
 	constructor(
-		@inject("JwtService")
-		private readonly jwtService: JwtService,
+		@inject(TOKENS.TokenService)
+		private readonly tokenService: TokenService,
 	) {}
 
 	/**
@@ -26,7 +33,10 @@ export class AuthMiddleware {
 	 * @param {Next} next - Función asíncrona para ceder el control al siguiente middleware o controlador.
 	 * @returns {Promise<Response | void>} Retorna una respuesta HTTP 401 si falla, o cede el control con `await next()`.
 	 */
-	handle = async (c: Context, next: Next): Promise<Response | void> => {
+	handle = async (
+		c: Context<AuthEnv>,
+		next: Next,
+	): Promise<Response | void> => {
 		// En Hono, los headers se obtienen a través de c.req.header()
 		const authHeader = c.req.header("Authorization");
 
@@ -46,22 +56,18 @@ export class AuthMiddleware {
 			return c.json({ success: false, error: "Token inválido" }, 401);
 		}
 
+		// next() queda fuera del try: un error del controlador no es un token inválido.
 		try {
-			const decoded = this.jwtService.verifyToken(token);
-
 			// En lugar de mutar req (ej. req.user), en Hono guardamos datos en el contexto
 			// usando c.set() para que otros middlewares/controladores puedan leerlo con c.get()
-			c.set("user", decoded);
-
-			await next(); // Siempre debe llevar await en Hono
-		} catch (error) {
-			console.log("Error auth middleware");
-			console.log(error);
-
+			c.set("user", this.tokenService.verifyToken(token));
+		} catch {
 			return c.json(
 				{ success: false, error: "Token inválido o expirado" },
 				401,
 			);
 		}
+
+		await next(); // Siempre debe llevar await en Hono
 	};
 }

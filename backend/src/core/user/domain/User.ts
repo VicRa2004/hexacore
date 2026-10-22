@@ -1,6 +1,5 @@
 import { Entity } from "@/core/shared/domain/Entity";
 import { Email } from "./value-objects/Email";
-import { Role } from "./value-objects/Role";
 import { EntityId } from "@/core/shared/domain/EntityId";
 import { CreateUserEvent } from "./event/CreateUserEvent";
 
@@ -9,7 +8,8 @@ export class User extends Entity {
 	private email: Email;
 	private passwordHash: string;
 	private isActive: boolean;
-	private role: Role;
+	/** Nombres de los roles asignados (tabla N-a-N `user_role`). */
+	private roles: string[];
 
 	// El constructor es privado para forzar el uso del Factory Method
 	private constructor(
@@ -18,14 +18,14 @@ export class User extends Entity {
 		email: Email,
 		passwordHash: string,
 		isActive: boolean,
-		role: Role,
+		roles: string[],
 	) {
 		super(id);
 		this.name = name;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.isActive = isActive;
-		this.role = role;
+		this.roles = roles;
 	}
 
 	// Crear un usuario NUEVO desde la interfaz de usuario
@@ -33,10 +33,9 @@ export class User extends Entity {
 		name: string,
 		emailStr: string,
 		passwordHash: string,
-		roleStr: string = "USER",
+		roles: string[] = ["USER"],
 	): User {
 		const emailVO = new Email(emailStr);
-		const roleVO = new Role(roleStr);
 
 		// Aquí el ID es undefined porque es nuevo
 		const user = new User(
@@ -45,7 +44,7 @@ export class User extends Entity {
 			emailVO,
 			passwordHash,
 			true,
-			roleVO,
+			roles,
 		);
 
 		return user;
@@ -58,13 +57,12 @@ export class User extends Entity {
 		passwordHash: string,
 		isActive: boolean,
 		id: number,
-		roleStr: string,
+		roles: string[],
 	): User {
 		const entityId = new EntityId(id);
 		const emailVO = new Email(emailStr);
-		const roleVO = new Role(roleStr);
 
-		return new User(entityId, name, emailVO, passwordHash, isActive, roleVO);
+		return new User(entityId, name, emailVO, passwordHash, isActive, roles);
 	}
 
 	getName() {
@@ -79,8 +77,8 @@ export class User extends Entity {
 	getIsActive() {
 		return this.isActive;
 	}
-	getRole() {
-		return this.role.value;
+	getRoles() {
+		return [...this.roles];
 	}
 
 	// Comportamiento de dominio

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { LoginUseCase } from "./LoginUseCase";
+import { SessionIssuer } from "../services/SessionIssuer";
 import { User } from "@/core/user";
 
 const mockUserRepository = {
@@ -23,7 +24,7 @@ const mockRefreshTokenRepo = {
 };
 
 const buildUser = (isActive: boolean) =>
-	User.reconstitute("Ana", "a@x.com", "hash", isActive, 5, "USER");
+	User.reconstitute("Ana", "a@x.com", "hash", isActive, 5, ["USER"]);
 
 describe("LoginUseCase", () => {
 	let useCase: LoginUseCase;
@@ -35,8 +36,7 @@ describe("LoginUseCase", () => {
 		useCase = new LoginUseCase(
 			mockUserRepository as any,
 			mockPasswordHasher as any,
-			mockTokenService as any,
-			mockRefreshTokenRepo as any,
+			new SessionIssuer(mockTokenService as any, mockRefreshTokenRepo as any),
 		);
 	});
 

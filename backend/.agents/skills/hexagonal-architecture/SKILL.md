@@ -126,7 +126,7 @@ export class User extends Entity<number> {
 ### 4.1 Casos de Uso (Use Cases)
 - **Regla estricta:** El método principal debe llamarse **`run`** (nunca `execute`).
 - Decorados obligatoriamente con `@injectable()`.
-- Inyección de dependencias de interfaces de dominio mediante `@inject("Token")`.
+- Inyección de dependencias de interfaces de dominio mediante `@inject(TOKENS.Token)`.
 - Un caso de uso representa un único flujo o intención de usuario.
 - Orquestan el flujo: validan reglas de negocio, llaman al dominio, persisten en el repositorio, emiten eventos y retornan DTOs.
 - **Prohibición absoluta:** Nunca devolver entidades de dominio hacia el exterior o controladores HTTP.
@@ -142,7 +142,7 @@ import { UserMapper } from "../mappers/UserMapper";
 @injectable()
 export class CreateUserUseCase {
   constructor(
-    @inject("UserRepository") private readonly userRepository: UserRepository,
+    @inject(TOKENS.UserRepository) private readonly userRepository: UserRepository,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -235,13 +235,13 @@ export class CreateUserController extends BaseController {
 
 1. **Tokens de Registro:** Toda interfaz se registra con un token de string en `src/core/shared/infrastructure/di/container.ts`:
    ```typescript
-   container.register("UserRepository", { useClass: PrismaUserRepository });
+   container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
    ```
 2. **Ciclo de Vida:**
    - Repositorios y Use Cases: por defecto (Transient).
    - EventBus y servicios con estado persistente: `{ lifecycle: Lifecycle.Singleton }`.
 3. **Reglas de Importación:**
-   - `import type` para interfaces y DTOs inyectados con `@inject("Token")`.
+   - `import type` para interfaces y DTOs inyectados con `@inject(TOKENS.Token)`.
    - `import` normal para clases concretas inyectadas directamente (ej. controladores en routers).
 
 ---

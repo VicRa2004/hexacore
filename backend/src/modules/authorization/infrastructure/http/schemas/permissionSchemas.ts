@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 /** Numeric ID from route params */
 export const permissionIdSchema = z.object({
@@ -36,3 +36,13 @@ export const userIdParamSchema = z.object({
 		.regex(/^\d+$/, "userId must be a valid number")
 		.transform(Number),
 });
+
+// ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────
+
+export const permissionDtoSchema = z
+	.object({
+		id: z.number().int().openapi({ example: 1 }),
+		resource: z.string().openapi({ example: "users" }),
+		action: z.string().openapi({ example: "read" }),
+	})
+	.openapi("PermissionDto");

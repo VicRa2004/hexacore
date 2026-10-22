@@ -1,54 +1,50 @@
 import { Lifecycle, container } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 
 // Import implementations
 import { PrismaUserRepository } from "@/core/user/infrastructure/repository/PrismaUserRepository";
 import { BcryptPasswordHasherService } from "@/core/user/infrastructure/service/BcryptPasswordHasherService";
-import { NodeEventBus } from "../events/NodeEventBus";
+import { InMemoryEventBus } from "../events/InMemoryEventBus";
 import { SendWelcomeEmail } from "@/core/user/application/subscribers/SendWelcomeEmail";
 import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
 import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
 import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
 import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
-import { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
 import { PrismaRefreshTokenRepository } from "@/modules/auth/infrastructure/repository/PrismaRefreshTokenRepository";
 
 // Register Tokens
-container.register("UserRepository", {
+container.register(TOKENS.UserRepository, {
 	useClass: PrismaUserRepository,
 });
 
-container.register("PasswordHasher", {
+container.register(TOKENS.PasswordHasher, {
 	useClass: BcryptPasswordHasherService,
 });
 
-container.register("JwtService", {
+container.register(TOKENS.TokenService, {
 	useClass: JwtService,
 });
 
-container.register("AuthorizationRepository", {
+container.register(TOKENS.AuthorizationRepository, {
 	useClass: PrismaAuthorizationRepository,
 });
 
-container.register("AuthMiddleware", {
+container.register(TOKENS.AuthMiddleware, {
 	useClass: AuthMiddleware,
 });
 
-container.register("RequirePermissionMiddleware", {
+container.register(TOKENS.RequirePermissionMiddleware, {
 	useClass: RequirePermissionMiddleware,
 });
 
-container.register("CheckUserPermissionUseCase", {
-	useClass: CheckUserPermissionUseCase,
-});
-
-container.register("RefreshTokenRepository", {
+container.register(TOKENS.RefreshTokenRepository, {
 	useClass: PrismaRefreshTokenRepository,
 });
 
 container.register(
-	"EventBus",
+	TOKENS.EventBus,
 	{
-		useClass: NodeEventBus,
+		useClass: InMemoryEventBus,
 	},
 	{ lifecycle: Lifecycle.Singleton },
 );

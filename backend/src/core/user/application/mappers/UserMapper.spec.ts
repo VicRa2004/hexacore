@@ -11,7 +11,7 @@ describe("UserMapper", () => {
 			"hash",
 			true,
 			456,
-			"ADMIN",
+			["ADMIN", "USER"],
 		);
 
 		const dto = UserMapper.toDto(user);
@@ -20,7 +20,7 @@ describe("UserMapper", () => {
 		expect(dto.name).toBe("Jane Doe");
 		expect(dto.email).toBe("jane@example.com");
 		expect(dto.isActive).toBe(true);
-		expect(dto.role).toBe("ADMIN");
+		expect(dto.roles).toEqual(["ADMIN", "USER"]);
 		// Verificamos que no incluya password u otros campos sensibles si existieran
 		expect((dto as any).passwordHash).toBeUndefined();
 	});

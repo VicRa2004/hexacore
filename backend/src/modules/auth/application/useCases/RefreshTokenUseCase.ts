@@ -1,19 +1,20 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UserRepository } from "@/core/user";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
-
-/** Duración del nuevo refresh token: 7 días */
-const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+import { SessionIssuer } from "../services/SessionIssuer";
 
 @injectable()
 export class RefreshTokenUseCase {
 	constructor(
-		@inject("JwtService") private readonly tokenService: TokenService,
-		@inject("RefreshTokenRepository")
+		@inject(TOKENS.TokenService) private readonly tokenService: TokenService,
+		@inject(TOKENS.RefreshTokenRepository)
 		private readonly refreshTokenRepo: RefreshTokenRepository,
-		@inject("UserRepository") private readonly userRepository: UserRepository,
+		@inject(TOKENS.UserRepository)
+		private readonly userRepository: UserRepository,
+		private readonly sessionIssuer: SessionIssuer,
 	) {}
 
 	/**
@@ -55,28 +56,6 @@ export class RefreshTokenUseCase {
 			throw new BaseError("User not found or inactive", 401);
 		}
 
-		// Generar nuevo par de tokens
-		const newAccessToken = this.tokenService.generateToken({
-			id: user.getId(),
-			email: user.getEmail(),
-			role: user.getRole(),
-		});
-
-		const newRawRefreshToken = this.tokenService.generateRefreshToken();
-		const newTokenHash = this.tokenService.hashRefreshToken(newRawRefreshToken);
-
-		const expiresAt = new Date();
-		expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
-
-		await this.refreshTokenRepo.create({
-			tokenHash: newTokenHash,
-			userId: user.getId(),
-			expiresAt,
-		});
-
-		return {
-			accessToken: newAccessToken,
-			refreshToken: newRawRefreshToken,
-		};
+		return this.sessionIssuer.issue(user);
 	}
 }

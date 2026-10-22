@@ -47,7 +47,7 @@ describe("CreateUserUseCase", () => {
 			name: "Test User",
 			email: "test@example.com",
 			password: "securePassword123",
-			role: "USER",
+			roles: ["USER"],
 			isActive: true,
 		};
 
@@ -60,7 +60,7 @@ describe("CreateUserUseCase", () => {
 			"hashed_password",
 			dto.isActive,
 			dto.id,
-			dto.role,
+			dto.roles,
 		);
 		mockUserRepository.create.mockResolvedValue(fakeUser);
 

@@ -40,7 +40,7 @@ export interface RefreshTokenRepository {
 	revokeAllByUserId(userId: number): Promise<void>;
 
 	/**
-	 * Elimina tokens expirados de la base de datos (limpieza periódica).
+	 * Elimina tokens expirados (revocados o no) de la base de datos (limpieza periódica).
 	 */
 	deleteExpired(): Promise<void>;
 }

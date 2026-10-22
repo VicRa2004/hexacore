@@ -28,12 +28,11 @@ export function DashboardPage() {
 		limit: 1,
 	});
 
-	const roleVariant =
-		user?.role === "ADMIN"
-			? "purple"
-			: user?.role === "MOD"
-				? "warning"
-				: "default";
+	const roleVariant = user?.roles.includes("ADMIN")
+		? "purple"
+		: user?.roles.includes("MOD")
+			? "warning"
+			: "default";
 
 	return (
 		<div className="space-y-8">
@@ -42,7 +41,7 @@ export function DashboardPage() {
 				<div className="relative z-10 max-w-2xl space-y-3">
 					<div className="inline-flex items-center gap-2">
 						<Badge variant={roleVariant} className="px-3 py-1 text-xs">
-							Rol: {user?.role}
+							Rol: {user?.roles.join(", ")}
 						</Badge>
 						<Badge variant="success" className="px-3 py-1 text-xs">
 							Sistema Operativo

@@ -1,4 +1,5 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
@@ -6,8 +7,8 @@ import type { RefreshTokenRepository } from "../../domain/repository/RefreshToke
 @injectable()
 export class LogoutUseCase {
 	constructor(
-		@inject("JwtService") private readonly tokenService: TokenService,
-		@inject("RefreshTokenRepository")
+		@inject(TOKENS.TokenService) private readonly tokenService: TokenService,
+		@inject(TOKENS.RefreshTokenRepository)
 		private readonly refreshTokenRepo: RefreshTokenRepository,
 	) {}
 

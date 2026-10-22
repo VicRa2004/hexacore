@@ -2,14 +2,13 @@ import "reflect-metadata";
 import { describe, expect, it } from "bun:test";
 import { User } from "./User";
 import { CreateUserEvent } from "./event/CreateUserEvent";
-import type { RoleType } from "./value-objects/Role";
 
 describe("User Entity", () => {
 	const userData = {
 		name: "John Doe",
 		email: "john@example.com",
 		passwordHash: "hashed_password",
-		role: "USER" as RoleType,
+		roles: ["USER", "MOD"],
 	};
 
 	it("debería crear un usuario nuevo correctamente usando User.create", () => {
@@ -17,13 +16,13 @@ describe("User Entity", () => {
 			userData.name,
 			userData.email,
 			userData.passwordHash,
-			userData.role,
+			userData.roles,
 		);
 
 		expect(user.getName()).toBe(userData.name);
 		expect(user.getEmail()).toBe(userData.email);
 		expect(user.getPasswordHash()).toBe(userData.passwordHash);
-		expect(user.getRole()).toBe(userData.role);
+		expect(user.getRoles()).toEqual(userData.roles);
 		expect(user.getIsActive()).toBe(true);
 	});
 
@@ -36,13 +35,23 @@ describe("User Entity", () => {
 			userData.passwordHash,
 			isActive,
 			id,
-			userData.role,
+			userData.roles,
 		);
 
 		expect(user.getId()).toBe(id);
 		expect(user.getName()).toBe(userData.name);
 		expect(user.getEmail()).toBe(userData.email);
 		expect(user.getIsActive()).toBe(isActive);
+		expect(user.getRoles()).toEqual(userData.roles);
+	});
+
+	it("debería asignar el rol USER por defecto al crear", () => {
+		const user = User.create(
+			userData.name,
+			userData.email,
+			userData.passwordHash,
+		);
+		expect(user.getRoles()).toEqual(["USER"]);
 	});
 
 	it("debería desactivar un usuario cuando se llama a deactivate()", () => {
@@ -67,7 +76,7 @@ describe("User Entity", () => {
 			userData.passwordHash,
 			isActive,
 			id,
-			userData.role,
+			userData.roles,
 		);
 		user.addCreateEvent();
 

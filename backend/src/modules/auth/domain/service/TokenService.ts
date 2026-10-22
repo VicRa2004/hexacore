@@ -1,6 +1,18 @@
+/** Datos del usuario que viajan firmados en el access token. */
+export interface AccessTokenPayload {
+	id: number;
+	email: string;
+	roles: string[];
+}
+
 export interface TokenService {
-	generateToken(payload: object): string;
-	verifyToken(token: string): object | string;
+	generateToken(payload: AccessTokenPayload): string;
+
+	/**
+	 * Verifica la firma y la expiración del access token.
+	 * @throws si el token es inválido o expiró.
+	 */
+	verifyToken(token: string): AccessTokenPayload;
 
 	/**
 	 * Genera un string aleatorio opaco para usar como refresh token.

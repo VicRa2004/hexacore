@@ -1,23 +1,29 @@
 import jwt from "jsonwebtoken";
 import { injectable } from "tsyringe";
 import { env } from "../../../../core/config/env";
-import type { TokenService } from "../../domain/service/TokenService";
+import type {
+	AccessTokenPayload,
+	TokenService,
+} from "../../domain/service/TokenService";
 import crypto from "node:crypto";
 
 @injectable()
 export class JwtService implements TokenService {
 	private secret = env.JWT_SECRET;
 
-	generateToken(payload: object): string {
+	generateToken(payload: AccessTokenPayload): string {
 		return jwt.sign(payload, this.secret, {
 			algorithm: "HS256",
 			expiresIn: "15m",
 		});
 	}
 
-	verifyToken(token: string): object | string {
+	verifyToken(token: string): AccessTokenPayload {
 		// Fijar el algoritmo evita aceptar tokens firmados con otro (p.ej. "none").
-		return jwt.verify(token, this.secret, { algorithms: ["HS256"] });
+		// La firma garantiza que el payload es el que emitió generateToken.
+		return jwt.verify(token, this.secret, {
+			algorithms: ["HS256"],
+		}) as AccessTokenPayload;
 	}
 
 	generateRefreshToken(): string {

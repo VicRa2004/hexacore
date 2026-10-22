@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
 const passwordSchema = z
 	.string("Password is required")
@@ -13,13 +13,17 @@ const passwordSchema = z
 
 export const createUserSchema = z.object({
 	email: z.email("Must be a valid email"),
-	name: z.string().optional(),
+	name: z.string().trim().min(2, "Name must have at least 2 characters"),
 	password: passwordSchema,
 });
 
 export const updateUserSchema = z.object({
 	email: z.email("Must be a valid email").optional(),
-	name: z.string().optional(),
+	name: z
+		.string()
+		.trim()
+		.min(2, "Name must have at least 2 characters")
+		.optional(),
 	password: passwordSchema.optional(),
 });
 
@@ -30,5 +34,25 @@ export const userIdSchema = z.object({
 export const getAllUsersSchema = z.object({
 	page: z.string().regex(/^\d+$/).transform(Number).optional().default(1),
 	limit: z.string().regex(/^\d+$/).transform(Number).optional().default(10),
-	email: z.email("Must be a valid email").optional(),
+	// Búsqueda parcial: basta un fragmento del email
+	email: z.string().trim().min(1).max(128).optional(),
+});
+
+// ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────
+
+export const userDtoSchema = z
+	.object({
+		id: z.number().int().openapi({ example: 1 }),
+		name: z.string().openapi({ example: "John Doe" }),
+		email: z.email().openapi({ example: "user@example.com" }),
+		isActive: z.boolean().openapi({ example: true }),
+		roles: z.array(z.string()).openapi({ example: ["USER"] }),
+	})
+	.openapi("UserDto");
+
+export const userPageSchema = z.object({
+	data: z.array(userDtoSchema),
+	page: z.number().int().openapi({ example: 1 }),
+	totalItems: z.number().int().openapi({ example: 10 }),
+	totalPages: z.number().int().openapi({ example: 1 }),
 });

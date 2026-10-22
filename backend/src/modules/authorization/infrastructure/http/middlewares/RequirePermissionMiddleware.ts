@@ -1,8 +1,15 @@
 import type { Context, Next } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { injectable, inject } from "tsyringe";
-import type { CheckUserPermissionUseCase } from "@/modules/authorization/application/useCases/CheckUserPermissionUseCase";
-import { BaseError } from "@/core/shared/domain/error/BaseError";
+import { injectable } from "tsyringe";
+import type { AuthEnv } from "@/modules/auth";
+import { GetUserPermissionsUseCase } from "../../../application/useCases/GetUserPermissionsUseCase";
+import type { PermissionDto } from "../../../application/dtos/PermissionDto";
+import { ForbiddenError } from "../../../domain/error/ForbiddenError";
+
+/** `permissions` cachea los permisos efectivos durante la petición. */
+type PermissionEnv = {
+	Variables: AuthEnv["Variables"] & { permissions?: PermissionDto[] };
+};
 
 /**
  * Middleware de autorización granular (RBAC).
@@ -23,8 +30,7 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 @injectable()
 export class RequirePermissionMiddleware {
 	constructor(
-		@inject("CheckUserPermissionUseCase")
-		private readonly checkUserPermissionUseCase: CheckUserPermissionUseCase,
+		private readonly getUserPermissionsUseCase: GetUserPermissionsUseCase,
 	) {}
 
 	/**
@@ -34,11 +40,12 @@ export class RequirePermissionMiddleware {
 	 * @param action   - Acción requerida (ej: "create", "read", "update", "delete")
 	 */
 	handle = (resource: string, action: string) => {
-		return async (c: Context, next: Next): Promise<Response | void> => {
-			// En Hono, la convención para pasar variables entre middlewares es usar c.get()
-			// Asumiendo que tu authMiddleware hace algo como: c.set('user', user)
-			const user = c.get("user");
-			const userId: number | undefined = user?.id;
+		return async (
+			c: Context<PermissionEnv>,
+			next: Next,
+		): Promise<Response | void> => {
+			// Lo publica authMiddleware con c.set("user", ...)
+			const userId = c.get("user")?.id;
 
 			if (!userId) {
 				return c.json(
@@ -52,23 +59,31 @@ export class RequirePermissionMiddleware {
 
 			// next() queda fuera del try: un error del controlador no debe
 			// confundirse con un fallo de verificación de permisos.
+			let permissions = c.get("permissions");
 			try {
-				await this.checkUserPermissionUseCase.run(userId, resource, action);
+				// Una sola consulta por petición aunque se encadenen varios checks.
+				permissions ??= await this.getUserPermissionsUseCase.run(userId);
 			} catch (error) {
-				if (error instanceof BaseError) {
-					// ForbiddenError extiende BaseError; Hono tipa estrictamente los status.
-					return c.json(
-						{ success: false, error: error.message },
-						error.code as ContentfulStatusCode,
-					);
-				}
-
+				console.error(error);
 				return c.json(
 					{
 						success: false,
 						error: "Error interno al verificar permisos",
 					},
 					500,
+				);
+			}
+			c.set("permissions", permissions);
+
+			const allowed = permissions.some(
+				(p) => p.resource === resource && p.action === action,
+			);
+
+			if (!allowed) {
+				const error = new ForbiddenError(resource, action);
+				return c.json(
+					{ success: false, error: error.message },
+					error.code as ContentfulStatusCode,
 				);
 			}
 

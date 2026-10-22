@@ -1,4 +1,5 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";
 import type { CreatePermissionDto } from "../dtos/CreatePermissionDto";
 import type { PermissionDto } from "../dtos/PermissionDto";
@@ -13,7 +14,7 @@ import { PermissionMapper } from "../mappers/PermissionMapper";
 @injectable()
 export class CreatePermissionUseCase {
 	constructor(
-		@inject("AuthorizationRepository")
+		@inject(TOKENS.AuthorizationRepository)
 		private readonly authorizationRepository: AuthorizationRepository,
 	) {}
 

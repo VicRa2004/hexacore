@@ -1,11 +1,13 @@
 import { injectable, inject } from "tsyringe";
+import { TOKENS } from "@/core/shared/application/tokens";
 import { UserNotFoundError } from "../../domain/error/UserNotFoundError";
 import type { UserRepository } from "../../domain/repository/UserRepository";
 
 @injectable()
 export class DeleteUserUseCase {
 	constructor(
-		@inject("UserRepository") private readonly userRepository: UserRepository,
+		@inject(TOKENS.UserRepository)
+		private readonly userRepository: UserRepository,
 	) {}
 
 	async run(id: number) {

@@ -36,20 +36,20 @@
 
 ## 🟡 Arquitectura y diseño
 
-- [ ] **Emisión de sesión triplicada:** la lógica para emitir el access token, crear el refresh y fijar la expiración a 7 días está copiada en Login, Register y Refresh. Extraerla a un `SessionIssuer` / `IssueTokensService`.
-- [ ] **Dependencias de infraestructura en el dominio:**
+- [x] **Emisión de sesión triplicada:** la lógica para emitir el access token, crear el refresh y fijar la expiración a 7 días está copiada en Login, Register y Refresh. Extraerla a un `SessionIssuer` / `IssueTokensService`.
+- [x] **Dependencias de infraestructura en el dominio:**
   - `AuthMiddleware` depende de la clase concreta `JwtService` en lugar del puerto `TokenService`, y el token DI se llama `"JwtService"`.
   - Los tokens string sueltos (`"UserRepository"`, …) podrían ser `Symbol`s centralizados.
-- [ ] **Rol único:** `User` modela un solo rol mientras la BD es N-a-N (`toDomain` toma el primero y usa `"USER"` por defecto aunque no tenga ninguno). Además, `Role` es un enum fijo `USER|MOD|ADMIN` que contradice el modelo dinámico de roles en BD.
-- [ ] **`getEffectivePermissions`:** hace 2 queries por cada petición protegida. Hacerlo en una y cachear por request.
-- [ ] **Contexto sin tipar:** `c.set("user", decoded)` no tiene tipos. Declarar `Variables` en `Hono<{ Variables: { user: JwtPayload } }>`.
-- [ ] **Eventos sin `await`:** `NodeEventBus` usa `EventEmitter` síncrono, así que un subscriber que lance error rompe el caso de uso.
-- [ ] **Limpieza de tokens:** `PrismaRefreshTokenRepository.deleteExpired()` nunca se ejecuta. Falta un cron, o limpiar al hacer login.
-- [ ] **Rutas duplicadas:** `/api/user` y `/api/users` montan el mismo router, lo que duplica rutas y confunde la documentación.
-- [ ] **Validación inconsistente:**
+- [x] **Rol único:** `User` modela un solo rol mientras la BD es N-a-N (`toDomain` toma el primero y usa `"USER"` por defecto aunque no tenga ninguno). Además, `Role` es un enum fijo `USER|MOD|ADMIN` que contradice el modelo dinámico de roles en BD.
+- [x] **`getEffectivePermissions`:** hace 2 queries por cada petición protegida. Hacerlo en una y cachear por request.
+- [x] **Contexto sin tipar:** `c.set("user", decoded)` no tiene tipos. Declarar `Variables` en `Hono<{ Variables: { user: JwtPayload } }>`.
+- [x] **Eventos sin `await`:** `NodeEventBus` usa `EventEmitter` síncrono, así que un subscriber que lance error rompe el caso de uso.
+- [x] **Limpieza de tokens:** `PrismaRefreshTokenRepository.deleteExpired()` nunca se ejecuta. Falta un cron, o limpiar al hacer login.
+- [x] **Rutas duplicadas:** `/api/user` y `/api/users` montan el mismo router, lo que duplica rutas y confunde la documentación.
+- [x] **Validación inconsistente:**
   - `createUserSchema` deja `name` opcional y se guarda `""`.
   - `getAllUsersSchema` exige un email completo, mientras el repositorio hace búsqueda parcial.
-- [ ] **Documentación OpenAPI:** se mantiene a mano en JSDoc (cientos de líneas). Con `@hono/zod-openapi` se generaría desde los mismos schemas Zod.
+- [x] **Documentación OpenAPI:** se mantiene a mano en JSDoc (cientos de líneas). Con `@hono/zod-openapi` se generaría desde los mismos schemas Zod.
 
 ## 🔵 Configuración, dependencias y Docker
 

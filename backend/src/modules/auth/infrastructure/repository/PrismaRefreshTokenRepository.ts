@@ -66,10 +66,9 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 	}
 
 	async deleteExpired(): Promise<void> {
+		// Los revocados aún vigentes se conservan: detectan la reutilización de tokens.
 		await prisma.refreshToken.deleteMany({
-			where: {
-				OR: [{ expiresAt: { lt: new Date() } }, { revoked: true }],
-			},
+			where: { expiresAt: { lt: new Date() } },
 		});
 	}
 }

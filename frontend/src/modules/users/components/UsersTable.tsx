@@ -85,12 +85,11 @@ export function UsersTable({
 						</thead>
 						<tbody className="divide-y divide-slate-800/60">
 							{users.map((user) => {
-								const roleVariant =
-									user.role === "ADMIN"
-										? "purple"
-										: user.role === "MOD"
-											? "warning"
-											: "default";
+								const roleVariant = user.roles.includes("ADMIN")
+									? "purple"
+									: user.roles.includes("MOD")
+										? "warning"
+										: "default";
 
 								return (
 									<tr
@@ -112,7 +111,7 @@ export function UsersTable({
 										<td className="px-6 py-4">
 											<Badge variant={roleVariant} className="gap-1">
 												<Shield className="h-3 w-3" />
-												{user.role}
+												{user.roles.join(", ")}
 											</Badge>
 										</td>
 										<td className="px-6 py-4">

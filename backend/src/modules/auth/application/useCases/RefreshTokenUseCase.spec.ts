@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { RefreshTokenUseCase } from "./RefreshTokenUseCase";
+import { SessionIssuer } from "../services/SessionIssuer";
 import { User } from "@/core/user";
 
 const mockTokenService = {
@@ -36,13 +37,14 @@ describe("RefreshTokenUseCase", () => {
 			mockTokenService as any,
 			mockRefreshTokenRepo as any,
 			mockUserRepository as any,
+			new SessionIssuer(mockTokenService as any, mockRefreshTokenRepo as any),
 		);
 	});
 
 	it("debería rotar el token y emitir un nuevo par", async () => {
 		mockRefreshTokenRepo.revokeById.mockResolvedValue(true);
 		mockUserRepository.findById.mockResolvedValue(
-			User.reconstitute("Ana", "a@x.com", "hash", true, 5, "USER"),
+			User.reconstitute("Ana", "a@x.com", "hash", true, 5, ["USER"]),
 		);
 
 		const result = await useCase.run("refresh");
@@ -63,7 +65,7 @@ describe("RefreshTokenUseCase", () => {
 	it("debería rechazar a un usuario desactivado", async () => {
 		mockRefreshTokenRepo.revokeById.mockResolvedValue(true);
 		mockUserRepository.findById.mockResolvedValue(
-			User.reconstitute("Ana", "a@x.com", "hash", false, 5, "USER"),
+			User.reconstitute("Ana", "a@x.com", "hash", false, 5, ["USER"]),
 		);
 
 		expect(useCase.run("refresh")).rejects.toThrow("inactive");

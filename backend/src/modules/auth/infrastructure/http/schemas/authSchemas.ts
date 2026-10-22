@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
+import { userDtoSchema } from "@/core/user";
 
 const passwordSchema = z
 	.string("Password is required")
@@ -24,4 +25,25 @@ export const registerSchema = z.object({
 
 export const refreshTokenSchema = z.object({
 	refreshToken: z.string().min(1, "Refresh token is required"),
+});
+
+// ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────
+
+const accessTokenSchema = z
+	.string()
+	.openapi({ example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." });
+
+export const authResponseSchema = z
+	.object({
+		accessToken: accessTokenSchema,
+		user: userDtoSchema,
+	})
+	.openapi("AuthResponse");
+
+export const refreshResponseSchema = z.object({
+	accessToken: accessTokenSchema,
+});
+
+export const messageResponseSchema = z.object({
+	message: z.string().openapi({ example: "Sesión cerrada correctamente" }),
 });
