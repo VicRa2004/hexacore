@@ -7,6 +7,8 @@ import type { RefreshTokenRepository } from "@/modules/auth/domain/repository/Re
 
 const server = Bun.serve({
 	port: env.PORT,
+	// En el contenedor hay que escuchar en todas las interfaces o el proxy no llega.
+	hostname: env.NODE_ENV === "prod" ? "0.0.0.0" : "localhost",
 	fetch: app.fetch,
 });
 
