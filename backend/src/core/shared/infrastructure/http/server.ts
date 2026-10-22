@@ -44,6 +44,8 @@ app.get(
 );
 app.get("/api-docs", (c) => c.redirect("/docs"));
 
+app.get("/health", (c) => c.json({ status: "ok" }));
+
 // 3. Resolución de dependencias (TSyringe sigue intacto)
 const userRouter = container.resolve(UserRouter);
 const authRouter = container.resolve(AuthRouter);
