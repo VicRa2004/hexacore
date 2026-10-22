@@ -59,6 +59,16 @@ Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`.
 - `AGENTS.md` es la guía real; cada `CLAUDE.md` contiene solo `@AGENTS.md`.
 - Skills por paquete en `<paquete>/.agents/skills/` (`backend/`, `frontend/`) y transversales en `.agents/skills/`. Claude Code las lee vía symlinks en `.claude/skills/`: ejecutar `link-skills` desde la raíz tras instalar o eliminar una skill. `skills-lock.json` registra su origen.
 
+## Decisiones de arquitectura (ADRs)
+
+El porqué de las reglas no negociables está en `docs/decisions/`. Leer el ADR antes de proponer cambiarlas; cambiar una decisión = ADR nuevo que reemplace al anterior.
+
+- [0001 — Prisma fijado a v7](docs/decisions/0001-prisma-7-fijado.md)
+- [0002 — Arquitectura hexagonal con TSyringe](docs/decisions/0002-tsyringe-y-hexagonal.md)
+- [0003 — pnpm instala, Bun ejecuta](docs/decisions/0003-pnpm-instala-bun-ejecuta.md)
+- [0004 — Un solo contenedor en Dokploy](docs/decisions/0004-un-solo-contenedor-dokploy.md)
+- [0005 — Zustand solo para la sesión](docs/decisions/0005-zustand-solo-sesion.md)
+
 ## Estructura
 
 ```text

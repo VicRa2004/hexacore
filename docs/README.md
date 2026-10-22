@@ -6,7 +6,7 @@ Cada archivo es **una sesión de Claude**. Ejecutarlas en orden: algunas depende
 |---|---|---|
 | 1 | [01-verificacion-y-ci.md](01-verificacion-y-ci.md) | — |
 | 2 | [02-contrato-openapi-frontend.md](02-contrato-openapi-frontend.md) | 1 |
-| 3 | [03-skills-y-docs-ia.md](03-skills-y-docs-ia.md) | — |
+| 3 ✅ | [03-skills-y-docs-ia.md](03-skills-y-docs-ia.md) | — |
 | 4 | [04-modulos-opcionales.md](04-modulos-opcionales.md) | 1 |
 | 5 | [05-scaffold-modulos.md](05-scaffold-modulos.md) | 4 |
 | 6 | [06-fiabilidad-produccion.md](06-fiabilidad-produccion.md) | 1 |
