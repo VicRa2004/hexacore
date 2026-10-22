@@ -32,21 +32,6 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hexacore_db}?schema=public"
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env (mínimo 32 caracteres)}
       PORT: 3000
-      NODE_ENV: dev
-    command: sh -c "pnpm exec prisma migrate deploy && bun src/index.ts"
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    container_name: hexacore_frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "5173:5173"
-    environment:
-      VITE_API_URL: "http://backend:3000"
 
 volumes:
   pgdata:

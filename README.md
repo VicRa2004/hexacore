@@ -103,9 +103,11 @@ pnpm lint:fix   # corrige automáticamente
 ## Docker
 
 ```bash
-cp .env.example .env        # credenciales de la BD y JWT_SECRET (obligatorias)
-docker compose up --build   # db + backend (migraciones automáticas) + frontend
+cp .env.example .env        # credenciales de la BD y JWT_SECRET propio (obligatorias)
+docker compose up --build   # db + backend en modo prod sirviendo el frontend en http://localhost:3000
 ```
+
+La imagen aplica las migraciones al arrancar y rechaza el `JWT_SECRET` de ejemplo. Para desarrollo, levanta sólo la BD (`docker compose up db`) y usa `pnpm dev`: `backend/.env.example` ya apunta a ella (puerto `5433`).
 
 ---
 
