@@ -12,7 +12,7 @@ describe("GetAllUsersUseCase", () => {
 
 	beforeEach(() => {
 		mockUserRepository.find.mockClear();
-		useCase = new GetAllUsersUseCase(mockUserRepository as any);
+		useCase = new GetAllUsersUseCase(mockUserRepository as never);
 	});
 
 	it("debería devolver una lista paginada de usuarios", async () => {

@@ -22,6 +22,6 @@ describe("UserMapper", () => {
 		expect(dto.isActive).toBe(true);
 		expect(dto.roles).toEqual(["ADMIN", "USER"]);
 		// Verificamos que no incluya password u otros campos sensibles si existieran
-		expect((dto as any).passwordHash).toBeUndefined();
+		expect(dto).not.toHaveProperty("passwordHash");
 	});
 });

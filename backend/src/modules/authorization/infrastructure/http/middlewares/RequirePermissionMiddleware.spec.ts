@@ -5,7 +5,9 @@ import { RequirePermissionMiddleware } from "./RequirePermissionMiddleware";
 
 const buildApp = (permissions: { resource: string; action: string }[]) => {
 	const getUserPermissions = { run: mock(async () => permissions) };
-	const middleware = new RequirePermissionMiddleware(getUserPermissions as any);
+	const middleware = new RequirePermissionMiddleware(
+		getUserPermissions as never,
+	);
 	const app = new Hono();
 	app.use(async (c, next) => {
 		c.set("user" as never, { id: 1, email: "a@x.com", roles: [] } as never);

@@ -31,12 +31,12 @@ export class AuthMiddleware {
 	 *
 	 * @param {Context} c - Contexto de la petición de Hono (contiene req, res y variables de estado).
 	 * @param {Next} next - Función asíncrona para ceder el control al siguiente middleware o controlador.
-	 * @returns {Promise<Response | void>} Retorna una respuesta HTTP 401 si falla, o cede el control con `await next()`.
+	 * @returns {Promise<Response | undefined>} Retorna una respuesta HTTP 401 si falla, o cede el control con `await next()`.
 	 */
 	handle = async (
 		c: Context<AuthEnv>,
 		next: Next,
-	): Promise<Response | void> => {
+	): Promise<Response | undefined> => {
 		// En Hono, los headers se obtienen a través de c.req.header()
 		const authHeader = c.req.header("Authorization");
 

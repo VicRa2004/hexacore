@@ -15,7 +15,7 @@ describe("DeleteUserUseCase", () => {
 	beforeEach(() => {
 		mockUserRepository.findById.mockClear();
 		mockUserRepository.delete.mockClear();
-		useCase = new DeleteUserUseCase(mockUserRepository as any);
+		useCase = new DeleteUserUseCase(mockUserRepository as never);
 	});
 
 	it("debería borrar el usuario si existe", async () => {

@@ -22,8 +22,8 @@ describe("UpdateUserUseCase", () => {
 		mockUserRepository.update.mockClear();
 		mockPasswordHasher.hash.mockClear();
 		useCase = new UpdateUserUseCase(
-			mockUserRepository as any,
-			mockPasswordHasher as any,
+			mockUserRepository as never,
+			mockPasswordHasher as never,
 		);
 	});
 

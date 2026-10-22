@@ -34,10 +34,13 @@ describe("RefreshTokenUseCase", () => {
 			expiresAt: new Date(Date.now() + 60_000),
 		});
 		useCase = new RefreshTokenUseCase(
-			mockTokenService as any,
-			mockRefreshTokenRepo as any,
-			mockUserRepository as any,
-			new SessionIssuer(mockTokenService as any, mockRefreshTokenRepo as any),
+			mockTokenService as never,
+			mockRefreshTokenRepo as never,
+			mockUserRepository as never,
+			new SessionIssuer(
+				mockTokenService as never,
+				mockRefreshTokenRepo as never,
+			),
 		);
 	});
 

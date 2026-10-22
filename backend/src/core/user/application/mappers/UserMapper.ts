@@ -1,8 +1,8 @@
 import type { User } from "../../domain/User";
 import type { UserDto } from "../dtos/UserDto";
 
-export class UserMapper {
-	public static toDto(user: User): UserDto {
+export const UserMapper = {
+	toDto(user: User): UserDto {
 		return {
 			id: user.getId(),
 			name: user.getName(),
@@ -10,5 +10,5 @@ export class UserMapper {
 			isActive: user.getIsActive(),
 			roles: user.getRoles(),
 		};
-	}
-}
+	},
+};

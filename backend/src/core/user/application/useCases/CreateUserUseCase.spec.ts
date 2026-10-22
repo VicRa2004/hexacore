@@ -34,9 +34,9 @@ describe("CreateUserUseCase", () => {
 		mockEventBus.publishAll.mockClear();
 
 		useCase = new CreateUserUseCase(
-			mockUserRepository as any,
-			mockPasswordHasher as any,
-			mockEventBus as any,
+			mockUserRepository as never,
+			mockPasswordHasher as never,
+			mockEventBus as never,
 		);
 	});
 

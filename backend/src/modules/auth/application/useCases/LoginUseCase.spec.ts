@@ -34,9 +34,12 @@ describe("LoginUseCase", () => {
 		mockPasswordHasher.compare.mockReset();
 		mockRefreshTokenRepo.create.mockClear();
 		useCase = new LoginUseCase(
-			mockUserRepository as any,
-			mockPasswordHasher as any,
-			new SessionIssuer(mockTokenService as any, mockRefreshTokenRepo as any),
+			mockUserRepository as never,
+			mockPasswordHasher as never,
+			new SessionIssuer(
+				mockTokenService as never,
+				mockRefreshTokenRepo as never,
+			),
 		);
 	});
 

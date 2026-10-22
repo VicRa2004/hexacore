@@ -13,7 +13,7 @@ describe("GetOneUserUseCase", () => {
 
 	beforeEach(() => {
 		mockUserRepository.findById.mockClear();
-		useCase = new GetOneUserUseCase(mockUserRepository as any);
+		useCase = new GetOneUserUseCase(mockUserRepository as never);
 	});
 
 	it("debería devolver un UserDto si el usuario existe", async () => {

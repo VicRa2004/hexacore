@@ -26,10 +26,14 @@ export class InMemoryEventBus implements EventBus {
 		}
 	}
 
-	subscribe(eventName: string, handler: EventHandler): void {
+	subscribe<E extends DomainEvent>(
+		eventName: string,
+		handler: EventHandler<E>,
+	): void {
+		// El nombre del evento determina su tipo: quien se suscribe elige E.
 		this.handlers.set(eventName, [
 			...(this.handlers.get(eventName) ?? []),
-			handler,
+			handler as EventHandler,
 		]);
 	}
 

@@ -43,7 +43,7 @@ export class RequirePermissionMiddleware {
 		return async (
 			c: Context<PermissionEnv>,
 			next: Next,
-		): Promise<Response | void> => {
+		): Promise<Response | undefined> => {
 			// Lo publica authMiddleware con c.set("user", ...)
 			const userId = c.get("user")?.id;
 
