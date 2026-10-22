@@ -64,7 +64,7 @@ Use a driver adapter for the standard SQL workflow.
 
 1. Install adapter and driver:
    ```bash
-   npm install @prisma/adapter-pg pg
+   pnpm add -E @prisma/adapter-pg pg --filter backend
    ```
 
 2. Instantiate Prisma Client with the adapter:

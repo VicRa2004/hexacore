@@ -1,12 +1,12 @@
 # Prisma Client Setup
 
-Generate and instantiate Prisma Client for Prisma's standard SQL provider workflow. For MongoDB, follow the provider-specific notes in `references/mongodb.md` instead of copying the SQL adapter example below.
+Generate and instantiate Prisma Client for Prisma's standard SQL provider workflow.
 
 ## 1. Install dependencies
 
 ```bash
-npm install prisma --save-dev
-npm install @prisma/client
+pnpm add -E -D prisma --filter backend
+pnpm add -E @prisma/client --filter backend
 ```
 
 ## 2. Add generator block
@@ -25,7 +25,7 @@ generator client {
 ## 3. Generate Prisma Client
 
 ```bash
-npx prisma generate
+pnpm db:generate
 ```
 
 Re-run `prisma generate` after every schema change to keep the client in sync.
