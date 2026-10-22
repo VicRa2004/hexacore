@@ -7,8 +7,8 @@ import {
 	protectedErrorResponses,
 } from "@/core/shared/infrastructure/http/openapi";
 
-import type { AuthMiddleware } from "@/modules/auth";
-import type { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
+import { AUTH_TOKENS, type AuthMiddleware } from "@/modules/auth";
+import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 
 // Controladores CRUD de permisos
 import { GetAllPermissionsController } from "../controllers/GetAllPermissionsController";
@@ -33,10 +33,10 @@ export class PermissionRouter {
 	public readonly router: OpenAPIHono;
 
 	constructor(
-		@inject(TOKENS.AuthMiddleware)
+		@inject(AUTH_TOKENS.AuthMiddleware)
 		private readonly authMiddleware: AuthMiddleware,
-		@inject(TOKENS.RequirePermissionMiddleware)
-		private readonly requirePermissionMiddleware: RequirePermissionMiddleware,
+		@inject(TOKENS.PermissionGuard)
+		private readonly requirePermissionMiddleware: PermissionGuard,
 		private readonly getAllPermissionsController: GetAllPermissionsController,
 		private readonly getPermissionController: GetPermissionController,
 		private readonly createPermissionController: CreatePermissionController,

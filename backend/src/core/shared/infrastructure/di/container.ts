@@ -1,46 +1,10 @@
 import { Lifecycle, container } from "tsyringe";
 import { TOKENS } from "@/core/shared/application/tokens";
-
-// Import implementations
-import { PrismaUserRepository } from "@/core/user/infrastructure/repository/PrismaUserRepository";
-import { BcryptPasswordHasherService } from "@/core/user/infrastructure/service/BcryptPasswordHasherService";
+import { modules } from "@/modules";
 import { InMemoryEventBus } from "../events/InMemoryEventBus";
-import { SendWelcomeEmail } from "@/core/user/application/subscribers/SendWelcomeEmail";
-import { JwtService } from "@/modules/auth/infrastructure/service/JwtService";
-import { PrismaAuthorizationRepository } from "@/modules/authorization/infrastructure/repository/PrismaAuthorizationRepository";
-import { AuthMiddleware } from "@/modules/auth/infrastructure/http/middlewares/authMiddleware";
-import { RequirePermissionMiddleware } from "@/modules/authorization/infrastructure/http/middlewares/RequirePermissionMiddleware";
-import { PrismaRefreshTokenRepository } from "@/modules/auth/infrastructure/repository/PrismaRefreshTokenRepository";
+import { AllowAuthenticatedGuard } from "../http/permissionGuard";
 
-// Register Tokens
-container.register(TOKENS.UserRepository, {
-	useClass: PrismaUserRepository,
-});
-
-container.register(TOKENS.PasswordHasher, {
-	useClass: BcryptPasswordHasherService,
-});
-
-container.register(TOKENS.TokenService, {
-	useClass: JwtService,
-});
-
-container.register(TOKENS.AuthorizationRepository, {
-	useClass: PrismaAuthorizationRepository,
-});
-
-container.register(TOKENS.AuthMiddleware, {
-	useClass: AuthMiddleware,
-});
-
-container.register(TOKENS.RequirePermissionMiddleware, {
-	useClass: RequirePermissionMiddleware,
-});
-
-container.register(TOKENS.RefreshTokenRepository, {
-	useClass: PrismaRefreshTokenRepository,
-});
-
+// Infraestructura compartida; los módulos se registran después y pueden sobrescribirla.
 container.register(
 	TOKENS.EventBus,
 	{
@@ -49,13 +13,10 @@ container.register(
 	{ lifecycle: Lifecycle.Singleton },
 );
 
-function bootstrapSubscribers() {
-	const welcomeEmailSubscriber = container.resolve(SendWelcomeEmail);
-	welcomeEmailSubscriber.setupSubscription();
+container.register(TOKENS.PermissionGuard, {
+	useClass: AllowAuthenticatedGuard,
+});
 
-	console.log("✅ Suscriptores de eventos inicializados");
-}
-
-bootstrapSubscribers();
+for (const module of modules) module.register(container);
 
 export { container };

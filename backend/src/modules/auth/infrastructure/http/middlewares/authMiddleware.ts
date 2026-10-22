@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
+import { AUTH_TOKENS } from "@/modules/auth/application/tokens";
 import type {
 	AccessTokenPayload,
 	TokenService,
@@ -21,7 +21,7 @@ export type AuthEnv = { Variables: { user: AccessTokenPayload } };
 @injectable()
 export class AuthMiddleware {
 	constructor(
-		@inject(TOKENS.TokenService)
+		@inject(AUTH_TOKENS.TokenService)
 		private readonly tokenService: TokenService,
 	) {}
 

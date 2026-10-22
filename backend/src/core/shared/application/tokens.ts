@@ -1,14 +1,10 @@
 /**
- * Tokens de inyección de TSyringe para las dependencias registradas por interfaz.
- * Se registran en `infrastructure/di/container.ts` y se inyectan con `@inject(TOKENS.X)`.
+ * Tokens de inyección de TSyringe del núcleo (`core/`). Cada módulo de `src/modules/`
+ * define los suyos en `application/tokens.ts` y los registra en su `module.ts`.
  */
 export const TOKENS = {
 	UserRepository: Symbol("UserRepository"),
 	PasswordHasher: Symbol("PasswordHasher"),
-	TokenService: Symbol("TokenService"),
-	RefreshTokenRepository: Symbol("RefreshTokenRepository"),
-	AuthorizationRepository: Symbol("AuthorizationRepository"),
-	AuthMiddleware: Symbol("AuthMiddleware"),
-	RequirePermissionMiddleware: Symbol("RequirePermissionMiddleware"),
 	EventBus: Symbol("EventBus"),
+	PermissionGuard: Symbol("PermissionGuard"),
 } as const;

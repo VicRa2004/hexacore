@@ -11,9 +11,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { container } from "@/core/shared/infrastructure/di/container";
-import { UserRouter } from "@/core/user/infrastructure/http/routes/UserRouter";
-import { AuthRouter } from "@/modules/auth/infrastructure/http/routes/AuthRouter";
-import { PermissionRouter } from "@/modules/authorization/infrastructure/http/routes/PermissionRouter";
+import { modules } from "@/modules";
 
 const app = new OpenAPIHono();
 
@@ -46,16 +44,8 @@ app.get("/api-docs", (c) => c.redirect("/docs"));
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-// 3. Resolución de dependencias (TSyringe sigue intacto)
-const userRouter = container.resolve(UserRouter);
-const authRouter = container.resolve(AuthRouter);
-const permissionRouter = container.resolve(PermissionRouter);
-
-// 4. Registro de rutas
-// En Hono se usa .route() en lugar de .use() para anidar otros routers
-app.route("/api/users", userRouter.router);
-app.route("/api/auth", authRouter.router);
-app.route("/api/permissions", permissionRouter.router);
+// 3-4. Rutas de cada módulo activo (lista en src/modules.ts)
+for (const module of modules) module.mount(app, container);
 
 // 5. Global Error Handler
 app.onError((err, c) => {

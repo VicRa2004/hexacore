@@ -2,6 +2,7 @@ import type { Context, Next } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { injectable } from "tsyringe";
 import type { AuthEnv } from "@/modules/auth";
+import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 import { GetUserPermissionsUseCase } from "../../../application/useCases/GetUserPermissionsUseCase";
 import type { PermissionDto } from "../../../application/dtos/PermissionDto";
 import { ForbiddenError } from "../../../domain/error/ForbiddenError";
@@ -28,7 +29,7 @@ type PermissionEnv = {
  * que el usuario esté disponible en el contexto de Hono.
  */
 @injectable()
-export class RequirePermissionMiddleware {
+export class RequirePermissionMiddleware implements PermissionGuard {
 	constructor(
 		private readonly getUserPermissionsUseCase: GetUserPermissionsUseCase,
 	) {}

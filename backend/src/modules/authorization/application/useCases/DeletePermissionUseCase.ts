@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
+import { AUTHORIZATION_TOKENS } from "@/modules/authorization/application/tokens";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";
 
 /**
@@ -11,7 +11,7 @@ import type { AuthorizationRepository } from "../../domain/repository/Authorizat
 @injectable()
 export class DeletePermissionUseCase {
 	constructor(
-		@inject(TOKENS.AuthorizationRepository)
+		@inject(AUTHORIZATION_TOKENS.AuthorizationRepository)
 		private readonly authorizationRepository: AuthorizationRepository,
 	) {}
 
