@@ -9,7 +9,7 @@ Crear un módulo hexagonal completo de forma **determinista**: menos tokens y me
 ## Contexto actual
 
 - Un módulo CRUD son unos 20 archivos (entidad, errores, repo, DTOs, mapper, casos de uso, controladores, schemas, router) más su registro.
-- La guía está en `backend/docs/crear_modulo_guia.md` (o en la skill creada en la sesión 3).
+- La guía está en la skill `backend/.agents/skills/crear-modulo/SKILL.md`.
 
 ## Preguntas antes de empezar
 

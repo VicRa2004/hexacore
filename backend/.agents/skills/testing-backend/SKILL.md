@@ -1,3 +1,8 @@
+---
+name: testing-backend
+description: "Convenciones de tests del backend con bun:test: ubicación de los specs, tests unitarios de casos de uso con mocks y E2E de rutas HTTP con DATABASE_URL_TEST. Úsala al escribir, ejecutar o depurar tests en backend/."
+---
+
 # Testing (Hexacore)
 
 ## Comandos
@@ -91,7 +96,7 @@ Junto a la ruta que prueba. Requiere exportar `app` sin `.listen()`. Usa `DATABA
 ```typescript
 import { describe, expect, it, beforeEach } from "bun:test";
 import { container } from "tsyringe";
-import { app } from "@/app";
+import { app } from "@/core/shared/infrastructure/http/server";
 
 describe("POST /api/users/register", () => {
   beforeEach(() => {

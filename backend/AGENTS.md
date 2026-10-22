@@ -7,7 +7,7 @@
 - **Instalar:** siempre con pnpm desde la raíz y versión exacta: `pnpm add -E <paquete> --filter backend`. Prohibido `bun install` / `bun add`.
 - **Ejecutar:** siempre con Bun desde este workspace: `pnpm --filter backend dev`, `pnpm --filter backend test`, `bun scripts/create-admin.ts`, `bun prisma/seed.ts`.
 - **Lint:** no hay Biome local; se lintea desde la raíz con `pnpm lint` / `pnpm lint:fix`.
-- Todas las rutas de este archivo son relativas a `backend/` (`src/`, `prisma/`, `docs/`, `scripts/`).
+- Todas las rutas de este archivo son relativas a `backend/` (`src/`, `prisma/`, `scripts/`).
 
 ## Stack
 
@@ -18,7 +18,7 @@
 
 ## Skills
 
-Viven en `backend/.agents/skills/` (arquitectura hexagonal y Prisma). Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
+Viven en `backend/.agents/skills/`: arquitectura hexagonal, Prisma (solo PostgreSQL), `crear-modulo`, `testing-backend` y `autenticacion`. Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
 
 ## Dependencias
 
@@ -29,7 +29,6 @@ Antes de instalar cualquier paquete, revisar `package.json` para confirmar si ya
 - `src/` — todo el código
 - `src/core/` — base general, utilidades compartidas, configuración y módulos de dominio transversales (ej. `src/core/user`)
 - `src/modules/<nombre>/{domain,application,infrastructure}` — módulos de características delimitadas (ej. `auth`, `authorization`)
-- `/docs` — guías detalladas (p.ej., cómo crear un módulo completo, guía de testing y autenticación)
 
 ## Capas
 
