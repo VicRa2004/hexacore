@@ -38,6 +38,8 @@ pnpm dev:backend        # corre el backend con Bun (hot reload)
 pnpm dev:frontend       # corre el frontend con Vite (puerto 5173)
 pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
+pnpm test:frontend      # tests del frontend con Vitest
+pnpm typecheck          # tsc --noEmit en backend y frontend
 pnpm knip               # archivos, exports y dependencias sin uso (knip.json)
 pnpm check:architecture # reglas de capas/módulos del backend (dependency-cruiser)
 pnpm db:generate        # prisma generate (backend)
@@ -47,7 +49,7 @@ pnpm db:migrate         # prisma migrate dev (backend)
 
 Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`. Nunca instala.
 
-- **Cierre de tarea:** `pnpm lint && pnpm test:backend` (y `pnpm --filter frontend exec tsc --noEmit` si tocaste el frontend), más `pnpm knip` y `pnpm check:architecture` si añadiste, moviste o eliminaste archivos, exports, dependencias o imports entre capas/módulos.
+- **Cierre de tarea:** `pnpm lint && pnpm test:backend` (y `pnpm --filter frontend exec tsc --noEmit && pnpm test:frontend` si tocaste el frontend), más `pnpm knip` y `pnpm check:architecture` si añadiste, moviste o eliminaste archivos, exports, dependencias o imports entre capas/módulos.
 
 ## Skills y docs para IA
 
@@ -64,5 +66,5 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
 - `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
-- Docker vive en la raíz: `cp .env.example .env` y `docker compose up --build`.
+- Docker vive en la raíz: `cp .env.example .env` y `docker compose up --build` (imagen de producción en `:3000`). En desarrollo: `docker compose up db` + `pnpm dev`.
 - Variables: `cp backend/.env.example backend/.env`.

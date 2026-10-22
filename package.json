@@ -18,9 +18,11 @@
 		"build": "pnpm --filter frontend build",
 		"build:frontend": "pnpm --filter frontend build",
 		"test:backend": "pnpm --filter backend test",
-		"knip": "DATABASE_URL=${DATABASE_URL:-postgresql://user:password@localhost:5432/hexacore_db?schema=public} knip",
+		"test:frontend": "pnpm --filter frontend test",
+		"typecheck": "pnpm --filter backend --filter frontend exec tsc --noEmit",
+		"knip": "DATABASE_URL=${DATABASE_URL:-postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_db?schema=public} knip",
 		"check:architecture": "pnpm --filter backend check:architecture",
-		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://user:password@localhost:5432/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",
+		"db:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_db?schema=public} pnpm --filter backend exec prisma generate",
 		"db:push": "pnpm --filter backend exec prisma db push",
 		"db:migrate": "pnpm --filter backend exec prisma migrate dev"
 	},
