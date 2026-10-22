@@ -25,3 +25,10 @@ services:
         condition: service_completed_successfully
     expose:
       - "3000"
+    # Liveness (/health, sin BD). /ready comprueba además Postgres.
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
