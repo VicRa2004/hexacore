@@ -5,6 +5,16 @@ description: "Guía paso a paso para crear un módulo nuevo del backend (domain 
 
 # Guía de Módulos (Hexacore)
 
+## Paso 1: generarlo
+
+```bash
+pnpm gen:module producto   # camelCase y en singular
+```
+
+Crea `src/modules/producto/` con CRUD completo (entidad, error, repo + Prisma, DTOs, mapper, 5 casos de uso con specs, controladores, schemas, router con OpenAPI y permisos `productos:*`, tokens y `module.ts`), lo añade a `src/modules.ts`, añade un modelo `Producto` mínimo a `prisma/schema.prisma` y ejecuta `prisma generate`. Compila y pasa tests, knip y `check:architecture` sin tocar nada.
+
+Después, personalizar: campos de la entidad/modelo, `pnpm db:migrate`, permisos en `prisma/seed.ts` y `pnpm gen:api`. Las plantillas viven en `backend/scripts/gen-module.ts` (su test, `gen-module.spec.ts`, comprueba que el módulo generado compila). El resto de esta guía explica qué genera y cómo ampliarlo a mano.
+
 ## Estructura base
 
 ```text

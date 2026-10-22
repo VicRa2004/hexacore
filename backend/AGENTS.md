@@ -103,4 +103,4 @@ Ejemplo con `authorization` (probado: `pnpm verify` pasa tras estos pasos):
 7. **Contrato API:** `pnpm gen:api` y commitear `schema.gen.ts`.
 8. **Cierre:** `pnpm verify`.
 
-Añadir un módulo es lo inverso: crear su `module.ts` (skill `crear-modulo`) y añadir su línea en `src/modules.ts`.
+Añadir un módulo es lo inverso: `pnpm gen:module <nombre>` crea la carpeta, su modelo Prisma y su línea en `src/modules.ts` (skill `crear-modulo`).

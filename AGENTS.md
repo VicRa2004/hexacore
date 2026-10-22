@@ -41,6 +41,7 @@ pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
 pnpm test:frontend      # tests del frontend con Vitest
 pnpm typecheck          # tsc --noEmit en backend y frontend
+pnpm gen:module <nombre> # genera un módulo CRUD del backend (ver skill crear-modulo)
 pnpm gen:api            # regenera frontend/src/core/api/schema.gen.ts desde el OpenAPI del backend
 pnpm check:api          # gen:api + falla si schema.gen.ts no estaba al día
 pnpm knip               # archivos, exports y dependencias sin uso (knip.json)
