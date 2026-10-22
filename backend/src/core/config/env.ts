@@ -10,7 +10,7 @@ const EnvSchema = z
 	.object({
 		PORT: z.coerce.number("El puerto debe ser un numero").default(3000),
 		NODE_ENV: z.enum(["dev", "prod", "test"]).default("dev"),
-		DATABASE_URL: z.string().url("DATABASE_URL debe ser una URL valida"),
+		DATABASE_URL: z.url("DATABASE_URL debe ser una URL valida"),
 		JWT_SECRET: z
 			.string("JWT_SECRET es obligatorio")
 			.min(32, "JWT_SECRET debe tener al menos 32 caracteres"),
