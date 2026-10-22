@@ -1,6 +1,6 @@
 ---
 name: testing-backend
-description: "Convenciones de tests del backend con bun:test: ubicación de los specs, tests unitarios de casos de uso con mocks y E2E de rutas HTTP con DATABASE_URL_TEST. Úsala al escribir, ejecutar o depurar tests en backend/."
+description: "Convenciones de tests del backend con bun:test: ubicación de los specs, tests unitarios de casos de uso con mocks y E2E de rutas HTTP contra Postgres real (DATABASE_URL_TEST, pnpm test:e2e). Úsala al escribir, ejecutar o depurar tests en backend/."
 ---
 
 # Testing (Hexacore)
@@ -8,11 +8,14 @@ description: "Convenciones de tests del backend con bun:test: ubicación de los 
 ## Comandos
 
 ```bash
-bun test                          # todos los specs
-bun test --watch                  # watch mode
-bun test --coverage               # con coverage
-bun test src/modules/user         # módulo específico
+pnpm --filter backend test            # unitarios (excluye *.e2e.spec.ts)
+pnpm --filter backend test:watch      # watch mode
+pnpm --filter backend test:coverage   # con coverage
+pnpm --filter backend test src/core/user   # módulo específico
+pnpm test:e2e                         # e2e contra Postgres real (desde la raíz)
 ```
+
+`bun test` a secas ejecuta también los e2e: usar siempre los scripts.
 
 ---
 
@@ -91,48 +94,51 @@ describe("CreateUserUseCase", () => {
 
 ## Test E2E — Rutas HTTP
 
-Junto a la ruta que prueba. Requiere exportar `app` sin `.listen()`. Usa `DATABASE_URL_TEST`.
+`*.e2e.spec.ts` junto a la ruta que prueban (p. ej. `UserRouter.e2e.spec.ts`). Usan la `app` real
+(contenedor DI + Prisma) con `app.request(...)`, sin mocks, contra la BD de `DATABASE_URL_TEST`.
+
+### Ejecutar en local
+
+1. Define en `backend/.env` una BD **distinta** de la de desarrollo (se borra entera en cada ejecución;
+   el script se niega si coincide con `DATABASE_URL`). Prisma la crea si no existe:
+   ```bash
+   DATABASE_URL_TEST="postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_test?schema=public"
+   ```
+2. `pnpm test:e2e` (o `pnpm --filter backend test:e2e`). `scripts/test-e2e.ts` hace
+   `prisma migrate reset --force` + seed y luego `bun test .e2e.spec.ts`. Admite filtros extra:
+   `pnpm --filter backend test:e2e UserRouter`.
+
+### Aislamiento
+
+- BD limpia por ejecución (reset + seed: roles y permisos del catálogo).
+- Cada archivo vacía los usuarios en `beforeAll` con `resetUsers()` (`TRUNCATE "user" ... CASCADE`)
+  y crea los suyos: no depender de los usuarios del seed ni de otro archivo.
+
+### Helpers (`src/test/e2e.ts`)
+
+- `api(path, { method, body, token, cookie })` → `app.request` con JSON.
+- `createUser(email, role?)` crea en BD (contraseña `PASSWORD`); sin rol = sin permisos (403).
+- `login(email)` → access token. `refreshCookie(res)` → `refresh_token=...` para reenviarla.
+- El rate limit de `/login` (5 cada 15 min) y `/register` (4/h) es en memoria y compartido por todos
+  los e2e del proceso: minimizar logins (uno por usuario en `beforeAll`).
 
 ```typescript
-import { describe, expect, it, beforeEach } from "bun:test";
-import { container } from "tsyringe";
-import { app } from "@/core/shared/infrastructure/http/server";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { api, createUser, login, resetUsers } from "@/test/e2e";
 
-describe("POST /api/users/register", () => {
-  beforeEach(() => {
-    container.clearInstances();
+describe("Users (e2e)", () => {
+  let token: string;
+
+  beforeAll(async () => {
+    await resetUsers();
+    await createUser("admin@e2e.dev", "ADMIN");
+    token = await login("admin@e2e.dev");
   });
 
-  it("devuelve 400 si el payload es inválido (Zod)", async () => {
-    const res = await app.request("/api/users/register", {
-      method: "POST",
-      body: JSON.stringify({ email: "no-es-correo", password: "1" }),
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const body = await res.json();
-
-    expect(res.status).toBe(400);
-    expect(body).toHaveProperty("success", false);
-    expect(body.errors).toBeArray();
-  });
-
-  it("devuelve 201 y el DTO limpio al crear usuario", async () => {
-    const res = await app.request("/api/users/register", {
-      method: "POST",
-      body: JSON.stringify({
-        email: "john@doe.com",
-        password: "PasswordFuerte123",
-        roleId: "BASIC",
-      }),
-      headers: { "Content-Type": "application/json" }
-    });
-
-    const body = await res.json();
-
-    expect(res.status).toBe(201);
-    expect(body.data.email).toBe("john@doe.com");
-    expect(body.data).not.toHaveProperty("password");
+  it("sin permiso → 403", async () => {
+    await createUser("nobody@e2e.dev");
+    const res = await api("/api/users", { token: await login("nobody@e2e.dev") });
+    expect(res.status).toBe(403);
   });
 });
 ```
@@ -143,6 +149,5 @@ describe("POST /api/users/register", () => {
 
 - `mockReset()` en cada `beforeEach` — limpia contadores e implementación
 - `await expect(...).rejects.toThrow()` — sin `await` el test puede pasar en falso
-- `container.clearInstances()` en E2E para evitar fugas entre tests
 - Errores: siempre `throw new DomainError()`, nunca `return null` como señal de fallo
-- E2E: nunca tocar `DATABASE_URL`, usar `DATABASE_URL_TEST`
+- E2E: nunca tocar `DATABASE_URL`, usar `DATABASE_URL_TEST` (se resetea en cada ejecución)

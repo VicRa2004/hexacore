@@ -33,13 +33,14 @@ pnpm lint:unsafe        # incluye fixes inseguros (revisar el diff)
 pnpm format             # solo revisa formato
 pnpm format:fix         # aplica formato
 pnpm ci                 # chequeo tipo CI (falla si hay desvíos)
-pnpm verify             # verificación completa: ci + check:api + typecheck + tests + knip + arquitectura + build (lo mismo que el CI)
+pnpm verify             # verificación completa: ci + check:api + typecheck + tests + knip + arquitectura + build (el CI añade migraciones, e2e y Docker)
 pnpm dev                # corre frontend y backend concurrentemente en paralelo
 pnpm dev:backend        # corre el backend con Bun (hot reload)
 pnpm dev:frontend       # corre el frontend con Vite (puerto 5173)
 pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
 pnpm test:frontend      # tests del frontend con Vitest
+pnpm test:e2e           # e2e del backend contra Postgres real (DATABASE_URL_TEST, se resetea)
 pnpm typecheck          # tsc --noEmit en backend y frontend
 pnpm gen:module <nombre> # genera un módulo CRUD del backend (ver skill crear-modulo)
 pnpm gen:api            # regenera frontend/src/core/api/schema.gen.ts desde el OpenAPI del backend
@@ -53,7 +54,7 @@ pnpm db:migrate         # prisma migrate dev (backend)
 
 Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`. Nunca instala.
 
-- **Cierre de tarea:** `pnpm verify` (debe pasar; es exactamente lo que ejecuta el CI).
+- **Cierre de tarea:** `pnpm verify` (debe pasar). El CI ejecuta además `prisma migrate deploy`, `pnpm test:e2e` (Postgres real) y el build de la imagen Docker con smoke test de `/health`.
 
 ## Skills y docs para IA
 

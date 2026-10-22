@@ -10,7 +10,7 @@ Cada archivo es **una sesión de Claude**. Ejecutarlas en orden: algunas depende
 | 4 | [04-modulos-opcionales.md](04-modulos-opcionales.md) | 1 |
 | 5 | [05-scaffold-modulos.md](05-scaffold-modulos.md) | 4 |
 | 6 | [06-fiabilidad-produccion.md](06-fiabilidad-produccion.md) | 1 |
-| 7 | [07-tests-integracion-ci.md](07-tests-integracion-ci.md) | 1, 6 |
+| 7 ✅ | [07-tests-integracion-ci.md](07-tests-integracion-ci.md) | 1, 6 |
 | 8 | [08-escalado-y-plantilla.md](08-escalado-y-plantilla.md) | 4 |
 
 ## Cómo usar cada archivo

@@ -8,8 +8,24 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci?schema=public
+      # Los e2e resetean su BD en cada ejecución: va aparte de DATABASE_URL.
+      DATABASE_URL_TEST: postgresql://ci:ci@localhost:5432/ci_e2e?schema=public
       JWT_SECRET: ci_secret_de_al_menos_32_caracteres_xx
     steps:
       - uses: actions/checkout@v4
@@ -22,4 +38,14 @@ jobs:
         with:
           bun-version: 1.4.3
       - run: pnpm install --frozen-lockfile
+      # Lo mismo que el servicio `migrate` del compose en cada deploy.
+      - name: Migraciones (prisma migrate deploy)
+        run: pnpm --filter backend exec prisma migrate deploy
       - run: pnpm verify
+      - run: pnpm test:e2e
+      - name: Imagen Docker + smoke test de /health
+        run: |
+          docker build -f backend/Dockerfile -t hexacore .
+          docker run -d --name app --network host -e DATABASE_URL -e JWT_SECRET hexacore
+          curl -fsS --retry 15 --retry-connrefused --retry-delay 2 http://localhost:3000/health \
+            || { docker logs app; exit 1; }

@@ -20,6 +20,7 @@
 		"build:frontend": "pnpm --filter frontend build",
 		"test:backend": "pnpm --filter backend test",
 		"test:frontend": "pnpm --filter frontend test",
+		"test:e2e": "pnpm --filter backend test:e2e",
 		"typecheck": "pnpm --filter backend --filter frontend exec tsc --noEmit",
 		"knip": "DATABASE_URL=${DATABASE_URL:-postgresql://hexacore:cambia_esta_password@localhost:5433/hexacore_db?schema=public} knip",
 		"check:architecture": "pnpm --filter backend check:architecture",
