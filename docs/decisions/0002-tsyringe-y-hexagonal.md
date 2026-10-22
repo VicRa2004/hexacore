@@ -7,7 +7,7 @@ El template debe crecer por módulos sin que el dominio dependa de Hono, Prisma 
 ## Decisión
 
 - Backend en capas `domain` / `application` / `infrastructure` por módulo (`src/core/*`, `src/modules/*`).
-- Inyección de dependencias con TSyringe: interfaces registradas en `container.ts` con `Symbol`s de `TOKENS`; nada de `new` en código productivo.
+- Inyección de dependencias con TSyringe: interfaces registradas con `Symbol`s (`TOKENS` del núcleo o los tokens de cada módulo) en el `module.ts` de cada módulo, activado desde `src/modules.ts`; nada de `new` en código productivo.
 - Las reglas de capas y módulos las vigila `pnpm check:architecture` (dependency-cruiser).
 
 ## Consecuencias

@@ -59,13 +59,14 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 - Documentación: antes de cada endpoint, `this.router.openAPIRegistry.registerPath({...})` con los mismos schemas Zod que valida el controlador (helpers en `core/shared/infrastructure/http/openapi.ts`). Nada de JSDoc `@openapi`
 - Registro de endpoints: `this.router.get("/", this.ctrl.run)` o `this.router.post("/", middleware.handle(...), this.ctrl.run)`
 - Prohibido usar `container.resolve()` en la declaración de rutas
-- Montaje en el servidor: `src/core/shared/infrastructure/http/server.ts` con `app.route("/api/...", router.router)`
+- Montaje en el servidor: en el `mount` del `module.ts` del módulo con `app.route("/api/...", container.resolve(Router).router)`
 
 ## Inyección de dependencias (TSyringe)
 
 - `@injectable()` obligatorio en: Casos de Uso, Controladores, Repos, Mappers
 - Prohibido instanciar con `new` en código productivo (permitido solo en tests unitarios para aislamiento)
-- Interfaces: registrar en `src/core/shared/infrastructure/di/container.ts` con un `Symbol` de `TOKENS` (`src/core/shared/application/tokens.ts`) e inyectar con `@inject(TOKENS.Nombre)`
+- Interfaces: registrar en el `register` del `module.ts` del módulo con un `Symbol` e inyectar con `@inject(TOKEN)`. Los tokens del núcleo están en `TOKENS` (`src/core/shared/application/tokens.ts`); cada módulo de `src/modules/` define los suyos en `application/tokens.ts` (p. ej. `AUTH_TOKENS`) y los exporta por `index.ts` si otro módulo los necesita
+- `container.ts` solo registra la infraestructura compartida (`EventBus`, guard por defecto) y luego recorre `src/modules.ts`
 - `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
 - `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
 
@@ -80,3 +81,26 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
   - Los `*.spec.ts` / `*.test.ts` están exentos de las reglas de capas.
 - **Knip (`pnpm knip`, desde la raíz):** detecta archivos, exports y dependencias sin uso, y dependencias no listadas en `package.json`.
 - Ejecutar ambos al añadir, mover o eliminar archivos, exports, dependencias o imports entre capas/módulos.
+
+## Módulos enchufables
+
+Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/infrastructure/di/AppModule.ts`): `register(container)`, `mount(app, container)` y `onStart?(container)` (tareas de arranque, p. ej. la limpieza de refresh tokens de `auth`). La lista de módulos activos es `src/modules.ts`, el **único archivo central** que se toca al añadir o quitar uno. El `module.ts` no se exporta por `index.ts` (crearía ciclos entre módulos); solo lo importa `src/modules.ts`.
+
+- **Núcleo (siempre presentes):** `core/user`, `modules/auth`.
+- **Opcionales:** `modules/authorization`.
+- **Permisos sin `authorization`:** las rutas usan el contrato `PermissionGuard` (`TOKENS.PermissionGuard`, en `core/shared/infrastructure/http/permissionGuard.ts`). El núcleo registra `AllowAuthenticatedGuard` (solo exige estar autenticado) y `authorization` lo sustituye por `RequirePermissionMiddleware` al registrarse. Sin `authorization`, **cualquier usuario autenticado** pasa los `requirePermission`.
+
+### Cómo quitar un módulo
+
+Ejemplo con `authorization` (probado: `pnpm verify` pasa tras estos pasos):
+
+1. **Carpeta:** borrar `src/modules/<nombre>/`.
+2. **Lista:** quitar su línea (import y entrada) en `src/modules.ts`.
+3. **Schema:** borrar sus modelos y las relaciones inversas en otros modelos de `prisma/schema.prisma`. Para `authorization`: `Permission`, `RolePermission`, `UserPermission`, `User.directPermissions` y `Role.permissions` (`Role` y `UserRole` son del núcleo: los roles van en el usuario y en el JWT).
+4. **Migración:** `pnpm db:migrate` (crea una migración nueva que elimina las tablas) y `pnpm db:generate`.
+5. **Seed / scripts:** quitar lo que use esos modelos en `prisma/seed.ts` y `scripts/` (para `authorization`: secciones 2 y 3 del seed, permisos y su asignación a roles).
+6. **Frontend:** quitar sus rutas en `frontend/src/routes/`, sus enlaces en `MainLayout.tsx` y su carpeta en `frontend/src/modules/` (ver `frontend/AGENTS.md`). `authorization` no tiene UI hoy.
+7. **Contrato API:** `pnpm gen:api` y commitear `schema.gen.ts`.
+8. **Cierre:** `pnpm verify`.
+
+Añadir un módulo es lo inverso: crear su `module.ts` (skill `crear-modulo`) y añadir su línea en `src/modules.ts`.

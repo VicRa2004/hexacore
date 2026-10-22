@@ -119,16 +119,33 @@ export class UserRouter {
 
 ---
 
-## Registro en el contenedor DI
+## Registro del módulo (`module.ts`)
 
-Las interfaces desaparecen en runtime. Registrar implementaciones manualmente en  
-`src/core/shared/infrastructure/di/container.ts`:
+Las interfaces desaparecen en runtime. Cada módulo define sus tokens en `application/tokens.ts` y los registra, junto con sus rutas, en su `module.ts`:
 
 ```typescript
-import { PrismaUserRepository } from "@/modules/user/infrastructure/repository/PrismaUserRepository";
+// src/modules/turnos/application/tokens.ts
+export const TURNOS_TOKENS = {
+	TurnoRepository: Symbol("TurnoRepository"),
+} as const;
 
-container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
+// src/modules/turnos/module.ts
+import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
+import { TURNOS_TOKENS } from "./application/tokens";
+import { TurnoRouter } from "./infrastructure/http/routes/TurnoRouter";
+import { PrismaTurnoRepository } from "./infrastructure/repository/PrismaTurnoRepository";
+
+export const turnosModule: AppModule = {
+	register(container) {
+		container.register(TURNOS_TOKENS.TurnoRepository, { useClass: PrismaTurnoRepository });
+	},
+	mount(app, container) {
+		app.route("/api/turnos", container.resolve(TurnoRouter).router);
+	},
+};
 ```
+
+Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas protegidas inyectan `@inject(AUTH_TOKENS.AuthMiddleware)` (de `@/modules/auth`) y `@inject(TOKENS.PermissionGuard)` (tipo `PermissionGuard`), nunca `RequirePermissionMiddleware`: así funcionan aunque `authorization` no esté instalado.
 
 ---
 
@@ -143,4 +160,5 @@ container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
 - [ ] Repositorio Prisma implementando la interface (`@injectable()`)
 - [ ] Controlador por caso de uso extendiendo `BaseController`
 - [ ] Router `@injectable()` con `registerPath` + `this.ctrl.run` en cada endpoint
-- [ ] Registro en `container.ts` para cada interface
+- [ ] Tokens en `application/tokens.ts` y `module.ts` con `register` + `mount`
+- [ ] Línea en `src/modules.ts`

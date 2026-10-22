@@ -227,13 +227,13 @@ export class CreateUserController extends BaseController {
 - Instancia interna: `public readonly router: Hono = new Hono();`.
 - Inyección de controladores y middlewares vía constructor.
 - Asignación limpia de endpoints con `this.router.get(...)`, `this.router.post(...)`.
-- Montaje centralizado en `src/core/shared/infrastructure/http/server.ts` con `app.route("/api/...", router.router)`.
+- Montaje en el `mount` del `module.ts` del módulo con `app.route("/api/...", container.resolve(Router).router)`; `server.ts` recorre `src/modules.ts`.
 
 ---
 
 ## 6. Inyección de Dependencias (TSyringe)
 
-1. **Tokens de Registro:** Toda interfaz se registra con un token de string en `src/core/shared/infrastructure/di/container.ts`:
+1. **Tokens de Registro:** Toda interfaz se registra con un `Symbol` en el `register` del `module.ts` del módulo (tokens del núcleo en `TOKENS`; los de cada módulo en su `application/tokens.ts`):
    ```typescript
    container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
    ```
@@ -262,5 +262,5 @@ export class CreateUserController extends BaseController {
    - [ ] Crear controlador heredando de `BaseController` en `infrastructure/http/controllers/`.
    - [ ] Crear router `@injectable()` con `new Hono()` en `infrastructure/http/routes/`.
 4. **DI & Wiring:**
-   - [ ] Registrar las implementaciones e interfaces en `src/core/shared/infrastructure/di/container.ts`.
-   - [ ] Montar la ruta en `src/core/shared/infrastructure/http/server.ts` usando `app.route()`.
+   - [ ] Registrar las implementaciones e interfaces en el `register` del `module.ts` del módulo.
+   - [ ] Montar la ruta en su `mount` con `app.route()` y añadir el módulo a `src/modules.ts`.

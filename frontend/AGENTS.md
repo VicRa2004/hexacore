@@ -81,6 +81,15 @@ frontend/src/
 └── main.tsx                        # Punto de entrada de la aplicación React
 ```
 
+### Cómo quitar un módulo
+
+Parte frontend de la checklist de `backend/AGENTS.md` ("Cómo quitar un módulo"):
+
+1. Borrar `src/modules/<nombre>/`.
+2. Borrar sus rutas en `src/routes/` (`routeTree.gen.ts` se regenera solo en `dev`/`build`).
+3. Quitar sus enlaces de navegación en `src/core/components/layout/MainLayout.tsx`.
+4. `pnpm gen:api` desde la raíz (el backend ya no expone sus endpoints) y `pnpm verify`.
+
 ---
 
 ## Skills
