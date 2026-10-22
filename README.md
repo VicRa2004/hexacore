@@ -8,6 +8,30 @@ Monorepo con **backend** hexagonal (Bun + Hono + Prisma 7 + PostgreSQL) y **fron
 
 ---
 
+## Usar como template
+
+**1. Crear el proyecto.** En GitHub, *Use this template* → clona tu repo nuevo y ejecuta:
+
+```bash
+pnpm init:project   # pide nombre del proyecto, nombre de la BD y título de la API
+pnpm install && pnpm verify
+```
+
+Sustituye el nombre del template en paquetes, BD, título de la API (Scalar), docs y CI, y lista los archivos cambiados. Es idempotente: si ya está renombrado, no hace nada. No toca módulos ni migraciones.
+
+**2. Recibir mejoras del template.** Se añade el template como remoto y se traen los commits que interesen con `cherry-pick` (los mensajes siguen Conventional Commits, así que `git log` basta para elegir):
+
+```bash
+git remote add template git@github.com:VicRa2004/hexacore.git   # una sola vez
+git fetch template
+git log --oneline HEAD..template/main     # qué hay de nuevo (filtra con --grep "^fix")
+git cherry-pick <sha>                     # o un rango: <sha-viejo>^..<sha-nuevo>
+```
+
+En conflictos, el nombre del template frente al de tu proyecto es lo esperable: conserva el tuyo. No uses `git merge template/main`: el historial del proyecto nuevo no comparte raíz con el template.
+
+---
+
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT - mira el archivo [LICENCE.md](LICENCE.md) para detalles.

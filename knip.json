@@ -14,7 +14,7 @@
 	"ignoreExportsUsedInFile": true,
 	"workspaces": {
 		".": {
-			"entry": []
+			"entry": ["scripts/*.ts"]
 		},
 		"backend": {
 			"entry": ["scripts/**/*.ts", "src/**/*.spec.ts"],
