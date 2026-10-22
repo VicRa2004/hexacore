@@ -33,6 +33,7 @@ pnpm lint:unsafe        # incluye fixes inseguros (revisar el diff)
 pnpm format             # solo revisa formato
 pnpm format:fix         # aplica formato
 pnpm ci                 # chequeo tipo CI (falla si hay desvíos)
+pnpm verify             # verificación completa: ci + typecheck + tests + knip + arquitectura + build (lo mismo que el CI)
 pnpm dev                # corre frontend y backend concurrentemente en paralelo
 pnpm dev:backend        # corre el backend con Bun (hot reload)
 pnpm dev:frontend       # corre el frontend con Vite (puerto 5173)
@@ -49,7 +50,7 @@ pnpm db:migrate         # prisma migrate dev (backend)
 
 Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`. Nunca instala.
 
-- **Cierre de tarea:** `pnpm lint && pnpm test:backend` (y `pnpm --filter frontend exec tsc --noEmit && pnpm test:frontend` si tocaste el frontend), más `pnpm knip` y `pnpm check:architecture` si añadiste, moviste o eliminaste archivos, exports, dependencias o imports entre capas/módulos.
+- **Cierre de tarea:** `pnpm verify` (debe pasar; es exactamente lo que ejecuta el CI).
 
 ## Skills y docs para IA
 

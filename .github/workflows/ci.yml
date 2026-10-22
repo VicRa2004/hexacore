@@ -22,7 +22,4 @@ jobs:
         with:
           bun-version: 1.4.3
       - run: pnpm install --frozen-lockfile
-      - run: pnpm ci
-      - run: pnpm typecheck
-      - run: pnpm test:backend
-      - run: pnpm test:frontend
+      - run: pnpm verify

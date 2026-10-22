@@ -12,6 +12,7 @@
 		"format": "biome format ./backend ./frontend",
 		"format:fix": "biome format --write ./backend ./frontend",
 		"ci": "biome ci ./backend ./frontend",
+		"verify": "pnpm ci && pnpm typecheck && pnpm test:backend && pnpm test:frontend && pnpm knip && pnpm check:architecture && pnpm build:frontend",
 		"dev": "pnpm --filter backend --filter frontend --parallel dev",
 		"dev:backend": "pnpm --filter backend dev",
 		"dev:frontend": "pnpm --filter frontend dev",
