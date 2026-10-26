@@ -58,7 +58,7 @@ src/modules/<nombre>/ (o src/core/<nombre>/)
     │   └── Prisma<Entidad>Repository.ts
     ├── service/               # Adaptadores secundarios reales (Bcrypt, JWT, etc.)
     └── http/                  # Adaptadores primarios (Hono)
-        ├── controllers/       # Un controlador por caso de uso
+        ├── controllers/       # Un controlador por recurso (varios si hace falta)
         ├── middlewares/
         ├── routes/            # Clases Router con Hono
         └── schemas/           # Esquemas Zod para validación de entrada
@@ -157,7 +157,7 @@ export class CreateUserUseCase {
 ```
 
 ### 4.2 DTOs y Mappers
-- DTOs de entrada: Interfaces o tipos planos con los datos que requiere el caso de uso.
+- DTOs de entrada: Interfaces o tipos planos con los datos que requiere el caso de uso. Un único primitivo (`id`) va como parámetro, sin DTO.
 - DTOs de salida: Interfaces planas con los datos públicos que el caso de uso entrega.
 - Mappers: Clases o funciones con métodos como `toDto(entity)` y `toDomain(record)`.
 
@@ -184,33 +184,33 @@ export class PrismaUserRepository implements UserRepository {
 ```
 
 ### 5.2 Adaptadores Primarios: Controladores Hono
-- Un controlador por caso de uso en `http/controllers/`.
+- En `http/controllers/`, por defecto **uno por recurso** (`UserController` con `create`, `getAll`, `getOne`, `update`, `delete`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token).
 - Heredan de `BaseController` (`src/core/shared/infrastructure/http/base.controller.ts`).
 - Usan `this.executeSafely(c, async () => { ... })` para captura centralizada de errores.
-- Firma del método: `run = async (c: Context): Promise<Response> => { ... }`.
+- Cada handler es un método flecha `nombre = (c: Context): Promise<Response> => ...`.
 - Validación estructural en la frontera mediante Zod y la utilidad `validate(schema, body)`.
 - Respuestas estandarizadas: `this.ok(c, result)` (200), `this.created(c, result)` (201).
 
 ```typescript
-import type { Context } from "hono";
-import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
-import { validate } from "@/core/shared/infrastructure/libs/validate";
-import { CreateUserUseCase } from "../../../application/useCases/CreateUserUseCase";
-import { createUserSchema } from "../schemas/userSchemas";
-
-export class CreateUserController extends BaseController {
-  constructor(private readonly createUserUseCase: CreateUserUseCase) {
+export class UserController extends BaseController {
+  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`run(id)`).
+  constructor(
+    private readonly useCases: { create: CreateUserUseCase; getOne: GetOneUserUseCase },
+  ) {
     super();
   }
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const body = await c.req.json();
-      const dto = validate(createUserSchema, body);
-      const result = await this.createUserUseCase.run(dto);
-      return this.created(c, result);
+  create = (c: Context): Promise<Response> =>
+    this.executeSafely(c, async () => {
+      const dto = validate(createUserSchema, await c.req.json());
+      return this.created(c, await this.useCases.create.run(dto));
     });
-  };
+
+  getOne = (c: Context): Promise<Response> =>
+    this.executeSafely(c, async () => {
+      const { id } = validate(userIdSchema, c.req.param());
+      return this.ok(c, await this.useCases.getOne.run(id));
+    });
 }
 ```
 
@@ -252,7 +252,7 @@ Sin decoradores ni librería de DI (ver ADR 0006).
 3. **Infrastructure:**
    - [ ] Crear implementación de repositorio con Prisma en `infrastructure/repository/`.
    - [ ] Crear esquema Zod de validación en `infrastructure/http/schemas/`.
-   - [ ] Crear controlador heredando de `BaseController` en `infrastructure/http/controllers/`.
+   - [ ] Crear el controlador del recurso heredando de `BaseController` en `infrastructure/http/controllers/`.
    - [ ] Crear router con `new Hono()` en `infrastructure/http/routes/`.
 4. **DI & Wiring:**
    - [ ] Construir repos, casos de uso, controladores y router en el `mount` del `module.ts`; `register` solo si comparte algo con otros módulos.

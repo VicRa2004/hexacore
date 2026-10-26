@@ -7,12 +7,7 @@ import { GetAllPermissionsUseCase } from "./application/useCases/GetAllPermissio
 import { GetPermissionUseCase } from "./application/useCases/GetPermissionUseCase";
 import { GetUserPermissionsUseCase } from "./application/useCases/GetUserPermissionsUseCase";
 import { UpdatePermissionUseCase } from "./application/useCases/UpdatePermissionUseCase";
-import { CreatePermissionController } from "./infrastructure/http/controllers/CreatePermissionController";
-import { DeletePermissionController } from "./infrastructure/http/controllers/DeletePermissionController";
-import { GetAllPermissionsController } from "./infrastructure/http/controllers/GetAllPermissionsController";
-import { GetPermissionController } from "./infrastructure/http/controllers/GetPermissionController";
-import { GetUserPermissionsController } from "./infrastructure/http/controllers/GetUserPermissionsController";
-import { UpdatePermissionController } from "./infrastructure/http/controllers/UpdatePermissionController";
+import { PermissionController } from "./infrastructure/http/controllers/PermissionController";
 import { RequirePermissionMiddleware } from "./infrastructure/http/middlewares/RequirePermissionMiddleware";
 import { PermissionRouter } from "./infrastructure/http/routes/PermissionRouter";
 import { PrismaAuthorizationRepository } from "./infrastructure/repository/PrismaAuthorizationRepository";
@@ -33,12 +28,14 @@ export const authorizationModule: AppModule = {
 		const router = new PermissionRouter(
 			container.get(AUTH_TOKENS.AuthMiddleware),
 			container.get(TOKENS.PermissionGuard),
-			new GetAllPermissionsController(new GetAllPermissionsUseCase(repo)),
-			new GetPermissionController(new GetPermissionUseCase(repo)),
-			new CreatePermissionController(new CreatePermissionUseCase(repo)),
-			new UpdatePermissionController(new UpdatePermissionUseCase(repo)),
-			new DeletePermissionController(new DeletePermissionUseCase(repo)),
-			new GetUserPermissionsController(getUserPermissions),
+			new PermissionController({
+				getAll: new GetAllPermissionsUseCase(repo),
+				getOne: new GetPermissionUseCase(repo),
+				create: new CreatePermissionUseCase(repo),
+				update: new UpdatePermissionUseCase(repo),
+				delete: new DeletePermissionUseCase(repo),
+				getByUser: getUserPermissions,
+			}),
 		);
 		app.route("/api/permissions", router.router);
 	},

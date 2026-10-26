@@ -40,6 +40,7 @@ Interfaces, errores (extendiendo `BaseError`) y modelos. Sin dependencias de fra
 
 - Método principal de Use Cases: `run` (nunca `execute`)
 - Prohibido devolver entidades de dominio hacia HTTP. Usar Mappers y DTOs
+- DTO solo si tiene forma (varios campos: entrada de create/update, filtros de listado, salida). Un único primitivo va como parámetro: `run(id: number)`, no `run({ id })`
 
 ### Infrastructure — HTTP
 
@@ -47,17 +48,18 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 
 **Middlewares** — llamar `await next()` fuera de cualquier `try/catch` propio, para no capturar errores de los handlers siguientes. Para códigos HTTP usar `ContentfulStatusCode` (`hono/utils/http-status`), nunca `as any`.
 
-**Controladores** — uno por caso de uso en `http/controllers/`:
+**Controladores** — en `http/controllers/`, por defecto **uno por recurso** (`UserController` con `create`, `getAll`, `getOne`, `update`, `delete`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token):
 
 - Heredan de `BaseController`, usan `this.executeSafely(c, async () => { ... })`
-- Método: `run = async (c: Context): Promise<Response>` (Hono usa `Context`, nunca `req, res`)
+- Cada handler es un método flecha `nombre = (c: Context): Promise<Response> => ...` (Hono usa `Context`, nunca `req, res`). Un controlador de un solo handler lo llama `run`
+- Reciben sus casos de uso en un objeto con nombres (`{ create, getOne, ... }`), no posicionales
 
 **Rutas** — clases en `http/routes/`:
 
 - Reciben controladores y middlewares por constructor
 - `public readonly router = new OpenAPIHono()` interno (`@hono/zod-openapi`; nunca `Router()` de Express)
 - Documentación: antes de cada endpoint, `this.router.openAPIRegistry.registerPath({...})` con los mismos schemas Zod que valida el controlador (helpers en `core/shared/infrastructure/http/openapi.ts`). Nada de JSDoc `@openapi`
-- Registro de endpoints: `this.router.get("/", this.ctrl.run)` o `this.router.post("/", middleware.handle(...), this.ctrl.run)`
+- Registro de endpoints: `this.router.get("/", this.controller.getAll)` o `this.router.post("/", middleware.handle(...), this.controller.create)`
 - Prohibido usar `container.get()` en la declaración de rutas
 - Montaje en el servidor: en el `mount` del `module.ts` del módulo con `app.route("/api/...", new Router(...).router)`
 

@@ -11,7 +11,7 @@ description: "Guía paso a paso para crear un módulo nuevo del backend (domain 
 pnpm gen:module producto   # camelCase y en singular
 ```
 
-Crea `src/modules/producto/` con CRUD completo (entidad, error, repo + Prisma, DTOs, mapper, 5 casos de uso con specs, controladores, schemas, router con OpenAPI y permisos `productos:*`, tokens y `module.ts`), lo añade a `src/modules.ts`, añade un modelo `Producto` mínimo a `prisma/schema.prisma` y ejecuta `prisma generate`. Compila y pasa tests, knip y `check:architecture` sin tocar nada.
+Crea `src/modules/producto/` con CRUD completo (entidad, error, repo + Prisma, DTOs, mapper, 5 casos de uso con specs, un controlador, schemas, router con OpenAPI y permisos `productos:*` y `module.ts`), lo añade a `src/modules.ts`, añade un modelo `Producto` mínimo a `prisma/schema.prisma` y ejecuta `prisma generate`. Compila y pasa tests, knip y `check:architecture` sin tocar nada.
 
 Después, personalizar: campos de la entidad/modelo, `pnpm db:migrate`, permisos en `prisma/seed.ts` y `pnpm gen:api`. Las plantillas viven en `backend/scripts/gen-module.ts` (su test, `gen-module.spec.ts`, comprueba que el módulo generado compila). El resto de esta guía explica qué genera y cómo ampliarlo a mano.
 
@@ -55,7 +55,7 @@ Un modulo puede ir dentro de core si va ser usando por otros modulos o tiene muc
 
 ### 2. Application
 
-- **DTOs** — definen qué datos entran y salen de cada caso de uso
+- **DTOs** — definen qué datos entran y salen de cada caso de uso cuando tienen forma; un único primitivo va como parámetro (`run(id: number)`)
 - **Mappers** — transforman Entidad → DTO
 - **Use Cases** — método obligatorio `run`. Reciben las interfaces del dominio por constructor (sin decoradores)
 
@@ -83,32 +83,38 @@ export class PrismaUserRepository implements UserRepository {
 }
 ```
 
-**Controladores** — uno por caso de uso, heredan `BaseController`:
+**Controladores** — heredan `BaseController`; por defecto **uno por recurso** (`UserController` con `create`, `getAll`, `getOne`, `update`, `delete`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token):
 
 ```typescript
-export class CreateUserController extends BaseController {
-  constructor(private readonly createUserUseCase: CreateUserUseCase) {
+export class UserController extends BaseController {
+  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`run(id)`).
+  constructor(
+    private readonly useCases: { create: CreateUserUseCase; getOne: GetOneUserUseCase },
+  ) {
     super();
   }
 
-  run = async (c: Context): Promise<Response> => {
-    return this.executeSafely(c, async () => {
-      const body = await c.req.json();
-      const dto = parseCreateUserDto(body);
-      const result = await this.createUserUseCase.run(dto);
-      return this.ok(c, result);
+  create = (c: Context): Promise<Response> =>
+    this.executeSafely(c, async () => {
+      const dto = validate(createUserSchema, await c.req.json());
+      return this.created(c, await this.useCases.create.run(dto));
     });
-  };
+
+  getOne = (c: Context): Promise<Response> =>
+    this.executeSafely(c, async () => {
+      const { id } = validate(userIdSchema, c.req.param());
+      return this.ok(c, await this.useCases.getOne.run(id));
+    });
 }
 ```
 
-**Rutas** — clase que recibe controladores y middlewares por constructor y registra `this.ctrl.run` (arrow function, sin `.bind()`):
+**Rutas** — clase que recibe controladores y middlewares por constructor y registra los métodos flecha del controlador (`this.controller.create`, sin `.bind()`):
 
 ```typescript
 export class UserRouter {
   public readonly router = new OpenAPIHono();
 
-  constructor(private readonly createUserController: CreateUserController) {
+  constructor(private readonly controller: UserController) {
     // Documentación OpenAPI generada desde los mismos schemas Zod del controlador
     this.router.openAPIRegistry.registerPath({
       method: "post",
@@ -118,7 +124,7 @@ export class UserRouter {
       request: { body: { content: { "application/json": { schema: createUserSchema } } } },
       responses: { 201: jsonResponse(userDtoSchema, "Usuario creado") },
     });
-    this.router.post("/", this.createUserController.run);
+    this.router.post("/", this.controller.create);
   }
 }
 ```
@@ -161,11 +167,11 @@ Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas pr
 - [ ] Entidad con `create` / `reconstitute`
 - [ ] Interface de repositorio en `domain/repository/`
 - [ ] Errores extendiendo `BaseError`
-- [ ] DTO de entrada y salida por caso de uso
+- [ ] DTOs de entrada (create/update/filtros) y de salida; nada de DTO para un solo `id`
 - [ ] Mapper Entidad → DTO
 - [ ] Use Case con método `run` (dependencias por constructor)
 - [ ] Repositorio Prisma implementando la interface
-- [ ] Controlador por caso de uso extendiendo `BaseController`
-- [ ] Router con `registerPath` + `this.ctrl.run` en cada endpoint
+- [ ] Controlador por recurso extendiendo `BaseController` (varios solo si hace falta)
+- [ ] Router con `registerPath` + `this.controller.<handler>` en cada endpoint
 - [ ] `module.ts` con `mount` (y `register` + tokens solo si comparte algo)
 - [ ] Línea en `src/modules.ts`

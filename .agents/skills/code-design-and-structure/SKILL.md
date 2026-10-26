@@ -32,7 +32,7 @@ Cuando una página o componente empieza a crecer:
 - **Extraer Schemas y Tipos:** Mantener los esquemas Zod en `schemas/<feature>Schemas.ts` y tipos en archivos de contrato.
 
 ### 2.2 Técnicas de Descomposición en Backend
-- **Un Controlador por Caso de Uso:** Nunca agrupar todas las rutas CRUD en un solo controlador monolítico. Crear `CreateUserController.ts`, `GetUsersController.ts`, etc.
+- **Un Controlador por Recurso:** Por defecto `UserController` con un método flecha por endpoint. Separarlo en varios cuando pase de ~6 handlers, tenga dependencias muy distintas o un ciclo HTTP propio (ej. `auth`).
 - **Value Objects Dedicados:** Si un campo tiene lógica de validación o normalización (ej. Email, Teléfono, Rol, UUID), extraerlo a su propio Value Object en `domain/value-objects/`.
 - **Mappers Independientes:** Mover la transformación Entidad ↔ DTO a `application/mappers/<Entidad>Mapper.ts`.
 - **Esquemas Zod Aislados:** Definir validaciones de payload en `infrastructure/http/schemas/<entidad>Schemas.ts`.
@@ -83,7 +83,7 @@ Cuando una página o componente empieza a crecer:
 | **Rutas (TanStack Router)** | kebab-case / archivo especial | `__root.tsx`, `_authenticated/dashboard.tsx` |
 | **Entidades / Value Objects** | PascalCase | `User.ts`, `Email.ts`, `EntityId.ts` |
 | **Casos de Uso** | PascalCase con sufijo `UseCase` | `CreateUserUseCase.ts`, `DeleteUserUseCase.ts` |
-| **Controladores** | PascalCase con sufijo `Controller`| `CreateUserController.ts` |
+| **Controladores** | PascalCase con sufijo `Controller`| `UserController.ts`, `LoginController.ts` |
 | **Enrutadores Backend** | PascalCase con sufijo `Router` | `UserRouter.ts`, `AuthRouter.ts` |
 | **Repositorios** | PascalCase con prefijo de tecnología | `PrismaUserRepository.ts` |
 | **DTOs** | PascalCase con sufijo `Dto` | `CreateUserDto.ts`, `UserDto.ts` |

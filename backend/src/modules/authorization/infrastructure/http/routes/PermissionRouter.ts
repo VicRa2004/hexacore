@@ -8,13 +8,7 @@ import {
 import type { AuthMiddleware } from "@/modules/auth";
 import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 
-// Controladores CRUD de permisos
-import { GetAllPermissionsController } from "../controllers/GetAllPermissionsController";
-import { GetPermissionController } from "../controllers/GetPermissionController";
-import { CreatePermissionController } from "../controllers/CreatePermissionController";
-import { UpdatePermissionController } from "../controllers/UpdatePermissionController";
-import { DeletePermissionController } from "../controllers/DeletePermissionController";
-import { GetUserPermissionsController } from "../controllers/GetUserPermissionsController";
+import { PermissionController } from "../controllers/PermissionController";
 import {
 	createPermissionSchema,
 	permissionDtoSchema,
@@ -32,12 +26,7 @@ export class PermissionRouter {
 	constructor(
 		private readonly authMiddleware: AuthMiddleware,
 		private readonly requirePermissionMiddleware: PermissionGuard,
-		private readonly getAllPermissionsController: GetAllPermissionsController,
-		private readonly getPermissionController: GetPermissionController,
-		private readonly createPermissionController: CreatePermissionController,
-		private readonly updatePermissionController: UpdatePermissionController,
-		private readonly deletePermissionController: DeletePermissionController,
-		private readonly getUserPermissionsController: GetUserPermissionsController,
+		private readonly controller: PermissionController,
 	) {
 		this.router = new OpenAPIHono();
 		this.initRoutes();
@@ -68,7 +57,7 @@ export class PermissionRouter {
 		this.router.get(
 			"/users/:userId",
 			this.requirePermissionMiddleware.handle("permissions", "read"),
-			this.getUserPermissionsController.run,
+			this.controller.getByUser,
 		);
 
 		docs.registerPath({
@@ -88,7 +77,7 @@ export class PermissionRouter {
 		this.router.get(
 			"/",
 			this.requirePermissionMiddleware.handle("permissions", "read"),
-			this.getAllPermissionsController.run,
+			this.controller.getAll,
 		);
 
 		docs.registerPath({
@@ -107,7 +96,7 @@ export class PermissionRouter {
 		this.router.get(
 			"/:id",
 			this.requirePermissionMiddleware.handle("permissions", "read"),
-			this.getPermissionController.run,
+			this.controller.getOne,
 		);
 
 		docs.registerPath({
@@ -131,7 +120,7 @@ export class PermissionRouter {
 		this.router.post(
 			"/",
 			this.requirePermissionMiddleware.handle("permissions", "create"),
-			this.createPermissionController.run,
+			this.controller.create,
 		);
 
 		docs.registerPath({
@@ -160,7 +149,7 @@ export class PermissionRouter {
 		this.router.put(
 			"/:id",
 			this.requirePermissionMiddleware.handle("permissions", "update"),
-			this.updatePermissionController.run,
+			this.controller.update,
 		);
 
 		docs.registerPath({
@@ -179,7 +168,7 @@ export class PermissionRouter {
 		this.router.delete(
 			"/:id",
 			this.requirePermissionMiddleware.handle("permissions", "delete"),
-			this.deletePermissionController.run,
+			this.controller.delete,
 		);
 	}
 }

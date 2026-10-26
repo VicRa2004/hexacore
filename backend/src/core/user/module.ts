@@ -7,11 +7,7 @@ import { DeleteUserUseCase } from "./application/useCases/DeleteUserUseCase";
 import { GetAllUsersUseCase } from "./application/useCases/GetAllUsersUseCase";
 import { GetOneUserUseCase } from "./application/useCases/GetOneUserUseCase";
 import { UpdateUserUseCase } from "./application/useCases/UpdateUserUseCase";
-import { CreateUserController } from "./infrastructure/http/controllers/CreateUserController";
-import { DeleteUserController } from "./infrastructure/http/controllers/DeleteUserController";
-import { GetAllUsersController } from "./infrastructure/http/controllers/GetAllUsersController";
-import { GetOneUserController } from "./infrastructure/http/controllers/GetOneUserController";
-import { UpdateUserController } from "./infrastructure/http/controllers/UpdateUserController";
+import { UserController } from "./infrastructure/http/controllers/UserController";
 import { UserRouter } from "./infrastructure/http/routes/UserRouter";
 import { PrismaUserRepository } from "./infrastructure/repository/PrismaUserRepository";
 import { BcryptPasswordHasherService } from "./infrastructure/service/BcryptPasswordHasherService";
@@ -34,11 +30,13 @@ export const userModule: AppModule = {
 		const router = new UserRouter(
 			container.get(AUTH_TOKENS.AuthMiddleware),
 			container.get(TOKENS.PermissionGuard),
-			new CreateUserController(new CreateUserUseCase(users, hasher, eventBus)),
-			new GetAllUsersController(new GetAllUsersUseCase(users)),
-			new GetOneUserController(new GetOneUserUseCase(users)),
-			new UpdateUserController(new UpdateUserUseCase(users, hasher)),
-			new DeleteUserController(new DeleteUserUseCase(users)),
+			new UserController({
+				create: new CreateUserUseCase(users, hasher, eventBus),
+				getAll: new GetAllUsersUseCase(users),
+				getOne: new GetOneUserUseCase(users),
+				update: new UpdateUserUseCase(users, hasher),
+				delete: new DeleteUserUseCase(users),
+			}),
 		);
 		app.route("/api/users", router.router);
 	},

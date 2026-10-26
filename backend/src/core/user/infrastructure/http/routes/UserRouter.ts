@@ -8,12 +8,7 @@ import {
 import type { AuthMiddleware } from "@/modules/auth";
 import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 
-// Controladores
-import { CreateUserController } from "../controllers/CreateUserController";
-import { GetAllUsersController } from "../controllers/GetAllUsersController";
-import { GetOneUserController } from "../controllers/GetOneUserController";
-import { UpdateUserController } from "../controllers/UpdateUserController";
-import { DeleteUserController } from "../controllers/DeleteUserController";
+import { UserController } from "../controllers/UserController";
 import {
 	createUserSchema,
 	getAllUsersSchema,
@@ -32,11 +27,7 @@ export class UserRouter {
 	constructor(
 		private readonly authMiddleware: AuthMiddleware,
 		private readonly requirePermissionMiddleware: PermissionGuard,
-		private readonly createUserController: CreateUserController,
-		private readonly getAllUsersController: GetAllUsersController,
-		private readonly getOneUserController: GetOneUserController,
-		private readonly updateUserController: UpdateUserController,
-		private readonly deleteUserController: DeleteUserController,
+		private readonly controller: UserController,
 	) {
 		this.router = new OpenAPIHono();
 		this.initRoutes();
@@ -73,7 +64,7 @@ export class UserRouter {
 		this.router.post(
 			"/",
 			this.requirePermissionMiddleware.handle("users", "create"),
-			this.createUserController.run,
+			this.controller.create,
 		);
 
 		docs.registerPath({
@@ -92,7 +83,7 @@ export class UserRouter {
 		this.router.get(
 			"/",
 			this.requirePermissionMiddleware.handle("users", "read"),
-			this.getAllUsersController.run,
+			this.controller.getAll,
 		);
 
 		docs.registerPath({
@@ -111,7 +102,7 @@ export class UserRouter {
 		this.router.get(
 			"/:id",
 			this.requirePermissionMiddleware.handle("users", "read"),
-			this.getOneUserController.run,
+			this.controller.getOne,
 		);
 
 		docs.registerPath({
@@ -137,7 +128,7 @@ export class UserRouter {
 		this.router.put(
 			"/:id",
 			this.requirePermissionMiddleware.handle("users", "update"),
-			this.updateUserController.run,
+			this.controller.update,
 		);
 
 		docs.registerPath({
@@ -156,7 +147,7 @@ export class UserRouter {
 		this.router.delete(
 			"/:id",
 			this.requirePermissionMiddleware.handle("users", "delete"),
-			this.deleteUserController.run,
+			this.controller.delete,
 		);
 	}
 }

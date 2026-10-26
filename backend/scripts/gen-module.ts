@@ -457,38 +457,68 @@ export const ${n}PageSchema = z.object({
 });
 `,
 
-	[`infrastructure/http/controllers/Create${N}Controller.ts`]: controller(
-		`Create${N}`,
-		`create${N}Schema`,
-		`const dto = validate(create${N}Schema, await c.req.json());
-			return this.created(c, await this.useCase.run(dto));`,
-	),
-	[`infrastructure/http/controllers/GetAll${Ns}Controller.ts`]: controller(
-		`GetAll${Ns}`,
-		`getAll${Ns}Schema`,
-		`const dto = validate(getAll${Ns}Schema, c.req.query());
-			return this.ok(c, await this.useCase.run(dto));`,
-	),
-	[`infrastructure/http/controllers/GetOne${N}Controller.ts`]: controller(
-		`GetOne${N}`,
-		`${n}IdSchema`,
-		`const { id } = validate(${n}IdSchema, c.req.param());
-			return this.ok(c, await this.useCase.run(id));`,
-	),
-	[`infrastructure/http/controllers/Update${N}Controller.ts`]: controller(
-		`Update${N}`,
-		`${n}IdSchema, update${N}Schema`,
-		`const { id } = validate(${n}IdSchema, c.req.param());
+	[`infrastructure/http/controllers/${N}Controller.ts`]: `import type { Context } from "hono";
+import type { Create${N}UseCase } from "../../../application/useCases/Create${N}UseCase";
+import type { Delete${N}UseCase } from "../../../application/useCases/Delete${N}UseCase";
+import type { GetAll${Ns}UseCase } from "../../../application/useCases/GetAll${Ns}UseCase";
+import type { GetOne${N}UseCase } from "../../../application/useCases/GetOne${N}UseCase";
+import type { Update${N}UseCase } from "../../../application/useCases/Update${N}UseCase";
+import {
+	create${N}Schema,
+	getAll${Ns}Schema,
+	update${N}Schema,
+	${n}IdSchema,
+} from "../schemas/${n}Schemas";
+import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
+import { validate } from "@/core/shared/infrastructure/libs/validate";
+
+export class ${N}Controller extends BaseController {
+	// Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (\`run(id)\`).
+	constructor(
+		private readonly useCases: {
+			create: Create${N}UseCase;
+			getAll: GetAll${Ns}UseCase;
+			getOne: GetOne${N}UseCase;
+			update: Update${N}UseCase;
+			delete: Delete${N}UseCase;
+		},
+	) {
+		super();
+	}
+
+	create = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () => {
+			const dto = validate(create${N}Schema, await c.req.json());
+			return this.created(c, await this.useCases.create.run(dto));
+		});
+
+	getAll = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () => {
+			const dto = validate(getAll${Ns}Schema, c.req.query());
+			return this.ok(c, await this.useCases.getAll.run(dto));
+		});
+
+	getOne = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () => {
+			const { id } = validate(${n}IdSchema, c.req.param());
+			return this.ok(c, await this.useCases.getOne.run(id));
+		});
+
+	update = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () => {
+			const { id } = validate(${n}IdSchema, c.req.param());
 			const dto = validate(update${N}Schema, await c.req.json());
-			return this.ok(c, await this.useCase.run(id, dto));`,
-	),
-	[`infrastructure/http/controllers/Delete${N}Controller.ts`]: controller(
-		`Delete${N}`,
-		`${n}IdSchema`,
-		`const { id } = validate(${n}IdSchema, c.req.param());
-			await this.useCase.run(id);
-			return c.body(null, 204);`,
-	),
+			return this.ok(c, await this.useCases.update.run(id, dto));
+		});
+
+	delete = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () => {
+			const { id } = validate(${n}IdSchema, c.req.param());
+			await this.useCases.delete.run(id);
+			return c.body(null, 204);
+		});
+}
+`,
 
 	[`infrastructure/http/routes/${N}Router.ts`]: `import { OpenAPIHono } from "@hono/zod-openapi";
 import {
@@ -498,11 +528,7 @@ import {
 } from "@/core/shared/infrastructure/http/openapi";
 import type { AuthMiddleware } from "@/modules/auth";
 import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
-import { Create${N}Controller } from "../controllers/Create${N}Controller";
-import { GetAll${Ns}Controller } from "../controllers/GetAll${Ns}Controller";
-import { GetOne${N}Controller } from "../controllers/GetOne${N}Controller";
-import { Update${N}Controller } from "../controllers/Update${N}Controller";
-import { Delete${N}Controller } from "../controllers/Delete${N}Controller";
+import { ${N}Controller } from "../controllers/${N}Controller";
 import {
 	create${N}Schema,
 	getAll${Ns}Schema,
@@ -522,11 +548,7 @@ export class ${N}Router {
 	constructor(
 		authMiddleware: AuthMiddleware,
 		guard: PermissionGuard,
-		create: Create${N}Controller,
-		getAll: GetAll${Ns}Controller,
-		getOne: GetOne${N}Controller,
-		update: Update${N}Controller,
-		remove: Delete${N}Controller,
+		controller: ${N}Controller,
 	) {
 		const docs = this.router.openAPIRegistry;
 		this.router.use(authMiddleware.handle);
@@ -549,7 +571,7 @@ export class ${N}Router {
 				...protectedErrorResponses(\`\${resource}:create\`),
 			},
 		});
-		this.router.post("/", guard.handle(resource, "create"), create.run);
+		this.router.post("/", guard.handle(resource, "create"), controller.create);
 
 		docs.registerPath({
 			method: "get",
@@ -564,7 +586,7 @@ export class ${N}Router {
 				...protectedErrorResponses(\`\${resource}:read\`),
 			},
 		});
-		this.router.get("/", guard.handle(resource, "read"), getAll.run);
+		this.router.get("/", guard.handle(resource, "read"), controller.getAll);
 
 		docs.registerPath({
 			method: "get",
@@ -579,7 +601,7 @@ export class ${N}Router {
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.get("/:id", guard.handle(resource, "read"), getOne.run);
+		this.router.get("/:id", guard.handle(resource, "read"), controller.getOne);
 
 		docs.registerPath({
 			method: "put",
@@ -601,7 +623,7 @@ export class ${N}Router {
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.put("/:id", guard.handle(resource, "update"), update.run);
+		this.router.put("/:id", guard.handle(resource, "update"), controller.update);
 
 		docs.registerPath({
 			method: "delete",
@@ -616,7 +638,7 @@ export class ${N}Router {
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.delete("/:id", guard.handle(resource, "delete"), remove.run);
+		this.router.delete("/:id", guard.handle(resource, "delete"), controller.delete);
 	}
 }
 `,
@@ -629,11 +651,7 @@ import { Delete${N}UseCase } from "./application/useCases/Delete${N}UseCase";
 import { GetAll${Ns}UseCase } from "./application/useCases/GetAll${Ns}UseCase";
 import { GetOne${N}UseCase } from "./application/useCases/GetOne${N}UseCase";
 import { Update${N}UseCase } from "./application/useCases/Update${N}UseCase";
-import { Create${N}Controller } from "./infrastructure/http/controllers/Create${N}Controller";
-import { Delete${N}Controller } from "./infrastructure/http/controllers/Delete${N}Controller";
-import { GetAll${Ns}Controller } from "./infrastructure/http/controllers/GetAll${Ns}Controller";
-import { GetOne${N}Controller } from "./infrastructure/http/controllers/GetOne${N}Controller";
-import { Update${N}Controller } from "./infrastructure/http/controllers/Update${N}Controller";
+import { ${N}Controller } from "./infrastructure/http/controllers/${N}Controller";
 import { ${N}Router } from "./infrastructure/http/routes/${N}Router";
 import { Prisma${Repo} } from "./infrastructure/repository/Prisma${Repo}";
 
@@ -643,38 +661,19 @@ export const ${n}Module: AppModule = {
 		const router = new ${N}Router(
 			container.get(AUTH_TOKENS.AuthMiddleware),
 			container.get(TOKENS.PermissionGuard),
-			new Create${N}Controller(new Create${N}UseCase(repo)),
-			new GetAll${Ns}Controller(new GetAll${Ns}UseCase(repo)),
-			new GetOne${N}Controller(new GetOne${N}UseCase(repo)),
-			new Update${N}Controller(new Update${N}UseCase(repo)),
-			new Delete${N}Controller(new Delete${N}UseCase(repo)),
+			new ${N}Controller({
+				create: new Create${N}UseCase(repo),
+				getAll: new GetAll${Ns}UseCase(repo),
+				getOne: new GetOne${N}UseCase(repo),
+				update: new Update${N}UseCase(repo),
+				delete: new Delete${N}UseCase(repo),
+			}),
 		);
 		app.route("/api/${kebabs}", router.router);
 	},
 };
 `,
 };
-
-function controller(useCase: string, schemas: string, body: string): string {
-	return `import type { Context } from "hono";
-import { ${useCase}UseCase } from "../../../application/useCases/${useCase}UseCase";
-import { ${schemas} } from "../schemas/${n}Schemas";
-import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
-import { validate } from "@/core/shared/infrastructure/libs/validate";
-
-export class ${useCase}Controller extends BaseController {
-	constructor(private readonly useCase: ${useCase}UseCase) {
-		super();
-	}
-
-	run = async (c: Context): Promise<Response> => {
-		return this.executeSafely(c, async () => {
-			${body}
-		});
-	};
-}
-`;
-}
 
 // ── Escritura ────────────────────────────────────────────────────────────────
 for (const [path, content] of Object.entries(files)) {

@@ -26,7 +26,7 @@ describe("GetOneUserUseCase", () => {
 		);
 		mockUserRepository.findById.mockResolvedValue(user);
 
-		const result = await useCase.run({ id: 1 });
+		const result = await useCase.run(1);
 
 		expect(result.id).toBe(1);
 		expect(result.email).toBe("john@test.com");
@@ -36,6 +36,6 @@ describe("GetOneUserUseCase", () => {
 	it("debería lanzar UserNotFoundError si el usuario no existe", async () => {
 		mockUserRepository.findById.mockResolvedValue(null);
 
-		expect(useCase.run({ id: 999 })).rejects.toThrow(UserNotFoundError);
+		expect(useCase.run(999)).rejects.toThrow(UserNotFoundError);
 	});
 });
