@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it, mock, spyOn } from "bun:test";
 import { InMemoryEventBus } from "./InMemoryEventBus";
 

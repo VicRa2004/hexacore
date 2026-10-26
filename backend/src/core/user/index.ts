@@ -4,3 +4,4 @@ export type { PasswordHasher } from "./domain/service/PasswordHasher";
 export { UserMapper } from "./application/mappers/UserMapper";
 export type { UserDto } from "./application/dtos/UserDto";
 export { userDtoSchema } from "./infrastructure/http/schemas/userSchemas";
+export { USER_TOKENS } from "./infrastructure/tokens";

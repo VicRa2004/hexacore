@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { CreateUserUseCase } from "./CreateUserUseCase";
 import { User } from "../../domain/User";

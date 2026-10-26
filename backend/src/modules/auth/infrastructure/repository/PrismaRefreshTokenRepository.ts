@@ -1,8 +1,6 @@
-import { injectable } from "tsyringe";
 import { prisma } from "@/core/config/prisma";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 
-@injectable()
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 	async create(data: {
 		tokenHash: string;

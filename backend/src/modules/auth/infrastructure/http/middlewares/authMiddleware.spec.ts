@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
 import { AuthMiddleware, type AuthEnv } from "./authMiddleware";

@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { LogoutUseCase } from "../../../application/useCases/LogoutUseCase";
 
@@ -10,12 +9,8 @@ import {
 } from "../refreshTokenCookie";
 import { refreshTokenSchema } from "../schemas/authSchemas";
 
-@injectable()
 export class LogoutController extends BaseController {
-	constructor(
-		@inject(LogoutUseCase)
-		private readonly logoutUseCase: LogoutUseCase,
-	) {
+	constructor(private readonly logoutUseCase: LogoutUseCase) {
 		super();
 	}
 

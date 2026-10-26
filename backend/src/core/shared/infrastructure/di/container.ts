@@ -1,22 +1,15 @@
-import { Lifecycle, container } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import { modules } from "@/modules";
 import { InMemoryEventBus } from "../events/InMemoryEventBus";
 import { AllowAuthenticatedGuard } from "../http/permissionGuard";
+import { DependencyContainer } from "./DependencyContainer";
+import { TOKENS } from "./tokens";
+
+const container = new DependencyContainer();
 
 // Infraestructura compartida; los módulos se registran después y pueden sobrescribirla.
-container.register(
-	TOKENS.EventBus,
-	{
-		useClass: InMemoryEventBus,
-	},
-	{ lifecycle: Lifecycle.Singleton },
-);
+container.set(TOKENS.EventBus, () => new InMemoryEventBus());
+container.set(TOKENS.PermissionGuard, () => new AllowAuthenticatedGuard());
 
-container.register(TOKENS.PermissionGuard, {
-	useClass: AllowAuthenticatedGuard,
-});
-
-for (const module of modules) module.register(container);
+for (const module of modules) module.register?.(container);
 
 export { container };

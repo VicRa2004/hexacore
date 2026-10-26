@@ -52,23 +52,23 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 - Heredan de `BaseController`, usan `this.executeSafely(c, async () => { ... })`
 - Método: `run = async (c: Context): Promise<Response>` (Hono usa `Context`, nunca `req, res`)
 
-**Rutas** — clases en `http/routes/` decoradas con `@injectable()`:
+**Rutas** — clases en `http/routes/`:
 
-- Inyectar controladores y middlewares por constructor
+- Reciben controladores y middlewares por constructor
 - `public readonly router = new OpenAPIHono()` interno (`@hono/zod-openapi`; nunca `Router()` de Express)
 - Documentación: antes de cada endpoint, `this.router.openAPIRegistry.registerPath({...})` con los mismos schemas Zod que valida el controlador (helpers en `core/shared/infrastructure/http/openapi.ts`). Nada de JSDoc `@openapi`
 - Registro de endpoints: `this.router.get("/", this.ctrl.run)` o `this.router.post("/", middleware.handle(...), this.ctrl.run)`
-- Prohibido usar `container.resolve()` en la declaración de rutas
-- Montaje en el servidor: en el `mount` del `module.ts` del módulo con `app.route("/api/...", container.resolve(Router).router)`
+- Prohibido usar `container.get()` en la declaración de rutas
+- Montaje en el servidor: en el `mount` del `module.ts` del módulo con `app.route("/api/...", new Router(...).router)`
 
-## Inyección de dependencias (TSyringe)
+## Inyección de dependencias
 
-- `@injectable()` obligatorio en: Casos de Uso, Controladores, Repos, Mappers
-- Prohibido instanciar con `new` en código productivo (permitido solo en tests unitarios para aislamiento)
-- Interfaces: registrar en el `register` del `module.ts` del módulo con un `Symbol` e inyectar con `@inject(TOKEN)`. Los tokens del núcleo están en `TOKENS` (`src/core/shared/application/tokens.ts`); cada módulo de `src/modules/` define los suyos en `application/tokens.ts` (p. ej. `AUTH_TOKENS`) y los exporta por `index.ts` si otro módulo los necesita
-- `container.ts` solo registra la infraestructura compartida (`EventBus`, guard por defecto) y luego recorre `src/modules.ts`
-- `import type` → Interfaces, DTOs, Tipos inyectados vía `@inject`
-- `import` regular → Clases inyectadas directamente (ej: Controladores en Rutas)
+Sin decoradores ni librería de DI (ADR [0006](../docs/decisions/0006-contenedor-propio.md)).
+
+- **`module.ts` = composition root del módulo:** construye repos, casos de uso, controladores y router con `new` y pasa las dependencias por constructor. Fuera de `module.ts` (y de los tests) no se cablea nada.
+- **Contenedor (`DependencyContainer`, `src/core/shared/infrastructure/di/`):** solo para lo que se comparte entre módulos o se puede sustituir. Tokens tipados con `token<T>("Nombre")`; `container.set(TOKEN, () => new Impl())` en `register` y `container.get(TOKEN)` en `mount`/`onStart` (tipado, sin casts). Todo es singleton y se resuelve en diferido; registrar de nuevo un token lo sustituye.
+- **Tokens:** los compartidos del núcleo en `TOKENS` (`src/core/shared/infrastructure/di/tokens.ts`: `EventBus`, `PermissionGuard`); los de cada módulo en su `infrastructure/tokens.ts` (`USER_TOKENS`, `AUTH_TOKENS`), exportados por `index.ts`. Lo interno de un módulo no lleva token.
+- `container.ts` solo registra la infraestructura compartida (`EventBus`, guard por defecto) y luego recorre `src/modules.ts`.
 
 ## Verificación de arquitectura y código sin uso
 
@@ -84,7 +84,7 @@ Todo en `infrastructure/http/`: Rutas, Controladores, Middlewares, Schemas.
 
 ## Módulos enchufables
 
-Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/infrastructure/di/AppModule.ts`): `register(container)`, `mount(app, container)` y `onStart?(container)` (tareas de arranque, p. ej. la limpieza de refresh tokens de `auth`). La lista de módulos activos es `src/modules.ts`, el **único archivo central** que se toca al añadir o quitar uno. El `module.ts` no se exporta por `index.ts` (crearía ciclos entre módulos); solo lo importa `src/modules.ts`.
+Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/infrastructure/di/AppModule.ts`): `register?(container)`, `mount(app, container)` y `onStart?(container)` (tareas de arranque, p. ej. la limpieza de refresh tokens de `auth`). La lista de módulos activos es `src/modules.ts`, el **único archivo central** que se toca al añadir o quitar uno. El `module.ts` no se exporta por `index.ts` (crearía ciclos entre módulos); solo lo importa `src/modules.ts`.
 
 - **Núcleo (siempre presentes):** `core/user`, `modules/auth`.
 - **Opcionales:** `modules/authorization`.

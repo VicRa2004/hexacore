@@ -1,6 +1,6 @@
 ---
 name: crear-modulo
-description: "Guía paso a paso para crear un módulo nuevo del backend (domain → application → infrastructure, registro en el contenedor TSyringe y checklist). Úsala al crear o ampliar un módulo en src/modules/ o src/core/, o al añadir una entidad, caso de uso, repositorio, controlador o router."
+description: "Guía paso a paso para crear un módulo nuevo del backend (domain → application → infrastructure, cableado en su module.ts y checklist). Úsala al crear o ampliar un módulo en src/modules/ o src/core/, o al añadir una entidad, caso de uso, repositorio, controlador o router."
 ---
 
 # Guía de Módulos (Hexacore)
@@ -56,14 +56,13 @@ Un modulo puede ir dentro de core si va ser usando por otros modulos o tiene muc
 ### 2. Application
 
 - **DTOs** — definen qué datos entran y salen de cada caso de uso
-- **Mappers** — transforman Entidad → DTO. Decorados con `@injectable()`
-- **Use Cases** — método obligatorio `run`. Inyectan interfaces del dominio vía `@inject(TOKENS.Token)`
+- **Mappers** — transforman Entidad → DTO
+- **Use Cases** — método obligatorio `run`. Reciben las interfaces del dominio por constructor (sin decoradores)
 
 ```typescript
-@injectable()
 export class CreateUserUseCase {
   constructor(
-    @inject(TOKENS.UserRepository) private readonly userRepository: UserRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -79,7 +78,6 @@ export class CreateUserUseCase {
 **Repositorios y servicios** — implementan las interfaces del dominio:
 
 ```typescript
-@injectable()
 export class PrismaUserRepository implements UserRepository {
   // implementación con PrismaClient
 }
@@ -88,7 +86,6 @@ export class PrismaUserRepository implements UserRepository {
 **Controladores** — uno por caso de uso, heredan `BaseController`:
 
 ```typescript
-@injectable()
 export class CreateUserController extends BaseController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {
     super();
@@ -105,10 +102,9 @@ export class CreateUserController extends BaseController {
 }
 ```
 
-**Rutas** — clase `@injectable()`, inyecta controladores y registra `this.ctrl.run` (arrow function, sin `.bind()`):
+**Rutas** — clase que recibe controladores y middlewares por constructor y registra `this.ctrl.run` (arrow function, sin `.bind()`):
 
 ```typescript
-@injectable()
 export class UserRouter {
   public readonly router = new OpenAPIHono();
 
@@ -131,31 +127,32 @@ export class UserRouter {
 
 ## Registro del módulo (`module.ts`)
 
-Las interfaces desaparecen en runtime. Cada módulo define sus tokens en `application/tokens.ts` y los registra, junto con sus rutas, en su `module.ts`:
+`module.ts` es el composition root del módulo: construye repos, casos de uso, controladores y router con `new`. El contenedor (`DependencyContainer`) solo guarda lo que se comparte entre módulos o se puede sustituir; lo interno no lleva token.
 
 ```typescript
-// src/modules/turnos/application/tokens.ts
-export const TURNOS_TOKENS = {
-	TurnoRepository: Symbol("TurnoRepository"),
-} as const;
-
 // src/modules/turnos/module.ts
 import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
-import { TURNOS_TOKENS } from "./application/tokens";
-import { TurnoRouter } from "./infrastructure/http/routes/TurnoRouter";
-import { PrismaTurnoRepository } from "./infrastructure/repository/PrismaTurnoRepository";
+import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
+import { AUTH_TOKENS } from "@/modules/auth";
+// ... imports de casos de uso, controladores, router y repo
 
 export const turnosModule: AppModule = {
-	register(container) {
-		container.register(TURNOS_TOKENS.TurnoRepository, { useClass: PrismaTurnoRepository });
-	},
 	mount(app, container) {
-		app.route("/api/turnos", container.resolve(TurnoRouter).router);
+		const repo = new PrismaTurnoRepository();
+		const router = new TurnoRouter(
+			container.get(AUTH_TOKENS.AuthMiddleware),
+			container.get(TOKENS.PermissionGuard),
+			new CreateTurnoController(new CreateTurnoUseCase(repo)),
+			// ...
+		);
+		app.route("/api/turnos", router.router);
 	},
 };
 ```
 
-Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas protegidas inyectan `@inject(AUTH_TOKENS.AuthMiddleware)` (de `@/modules/auth`) y `@inject(TOKENS.PermissionGuard)` (tipo `PermissionGuard`), nunca `RequirePermissionMiddleware`: así funcionan aunque `authorization` no esté instalado.
+Si otro módulo necesita algo de éste, se crea un token tipado en `infrastructure/tokens.ts` (`token<TurnoRepository>("TurnoRepository")`), se exporta por `index.ts` y se registra en `register(container)` con `container.set(TOKEN, () => new ...)`. `register` es opcional.
+
+Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas protegidas reciben `container.get(AUTH_TOKENS.AuthMiddleware)` (de `@/modules/auth`) y `container.get(TOKENS.PermissionGuard)` (tipo `PermissionGuard`), nunca `RequirePermissionMiddleware`: así funcionan aunque `authorization` no esté instalado.
 
 ---
 
@@ -165,10 +162,10 @@ Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas pr
 - [ ] Interface de repositorio en `domain/repository/`
 - [ ] Errores extendiendo `BaseError`
 - [ ] DTO de entrada y salida por caso de uso
-- [ ] Mapper Entidad → DTO (`@injectable()`)
-- [ ] Use Case con método `run` (`@injectable()`, `@inject`)
-- [ ] Repositorio Prisma implementando la interface (`@injectable()`)
+- [ ] Mapper Entidad → DTO
+- [ ] Use Case con método `run` (dependencias por constructor)
+- [ ] Repositorio Prisma implementando la interface
 - [ ] Controlador por caso de uso extendiendo `BaseController`
-- [ ] Router `@injectable()` con `registerPath` + `this.ctrl.run` en cada endpoint
-- [ ] Tokens en `application/tokens.ts` y `module.ts` con `register` + `mount`
+- [ ] Router con `registerPath` + `this.ctrl.run` en cada endpoint
+- [ ] `module.ts` con `mount` (y `register` + tokens solo si comparte algo)
 - [ ] Línea en `src/modules.ts`

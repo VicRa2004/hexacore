@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, it, expect, mock, beforeEach, type Mock } from "bun:test";
 import { GetAllPermissionsUseCase } from "./GetAllPermissionsUseCase";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";

@@ -1,6 +1,6 @@
 ---
 name: hexagonal-architecture
-description: Guía integral y estándares para diseñar e implementar la Arquitectura Hexagonal (Puertos y Adaptadores) en aplicaciones backend TypeScript con Bun, Hono, Prisma y TSyringe. Úsalo al crear nuevos módulos, casos de uso, entidades, puertos, adaptadores o al refactorizar lógica de negocio e infraestructura.
+description: Guía integral y estándares para diseñar e implementar la Arquitectura Hexagonal (Puertos y Adaptadores) en aplicaciones backend TypeScript con Bun, Hono y Prisma. Úsalo al crear nuevos módulos, casos de uso, entidades, puertos, adaptadores o al refactorizar lógica de negocio e infraestructura.
 ---
 
 # Arquitectura Hexagonal (Puertos y Adaptadores)
@@ -125,24 +125,21 @@ export class User extends Entity<number> {
 
 ### 4.1 Casos de Uso (Use Cases)
 - **Regla estricta:** El método principal debe llamarse **`run`** (nunca `execute`).
-- Decorados obligatoriamente con `@injectable()`.
-- Inyección de dependencias de interfaces de dominio mediante `@inject(TOKENS.Token)`.
+- Reciben las interfaces del dominio por constructor (sin decoradores); se construyen con `new` en el `module.ts`.
 - Un caso de uso representa un único flujo o intención de usuario.
 - Orquestan el flujo: validan reglas de negocio, llaman al dominio, persisten en el repositorio, emiten eventos y retornan DTOs.
 - **Prohibición absoluta:** Nunca devolver entidades de dominio hacia el exterior o controladores HTTP.
 
 ```typescript
-import { injectable, inject } from "tsyringe";
 import type { UserRepository } from "../../domain/repository/UserRepository";
 import type { CreateUserDto } from "../dtos/CreateUserDto";
 import type { UserDto } from "../dtos/UserDto";
 import { User } from "../../domain/User";
 import { UserMapper } from "../mappers/UserMapper";
 
-@injectable()
 export class CreateUserUseCase {
   constructor(
-    @inject(TOKENS.UserRepository) private readonly userRepository: UserRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async run(dto: CreateUserDto): Promise<UserDto> {
@@ -170,16 +167,13 @@ export class CreateUserUseCase {
 
 ### 5.1 Adaptadores Secundarios (Repositorios y Servicios)
 - Implementan las interfaces declaradas en el dominio.
-- Decorados con `@injectable()`.
 - Usan Prisma (`prisma.<model>`), librerías de encriptación (`bcrypt`) o clientes de red.
 
 ```typescript
-import { injectable } from "tsyringe";
 import { prisma } from "@/core/config/prisma";
 import type { UserRepository } from "../../domain/repository/UserRepository";
 import { User } from "../../domain/User";
 
-@injectable()
 export class PrismaUserRepository implements UserRepository {
   async findById(id: number): Promise<User | null> {
     const record = await prisma.user.findUnique({ where: { id } });
@@ -198,14 +192,12 @@ export class PrismaUserRepository implements UserRepository {
 - Respuestas estandarizadas: `this.ok(c, result)` (200), `this.created(c, result)` (201).
 
 ```typescript
-import { injectable } from "tsyringe";
 import type { Context } from "hono";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { validate } from "@/core/shared/infrastructure/libs/validate";
 import { CreateUserUseCase } from "../../../application/useCases/CreateUserUseCase";
 import { createUserSchema } from "../schemas/userSchemas";
 
-@injectable()
 export class CreateUserController extends BaseController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {
     super();
@@ -223,26 +215,27 @@ export class CreateUserController extends BaseController {
 ```
 
 ### 5.3 Enrutamiento Hono (Routers)
-- Clases decoradas con `@injectable()`.
+- Clases sin decoradores; se construyen en el `module.ts`.
 - Instancia interna: `public readonly router: Hono = new Hono();`.
 - Inyección de controladores y middlewares vía constructor.
 - Asignación limpia de endpoints con `this.router.get(...)`, `this.router.post(...)`.
-- Montaje en el `mount` del `module.ts` del módulo con `app.route("/api/...", container.resolve(Router).router)`; `server.ts` recorre `src/modules.ts`.
+- Montaje en el `mount` del `module.ts` del módulo con `app.route("/api/...", new Router(...).router)`; `server.ts` recorre `src/modules.ts`.
 
 ---
 
-## 6. Inyección de Dependencias (TSyringe)
+## 6. Inyección de Dependencias (composition root por módulo)
 
-1. **Tokens de Registro:** Toda interfaz se registra con un `Symbol` en el `register` del `module.ts` del módulo (tokens del núcleo en `TOKENS`; los de cada módulo en su `application/tokens.ts`):
+Sin decoradores ni librería de DI (ver ADR 0006).
+
+1. **Dentro del módulo:** el `module.ts` construye todo con `new` y pasa las dependencias por constructor.
+2. **Entre módulos o sustituible:** contenedor mínimo `DependencyContainer` (`core/shared/infrastructure/di/`) con tokens tipados:
    ```typescript
-   container.register(TOKENS.UserRepository, { useClass: PrismaUserRepository });
+   export const USER_TOKENS = { UserRepository: token<UserRepository>("UserRepository") } as const;
+   container.set(USER_TOKENS.UserRepository, () => new PrismaUserRepository());
+   const users = container.get(USER_TOKENS.UserRepository); // tipado, sin casts
    ```
-2. **Ciclo de Vida:**
-   - Repositorios y Use Cases: por defecto (Transient).
-   - EventBus y servicios con estado persistente: `{ lifecycle: Lifecycle.Singleton }`.
-3. **Reglas de Importación:**
-   - `import type` para interfaces y DTOs inyectados con `@inject(TOKENS.Token)`.
-   - `import` normal para clases concretas inyectadas directamente (ej. controladores en routers).
+   Todo es singleton y se resuelve en diferido. Registrar de nuevo un token lo sustituye (así `authorization` pisa `TOKENS.PermissionGuard`).
+3. **Tokens:** los del núcleo compartido en `core/shared/infrastructure/di/tokens.ts` (`TOKENS`); los de cada módulo en su `infrastructure/tokens.ts`, exportados por `index.ts`.
 
 ---
 
@@ -255,12 +248,12 @@ export class CreateUserController extends BaseController {
 2. **Application:**
    - [ ] Crear DTOs de entrada y salida en `application/dtos/`.
    - [ ] Crear Mapper Entidad → DTO en `application/mappers/`.
-   - [ ] Crear caso de uso con método `run()` y `@injectable()` en `application/useCases/`.
+   - [ ] Crear caso de uso con método `run()` en `application/useCases/`.
 3. **Infrastructure:**
    - [ ] Crear implementación de repositorio con Prisma en `infrastructure/repository/`.
    - [ ] Crear esquema Zod de validación en `infrastructure/http/schemas/`.
    - [ ] Crear controlador heredando de `BaseController` en `infrastructure/http/controllers/`.
-   - [ ] Crear router `@injectable()` con `new Hono()` en `infrastructure/http/routes/`.
+   - [ ] Crear router con `new Hono()` en `infrastructure/http/routes/`.
 4. **DI & Wiring:**
-   - [ ] Registrar las implementaciones e interfaces en el `register` del `module.ts` del módulo.
+   - [ ] Construir repos, casos de uso, controladores y router en el `mount` del `module.ts`; `register` solo si comparte algo con otros módulos.
    - [ ] Montar la ruta en su `mount` con `app.route()` y añadir el módulo a `src/modules.ts`.

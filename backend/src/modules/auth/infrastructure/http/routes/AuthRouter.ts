@@ -1,5 +1,4 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { injectable } from "tsyringe";
 
 import { LoginController } from "../controllers/LoginController";
 import { RegisterController } from "../controllers/RegisterController";
@@ -24,7 +23,6 @@ const tags = ["Auth"];
 // Rutas públicas: no exigen el bearerAuth global del documento.
 const security: [] = [];
 
-@injectable()
 export class AuthRouter {
 	public readonly router: OpenAPIHono;
 

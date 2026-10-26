@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { RegisterUseCase } from "./RegisterUseCase";
 import { SessionIssuer } from "../services/SessionIssuer";

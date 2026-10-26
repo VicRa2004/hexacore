@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import bcrypt from "bcrypt";
 import { prisma } from "@/core/config/prisma";
 import { app } from "@/core/shared/infrastructure/http/server";

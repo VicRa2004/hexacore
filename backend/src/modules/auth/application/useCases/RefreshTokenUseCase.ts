@@ -1,20 +1,13 @@
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
-import { AUTH_TOKENS } from "@/modules/auth/application/tokens";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UserRepository } from "@/core/user";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 import { SessionIssuer } from "../services/SessionIssuer";
 
-@injectable()
 export class RefreshTokenUseCase {
 	constructor(
-		@inject(AUTH_TOKENS.TokenService)
 		private readonly tokenService: TokenService,
-		@inject(AUTH_TOKENS.RefreshTokenRepository)
 		private readonly refreshTokenRepo: RefreshTokenRepository,
-		@inject(TOKENS.UserRepository)
 		private readonly userRepository: UserRepository,
 		private readonly sessionIssuer: SessionIssuer,
 	) {}

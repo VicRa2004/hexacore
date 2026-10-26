@@ -1,5 +1,3 @@
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import type { CreateUserDto } from "../dtos/CreateUserDto";
 import type { UserDto } from "../dtos/UserDto";
 import type { UserRepository } from "../../domain/repository/UserRepository";
@@ -9,14 +7,11 @@ import { UserMapper } from "../mappers/UserMapper";
 import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 
-@injectable()
 export class CreateUserUseCase {
 	constructor(
-		@inject(TOKENS.UserRepository)
 		private readonly userRepository: UserRepository,
-		@inject(TOKENS.PasswordHasher)
 		private readonly passwordHasherService: PasswordHasher,
-		@inject(TOKENS.EventBus) private readonly eventBus: EventBus,
+		private readonly eventBus: EventBus,
 	) {}
 
 	async run(dto: CreateUserDto): Promise<UserDto> {

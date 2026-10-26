@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it, mock } from "bun:test";
 import { Hono } from "hono";
 import { RequirePermissionMiddleware } from "./RequirePermissionMiddleware";

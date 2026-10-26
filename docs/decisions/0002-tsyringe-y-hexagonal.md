@@ -1,5 +1,7 @@
 # 0002 — Arquitectura hexagonal con TSyringe
 
+> **Reemplazado en parte por [0006](0006-contenedor-propio.md):** la arquitectura hexagonal sigue vigente; TSyringe ya no.
+
 ## Contexto
 
 El template debe crecer por módulos sin que el dominio dependa de Hono, Prisma ni de la infraestructura, y debe poder testearse sin BD ni HTTP.

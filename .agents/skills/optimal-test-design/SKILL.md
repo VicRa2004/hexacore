@@ -78,7 +78,7 @@ describe("Email Value Object", () => {
 ```
 
 ### 3.2 Pruebas de Casos de Uso (Application Layer)
-- **Instanciar con `new`:** No utilizar el contenedor TSyringe en pruebas unitarias de casos de uso para evitar lentitud y acoplamiento global.
+- **Instanciar con `new`:** Construir el caso de uso con `new` y sus dependencias mockeadas; nunca pasar por el contenedor ni por `module.ts` en pruebas unitarias.
 - **Creación de Mocks:** Utilizar `mock()` de `bun:test`.
 - **Limpieza en `beforeEach`:** Siempre ejecutar `mockClear()` o `mockReset()` para evitar fuga de estado entre tests.
 - **Aserción de Excepciones Asíncronas:** **CRÍTICO:** Siempre utilizar `await expect(promesa).rejects.toThrow()`. Si omites el `await`, la aserción no esperará la resolución y puede generar falsos positivos.
@@ -130,19 +130,13 @@ Para probar la integración HTTP, middlewares de autenticación/autorización y 
 
 1. Importar `app` desde `@/core/shared/infrastructure/http/server`.
 2. Usar `app.request(path, options)` para ejecutar peticiones HTTP nativas en memoria (sin abrir sockets de red).
-3. Limpiar instancias de TSyringe con `container.clearInstances()` en `beforeEach`.
-4. Si interactúa con base de datos, configurar estrictamente `DATABASE_URL_TEST`.
+3. Si interactúa con base de datos, configurar estrictamente `DATABASE_URL_TEST`.
 
 ```typescript
-import { describe, expect, it, beforeEach } from "bun:test";
-import { container } from "tsyringe";
+import { describe, expect, it } from "bun:test";
 import { app } from "@/core/shared/infrastructure/http/server";
 
 describe("POST /api/users (E2E)", () => {
-  beforeEach(() => {
-    container.clearInstances();
-  });
-
   it("debería retornar 400 con detalles de validación cuando el body no cumple el schema Zod", async () => {
     const res = await app.request("/api/users", {
       method: "POST",

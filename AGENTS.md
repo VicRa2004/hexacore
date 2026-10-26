@@ -67,16 +67,17 @@ Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`.
 El porqué de las reglas no negociables está en `docs/decisions/`. Leer el ADR antes de proponer cambiarlas; cambiar una decisión = ADR nuevo que reemplace al anterior.
 
 - [0001 — Prisma fijado a v7](docs/decisions/0001-prisma-7-fijado.md)
-- [0002 — Arquitectura hexagonal con TSyringe](docs/decisions/0002-tsyringe-y-hexagonal.md)
+- [0002 — Arquitectura hexagonal con TSyringe](docs/decisions/0002-tsyringe-y-hexagonal.md) (la parte de TSyringe la reemplaza 0006)
 - [0003 — pnpm instala, Bun ejecuta](docs/decisions/0003-pnpm-instala-bun-ejecuta.md)
 - [0004 — Un solo contenedor en Dokploy](docs/decisions/0004-un-solo-contenedor-dokploy.md)
 - [0005 — Zustand solo para la sesión](docs/decisions/0005-zustand-solo-sesion.md)
+- [0006 — Contenedor propio en lugar de TSyringe](docs/decisions/0006-contenedor-propio.md)
 
 ## Estructura
 
 ```text
 biome.json / package.json / pnpm-workspace.yaml  # raíz: lint + workspaces
-backend/   # Hono + Bun + Prisma + TSyringe (arquitectura hexagonal)
+backend/   # Hono + Bun + Prisma (arquitectura hexagonal)
 frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 ```
 

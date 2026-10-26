@@ -2,4 +2,4 @@ export type {
 	AuthEnv,
 	AuthMiddleware,
 } from "./infrastructure/http/middlewares/authMiddleware";
-export { AUTH_TOKENS } from "./application/tokens";
+export { AUTH_TOKENS } from "./infrastructure/tokens";

@@ -1,5 +1,3 @@
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import type { RegisterDto } from "../dtos/RegisterDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UserRepository } from "@/core/user";
@@ -9,12 +7,9 @@ import { SessionIssuer } from "../services/SessionIssuer";
 import type { UserDto } from "@/core/user";
 import { UserMapper } from "@/core/user";
 
-@injectable()
 export class RegisterUseCase {
 	constructor(
-		@inject(TOKENS.UserRepository)
 		private readonly userRepository: UserRepository,
-		@inject(TOKENS.PasswordHasher)
 		private readonly passwordHasher: PasswordHasher,
 		private readonly sessionIssuer: SessionIssuer,
 	) {}

@@ -1,5 +1,3 @@
-import { injectable, inject } from "tsyringe";
-import { AUTHORIZATION_TOKENS } from "@/modules/authorization/application/tokens";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";
 import type { PermissionDto } from "../dtos/PermissionDto";
 import { PermissionMapper } from "../mappers/PermissionMapper";
@@ -11,10 +9,8 @@ import { PermissionNotFoundError } from "../../domain/error/PermissionNotFoundEr
  * @throws {PermissionNotFoundError} si el permiso no existe.
  * @method run - método principal obligatorio por convención del proyecto
  */
-@injectable()
 export class GetPermissionUseCase {
 	constructor(
-		@inject(AUTHORIZATION_TOKENS.AuthorizationRepository)
 		private readonly authorizationRepository: AuthorizationRepository,
 	) {}
 

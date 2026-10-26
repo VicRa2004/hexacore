@@ -46,7 +46,7 @@ Este proyecto está bajo la Licencia MIT - mira el archivo [LICENCE.md](LICENCE.
 | Framework Web             | Hono                                              |
 | Base de datos             | PostgreSQL                                        |
 | ORM                       | Prisma v7 (pinnado a `7.x`)                       |
-| Inyección de dependencias | [TSyringe](https://github.com/microsoft/tsyringe) |
+| Inyección de dependencias | Composition root por módulo (sin librería)       |
 | Validación                | Zod                                               |
 | Auth & Seguridad          | JWT · Bcrypt · CORS                               |
 | Linter / Formatter        | Biome (raíz)                                      |

@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { RefreshTokenUseCase } from "./RefreshTokenUseCase";
 import { SessionIssuer } from "../services/SessionIssuer";

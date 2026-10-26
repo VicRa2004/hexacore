@@ -1,7 +1,5 @@
 // Escribe el spec OpenAPI en un archivo sin levantar el servidor ni conectar a la BD.
 // Uso: bun scripts/export-openapi.ts <salida.json>
-import "reflect-metadata";
-
 const output = process.argv[2];
 if (!output) {
 	console.error("Uso: bun scripts/export-openapi.ts <salida.json>");

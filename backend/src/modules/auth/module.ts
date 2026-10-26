@@ -1,29 +1,53 @@
 import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
-import { AUTH_TOKENS } from "./application/tokens";
-import type { RefreshTokenRepository } from "./domain/repository/RefreshTokenRepository";
+import { USER_TOKENS } from "@/core/user";
+import { SessionIssuer } from "./application/services/SessionIssuer";
+import { LoginUseCase } from "./application/useCases/LoginUseCase";
+import { LogoutUseCase } from "./application/useCases/LogoutUseCase";
+import { RefreshTokenUseCase } from "./application/useCases/RefreshTokenUseCase";
+import { RegisterUseCase } from "./application/useCases/RegisterUseCase";
+import { LoginController } from "./infrastructure/http/controllers/LoginController";
+import { LogoutController } from "./infrastructure/http/controllers/LogoutController";
+import { RefreshTokenController } from "./infrastructure/http/controllers/RefreshTokenController";
+import { RegisterController } from "./infrastructure/http/controllers/RegisterController";
 import { AuthMiddleware } from "./infrastructure/http/middlewares/authMiddleware";
 import { AuthRouter } from "./infrastructure/http/routes/AuthRouter";
 import { PrismaRefreshTokenRepository } from "./infrastructure/repository/PrismaRefreshTokenRepository";
 import { JwtService } from "./infrastructure/service/JwtService";
+import { AUTH_TOKENS } from "./infrastructure/tokens";
+
+// Internos del módulo: no se comparten, así que no pasan por el contenedor.
+const tokenService = new JwtService();
+const refreshTokenRepo = new PrismaRefreshTokenRepository();
 
 export const authModule: AppModule = {
 	register(container) {
-		container.register(AUTH_TOKENS.TokenService, { useClass: JwtService });
-		container.register(AUTH_TOKENS.RefreshTokenRepository, {
-			useClass: PrismaRefreshTokenRepository,
-		});
-		container.register(AUTH_TOKENS.AuthMiddleware, {
-			useClass: AuthMiddleware,
-		});
+		container.set(
+			AUTH_TOKENS.AuthMiddleware,
+			() => new AuthMiddleware(tokenService),
+		);
 	},
 	mount(app, container) {
-		app.route("/api/auth", container.resolve(AuthRouter).router);
-	},
-	onStart(container) {
-		// Limpieza periódica de refresh tokens expirados (cada hora).
-		const refreshTokenRepo = container.resolve<RefreshTokenRepository>(
-			AUTH_TOKENS.RefreshTokenRepository,
+		const users = container.get(USER_TOKENS.UserRepository);
+		const hasher = container.get(USER_TOKENS.PasswordHasher);
+		const sessions = new SessionIssuer(tokenService, refreshTokenRepo);
+
+		const router = new AuthRouter(
+			new LoginController(new LoginUseCase(users, hasher, sessions)),
+			new RegisterController(new RegisterUseCase(users, hasher, sessions)),
+			new RefreshTokenController(
+				new RefreshTokenUseCase(
+					tokenService,
+					refreshTokenRepo,
+					users,
+					sessions,
+				),
+			),
+			new LogoutController(new LogoutUseCase(tokenService, refreshTokenRepo)),
 		);
+		app.route("/api/auth", router.router);
+	},
+	onStart() {
+		// Limpieza periódica de refresh tokens expirados (cada hora).
 		const interval = setInterval(
 			() => refreshTokenRepo.deleteExpired().catch(console.error),
 			60 * 60 * 1000,

@@ -1,12 +1,10 @@
 import type { EventBus, EventHandler } from "../../domain/events/EventBus";
 import type { DomainEvent } from "../../domain/events/DomainEvent";
-import { singleton } from "tsyringe";
 
 /**
  * Bus de eventos en memoria. `publish` espera a todos los subscribers y aísla
  * sus fallos: un subscriber que lanza se loguea, pero no rompe el caso de uso.
  */
-@singleton()
 export class InMemoryEventBus implements EventBus {
 	private handlers = new Map<string, EventHandler[]>();
 

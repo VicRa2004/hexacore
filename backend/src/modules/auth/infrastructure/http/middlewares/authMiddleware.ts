@@ -1,6 +1,4 @@
 import type { Context, Next } from "hono";
-import { injectable, inject } from "tsyringe";
-import { AUTH_TOKENS } from "@/modules/auth/application/tokens";
 import type {
 	AccessTokenPayload,
 	TokenService,
@@ -18,12 +16,8 @@ export type AuthEnv = { Variables: { user: AccessTokenPayload } };
  * app.use("/api/*", authMiddleware.handle);
  * app.get("/api/perfil", authMiddleware.handle, controller.run.bind(controller));
  */
-@injectable()
 export class AuthMiddleware {
-	constructor(
-		@inject(AUTH_TOKENS.TokenService)
-		private readonly tokenService: TokenService,
-	) {}
+	constructor(private readonly tokenService: TokenService) {}
 
 	/**
 	 * Manejador del middleware para Hono.

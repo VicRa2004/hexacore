@@ -1,4 +1,3 @@
-import { injectable } from "tsyringe";
 import type { Context } from "hono";
 import { UpdatePermissionUseCase } from "../../../application/useCases/UpdatePermissionUseCase";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
@@ -8,7 +7,6 @@ import {
 	updatePermissionSchema,
 } from "../schemas/permissionSchemas";
 
-@injectable()
 export class UpdatePermissionController extends BaseController {
 	constructor(
 		private readonly updatePermissionUseCase: UpdatePermissionUseCase,

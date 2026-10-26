@@ -34,7 +34,6 @@ const ns = `${n}s`; // productos
 const Ns = `${N}s`; // Productos
 const snake = n.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`); // orden_compra
 const kebabs = `${snake.replaceAll("_", "-")}s`; // ordenes-compra → URL y recurso
-const TOKENS = `${snake.toUpperCase()}_TOKENS`;
 const Repo = `${N}Repository`;
 
 // ── Plantillas ───────────────────────────────────────────────────────────────
@@ -95,12 +94,6 @@ export interface ${Repo} {
 }
 `,
 
-	"application/tokens.ts": `/** Tokens de TSyringe propios del módulo \`${n}\`. Se registran en \`${n}/module.ts\`. */
-export const ${TOKENS} = {
-	${Repo}: Symbol("${Repo}"),
-} as const;
-`,
-
 	[`application/dtos/${N}Dto.ts`]: `export interface ${N}Dto {
 	id: number;
 	name: string;
@@ -137,18 +130,14 @@ export const ${N}Mapper = {
 };
 `,
 
-	[`application/useCases/Create${N}UseCase.ts`]: `import { injectable, inject } from "tsyringe";
-import { ${TOKENS} } from "../tokens";
-import type { Create${N}Dto } from "../dtos/Create${N}Dto";
+	[`application/useCases/Create${N}UseCase.ts`]: `import type { Create${N}Dto } from "../dtos/Create${N}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 import { ${N} } from "../../domain/${N}";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-@injectable()
 export class Create${N}UseCase {
 	constructor(
-		@inject(${TOKENS}.${Repo})
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
@@ -159,18 +148,14 @@ export class Create${N}UseCase {
 }
 `,
 
-	[`application/useCases/GetAll${Ns}UseCase.ts`]: `import { injectable, inject } from "tsyringe";
-import { ${TOKENS} } from "../tokens";
-import type { ${Repo} } from "../../domain/repository/${Repo}";
+	[`application/useCases/GetAll${Ns}UseCase.ts`]: `import type { ${Repo} } from "../../domain/repository/${Repo}";
 import type { GetAll${Ns}Dto } from "../dtos/GetAll${Ns}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import type { Pagination } from "@/core/shared/domain/Pagination";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-@injectable()
 export class GetAll${Ns}UseCase {
 	constructor(
-		@inject(${TOKENS}.${Repo})
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
@@ -181,17 +166,13 @@ export class GetAll${Ns}UseCase {
 }
 `,
 
-	[`application/useCases/GetOne${N}UseCase.ts`]: `import { injectable, inject } from "tsyringe";
-import { ${TOKENS} } from "../tokens";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/GetOne${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-@injectable()
 export class GetOne${N}UseCase {
 	constructor(
-		@inject(${TOKENS}.${Repo})
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
@@ -205,18 +186,14 @@ export class GetOne${N}UseCase {
 }
 `,
 
-	[`application/useCases/Update${N}UseCase.ts`]: `import { injectable, inject } from "tsyringe";
-import { ${TOKENS} } from "../tokens";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/Update${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 import type { Update${N}Dto } from "../dtos/Update${N}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-@injectable()
 export class Update${N}UseCase {
 	constructor(
-		@inject(${TOKENS}.${Repo})
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
@@ -231,15 +208,11 @@ export class Update${N}UseCase {
 }
 `,
 
-	[`application/useCases/Delete${N}UseCase.ts`]: `import { injectable, inject } from "tsyringe";
-import { ${TOKENS} } from "../tokens";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/Delete${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 
-@injectable()
 export class Delete${N}UseCase {
 	constructor(
-		@inject(${TOKENS}.${Repo})
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
@@ -254,8 +227,7 @@ export class Delete${N}UseCase {
 `,
 
 	// ── Specs ──
-	[`application/useCases/Create${N}UseCase.spec.ts`]: `import "reflect-metadata";
-import { describe, expect, it, mock } from "bun:test";
+	[`application/useCases/Create${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
 import { Create${N}UseCase } from "./Create${N}UseCase";
 import { ${N} } from "../../domain/${N}";
 
@@ -274,8 +246,7 @@ describe("Create${N}UseCase", () => {
 });
 `,
 
-	[`application/useCases/GetAll${Ns}UseCase.spec.ts`]: `import "reflect-metadata";
-import { describe, expect, it, mock } from "bun:test";
+	[`application/useCases/GetAll${Ns}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
 import { GetAll${Ns}UseCase } from "./GetAll${Ns}UseCase";
 import { ${N} } from "../../domain/${N}";
 
@@ -299,8 +270,7 @@ describe("GetAll${Ns}UseCase", () => {
 });
 `,
 
-	[`application/useCases/GetOne${N}UseCase.spec.ts`]: `import "reflect-metadata";
-import { describe, expect, it, mock } from "bun:test";
+	[`application/useCases/GetOne${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
 import { GetOne${N}UseCase } from "./GetOne${N}UseCase";
 import { ${N} } from "../../domain/${N}";
 import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
@@ -322,8 +292,7 @@ describe("GetOne${N}UseCase", () => {
 });
 `,
 
-	[`application/useCases/Update${N}UseCase.spec.ts`]: `import "reflect-metadata";
-import { describe, expect, it, mock } from "bun:test";
+	[`application/useCases/Update${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
 import { Update${N}UseCase } from "./Update${N}UseCase";
 import { ${N} } from "../../domain/${N}";
 import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
@@ -354,8 +323,7 @@ describe("Update${N}UseCase", () => {
 });
 `,
 
-	[`application/useCases/Delete${N}UseCase.spec.ts`]: `import "reflect-metadata";
-import { describe, expect, it, mock } from "bun:test";
+	[`application/useCases/Delete${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
 import { Delete${N}UseCase } from "./Delete${N}UseCase";
 import { ${N} } from "../../domain/${N}";
 import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
@@ -384,8 +352,7 @@ describe("Delete${N}UseCase", () => {
 `,
 
 	// ── Infraestructura ──
-	[`infrastructure/repository/Prisma${Repo}.ts`]: `import { injectable } from "tsyringe";
-import type { Pagination } from "@/core/shared/domain/Pagination";
+	[`infrastructure/repository/Prisma${Repo}.ts`]: `import type { Pagination } from "@/core/shared/domain/Pagination";
 import type {
 	${N}Filters,
 	${Repo},
@@ -398,7 +365,6 @@ interface Prisma${N}Record {
 	name: string;
 }
 
-@injectable()
 export class Prisma${Repo} implements ${Repo} {
 	private toDomain(raw: Prisma${N}Record): ${N} {
 		return ${N}.reconstitute(raw.id, raw.name);
@@ -525,14 +491,12 @@ export const ${n}PageSchema = z.object({
 	),
 
 	[`infrastructure/http/routes/${N}Router.ts`]: `import { OpenAPIHono } from "@hono/zod-openapi";
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import {
 	errorResponse,
 	jsonResponse,
 	protectedErrorResponses,
 } from "@/core/shared/infrastructure/http/openapi";
-import { AUTH_TOKENS, type AuthMiddleware } from "@/modules/auth";
+import type { AuthMiddleware } from "@/modules/auth";
 import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 import { Create${N}Controller } from "../controllers/Create${N}Controller";
 import { GetAll${Ns}Controller } from "../controllers/GetAll${Ns}Controller";
@@ -552,14 +516,11 @@ const tags = ["${Ns}"];
 const security = [{ bearerAuth: [] }];
 const resource = "${kebabs}";
 
-@injectable()
 export class ${N}Router {
 	public readonly router = new OpenAPIHono();
 
 	constructor(
-		@inject(AUTH_TOKENS.AuthMiddleware)
 		authMiddleware: AuthMiddleware,
-		@inject(TOKENS.PermissionGuard)
 		guard: PermissionGuard,
 		create: Create${N}Controller,
 		getAll: GetAll${Ns}Controller,
@@ -661,30 +622,46 @@ export class ${N}Router {
 `,
 
 	"module.ts": `import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
-import { ${TOKENS} } from "./application/tokens";
+import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
+import { AUTH_TOKENS } from "@/modules/auth";
+import { Create${N}UseCase } from "./application/useCases/Create${N}UseCase";
+import { Delete${N}UseCase } from "./application/useCases/Delete${N}UseCase";
+import { GetAll${Ns}UseCase } from "./application/useCases/GetAll${Ns}UseCase";
+import { GetOne${N}UseCase } from "./application/useCases/GetOne${N}UseCase";
+import { Update${N}UseCase } from "./application/useCases/Update${N}UseCase";
+import { Create${N}Controller } from "./infrastructure/http/controllers/Create${N}Controller";
+import { Delete${N}Controller } from "./infrastructure/http/controllers/Delete${N}Controller";
+import { GetAll${Ns}Controller } from "./infrastructure/http/controllers/GetAll${Ns}Controller";
+import { GetOne${N}Controller } from "./infrastructure/http/controllers/GetOne${N}Controller";
+import { Update${N}Controller } from "./infrastructure/http/controllers/Update${N}Controller";
 import { ${N}Router } from "./infrastructure/http/routes/${N}Router";
 import { Prisma${Repo} } from "./infrastructure/repository/Prisma${Repo}";
 
 export const ${n}Module: AppModule = {
-	register(container) {
-		container.register(${TOKENS}.${Repo}, { useClass: Prisma${Repo} });
-	},
 	mount(app, container) {
-		app.route("/api/${kebabs}", container.resolve(${N}Router).router);
+		const repo = new Prisma${Repo}();
+		const router = new ${N}Router(
+			container.get(AUTH_TOKENS.AuthMiddleware),
+			container.get(TOKENS.PermissionGuard),
+			new Create${N}Controller(new Create${N}UseCase(repo)),
+			new GetAll${Ns}Controller(new GetAll${Ns}UseCase(repo)),
+			new GetOne${N}Controller(new GetOne${N}UseCase(repo)),
+			new Update${N}Controller(new Update${N}UseCase(repo)),
+			new Delete${N}Controller(new Delete${N}UseCase(repo)),
+		);
+		app.route("/api/${kebabs}", router.router);
 	},
 };
 `,
 };
 
 function controller(useCase: string, schemas: string, body: string): string {
-	return `import { injectable } from "tsyringe";
-import type { Context } from "hono";
+	return `import type { Context } from "hono";
 import { ${useCase}UseCase } from "../../../application/useCases/${useCase}UseCase";
 import { ${schemas} } from "../schemas/${n}Schemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { validate } from "@/core/shared/infrastructure/libs/validate";
 
-@injectable()
 export class ${useCase}Controller extends BaseController {
 	constructor(private readonly useCase: ${useCase}UseCase) {
 		super();

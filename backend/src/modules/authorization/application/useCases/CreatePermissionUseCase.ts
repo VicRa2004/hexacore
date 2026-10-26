@@ -1,5 +1,3 @@
-import { injectable, inject } from "tsyringe";
-import { AUTHORIZATION_TOKENS } from "@/modules/authorization/application/tokens";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";
 import type { CreatePermissionDto } from "../dtos/CreatePermissionDto";
 import type { PermissionDto } from "../dtos/PermissionDto";
@@ -11,10 +9,8 @@ import { PermissionMapper } from "../mappers/PermissionMapper";
  * @throws {PermissionAlreadyExistsError} si la combinación ya existe.
  * @method run - método principal obligatorio por convención del proyecto
  */
-@injectable()
 export class CreatePermissionUseCase {
 	constructor(
-		@inject(AUTHORIZATION_TOKENS.AuthorizationRepository)
 		private readonly authorizationRepository: AuthorizationRepository,
 	) {}
 

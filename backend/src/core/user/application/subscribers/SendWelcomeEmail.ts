@@ -1,11 +1,8 @@
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
-import { inject, injectable } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import type { CreateUserEvent } from "../../domain/event/CreateUserEvent";
 
-@injectable()
 export class SendWelcomeEmail {
-	constructor(@inject(TOKENS.EventBus) private readonly eventBus: EventBus) {}
+	constructor(private readonly eventBus: EventBus) {}
 
 	public setupSubscription(): void {
 		this.eventBus.subscribe("user.created", (event: CreateUserEvent) => {

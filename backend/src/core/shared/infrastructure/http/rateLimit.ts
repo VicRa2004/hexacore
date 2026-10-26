@@ -12,7 +12,11 @@ function clientIp(c: Context): string {
 	// Detrás de Traefik (Dokploy) la IP real es la última de X-Forwarded-For:
 	// la añade el proxy y el cliente no puede falsearla.
 	if (process.env.TRUST_PROXY === "true") {
-		const forwarded = c.req.header("x-forwarded-for")?.split(",").at(-1)?.trim();
+		const forwarded = c.req
+			.header("x-forwarded-for")
+			?.split(",")
+			.at(-1)
+			?.trim();
 		if (forwarded) return forwarded;
 	}
 	try {

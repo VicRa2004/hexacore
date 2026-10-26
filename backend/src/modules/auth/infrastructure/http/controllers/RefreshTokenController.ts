@@ -1,5 +1,4 @@
 import type { Context } from "hono";
-import { injectable, inject } from "tsyringe";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { RefreshTokenUseCase } from "../../../application/useCases/RefreshTokenUseCase";
 
@@ -10,12 +9,8 @@ import {
 } from "../refreshTokenCookie";
 import { refreshTokenSchema } from "../schemas/authSchemas";
 
-@injectable()
 export class RefreshTokenController extends BaseController {
-	constructor(
-		@inject(RefreshTokenUseCase)
-		private readonly refreshTokenUseCase: RefreshTokenUseCase,
-	) {
+	constructor(private readonly refreshTokenUseCase: RefreshTokenUseCase) {
 		super();
 	}
 

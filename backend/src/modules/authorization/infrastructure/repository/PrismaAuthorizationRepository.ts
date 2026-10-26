@@ -1,4 +1,3 @@
-import { injectable } from "tsyringe";
 import { prisma } from "@/core/config/prisma";
 import type { AuthorizationRepository } from "../../domain/repository/AuthorizationRepository";
 import { Permission } from "../../domain/Permission";
@@ -16,7 +15,6 @@ import { PermissionAlreadyExistsError } from "../../domain/error/PermissionAlrea
  *    - Un permiso directo con `granted = false` lo ELIMINA del set
  *      (permite revocar granularmente un permiso de rol).
  */
-@injectable()
 export class PrismaAuthorizationRepository implements AuthorizationRepository {
 	// ── Permisos efectivos ──────────────────────────────────────────────────────
 

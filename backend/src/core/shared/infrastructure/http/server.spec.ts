@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 
 const queryRaw = mock(() => Promise.resolve([{ "?column?": 1 }]));

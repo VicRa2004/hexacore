@@ -1,5 +1,3 @@
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import type { LoginDto } from "../dtos/LoginDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UserRepository } from "@/core/user";
@@ -15,12 +13,9 @@ import { UserMapper } from "@/core/user";
 const DUMMY_PASSWORD_HASH =
 	"$2b$10$UZQKZ7yo9nGiqhSbmYdj4eV9jrthslRlUx4lX.r5eMN.sW4Pb.boi";
 
-@injectable()
 export class LoginUseCase {
 	constructor(
-		@inject(TOKENS.UserRepository)
 		private readonly userRepository: UserRepository,
-		@inject(TOKENS.PasswordHasher)
 		private readonly passwordHasher: PasswordHasher,
 		private readonly sessionIssuer: SessionIssuer,
 	) {}

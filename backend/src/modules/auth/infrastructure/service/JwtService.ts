@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { injectable } from "tsyringe";
 import { env } from "../../../../core/config/env";
 import type {
 	AccessTokenPayload,
@@ -7,7 +6,6 @@ import type {
 } from "../../domain/service/TokenService";
 import crypto from "node:crypto";
 
-@injectable()
 export class JwtService implements TokenService {
 	private secret = env.JWT_SECRET;
 

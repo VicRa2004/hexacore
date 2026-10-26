@@ -1,13 +1,11 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { injectable, inject } from "tsyringe";
-import { TOKENS } from "@/core/shared/application/tokens";
 import {
 	errorResponse,
 	jsonResponse,
 	protectedErrorResponses,
 } from "@/core/shared/infrastructure/http/openapi";
 
-import { AUTH_TOKENS, type AuthMiddleware } from "@/modules/auth";
+import type { AuthMiddleware } from "@/modules/auth";
 import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
 
 // Controladores
@@ -28,14 +26,11 @@ import {
 const tags = ["Users"];
 const security = [{ bearerAuth: [] }];
 
-@injectable()
 export class UserRouter {
 	public readonly router: OpenAPIHono;
 
 	constructor(
-		@inject(AUTH_TOKENS.AuthMiddleware)
 		private readonly authMiddleware: AuthMiddleware,
-		@inject(TOKENS.PermissionGuard)
 		private readonly requirePermissionMiddleware: PermissionGuard,
 		private readonly createUserController: CreateUserController,
 		private readonly getAllUsersController: GetAllUsersController,
