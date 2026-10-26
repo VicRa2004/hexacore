@@ -1,5 +1,8 @@
-import type { EventBus, EventHandler } from "../../domain/events/EventBus";
-import type { DomainEvent } from "../../domain/events/DomainEvent";
+import type {
+	EventBus,
+	EventHandler,
+} from "@/core/shared/domain/events/EventBus";
+import type { DomainEvent } from "@/core/shared/domain/events/DomainEvent";
 
 /**
  * Bus de eventos en memoria. `publish` espera a todos los subscribers y aísla

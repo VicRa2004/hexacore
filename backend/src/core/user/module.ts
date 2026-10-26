@@ -20,12 +20,13 @@ export const userModule: AppModule = {
 			USER_TOKENS.PasswordHasher,
 			() => new BcryptPasswordHasherService(),
 		);
-		new SendWelcomeEmail(container.get(TOKENS.EventBus)).setupSubscription();
 	},
 	mount(app, container) {
 		const users = container.get(USER_TOKENS.UserRepository);
 		const hasher = container.get(USER_TOKENS.PasswordHasher);
+		// En mount y no en register: el bus real lo registra el módulo `events`, que puede ir después.
 		const eventBus = container.get(TOKENS.EventBus);
+		new SendWelcomeEmail(eventBus).setupSubscription();
 
 		const router = new UserRouter(
 			container.get(AUTH_TOKENS.AuthMiddleware),

@@ -5,8 +5,8 @@ import type { DependencyContainer } from "./DependencyContainer";
 export interface AppModule {
 	/** Registra en el contenedor lo que comparte con otros módulos o sustituye (opcional). */
 	register?(container: DependencyContainer): void;
-	/** Construye sus casos de uso y controladores y monta sus rutas en la app. */
-	mount(app: OpenAPIHono, container: DependencyContainer): void;
+	/** Construye sus casos de uso y controladores y monta sus rutas en la app y suscribe sus handlers de eventos (opcional). */
+	mount?(app: OpenAPIHono, container: DependencyContainer): void;
 	/**
 	 * Tareas al arrancar el servidor (no se ejecuta al exportar el OpenAPI).
 	 * Puede devolver una función que las detiene en el apagado ordenado.

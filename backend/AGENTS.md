@@ -86,11 +86,12 @@ Sin decoradores ni librería de DI (ADR [0006](../docs/decisions/0006-contenedor
 
 ## Módulos enchufables
 
-Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/infrastructure/di/AppModule.ts`): `register?(container)`, `mount(app, container)` y `onStart?(container)` (tareas de arranque, p. ej. la limpieza de refresh tokens de `auth`). La lista de módulos activos es `src/modules.ts`, el **único archivo central** que se toca al añadir o quitar uno. El `module.ts` no se exporta por `index.ts` (crearía ciclos entre módulos); solo lo importa `src/modules.ts`.
+Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/infrastructure/di/AppModule.ts`): `register?(container)`, `mount?(app, container)` y `onStart?(container)` (tareas de arranque, p. ej. la limpieza de refresh tokens de `auth`). La lista de módulos activos es `src/modules.ts`, el **único archivo central** que se toca al añadir o quitar uno. El `module.ts` no se exporta por `index.ts` (crearía ciclos entre módulos); solo lo importa `src/modules.ts`.
 
 - **Núcleo (siempre presentes):** `core/user`, `modules/auth`.
-- **Opcionales:** `modules/authorization`.
+- **Opcionales:** `modules/authorization`, `modules/events`.
 - **Permisos sin `authorization`:** las rutas usan el contrato `PermissionGuard` (`TOKENS.PermissionGuard`, en `core/shared/infrastructure/http/permissionGuard.ts`). El núcleo registra `AllowAuthenticatedGuard` (solo exige estar autenticado) y `authorization` lo sustituye por `RequirePermissionMiddleware` al registrarse. Sin `authorization`, **cualquier usuario autenticado** pasa los `requirePermission`.
+- **Eventos sin `events`:** los casos de uso publican en `TOKENS.EventBus` y los módulos se suscriben en su `mount` (no en `register`: el bus real puede registrarse después). El núcleo registra `NoopEventBus` (no entrega nada) y `events` lo sustituye por `InMemoryEventBus`. Quitar `events` = borrar su carpeta y su línea en `src/modules.ts`; no hay schema ni casos de uso que tocar. Añadirlo = lo inverso.
 
 ### Cómo quitar un módulo
 

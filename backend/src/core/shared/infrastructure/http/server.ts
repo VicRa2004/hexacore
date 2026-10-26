@@ -76,7 +76,7 @@ app.get("/ready", async (c) => {
 });
 
 // 3-4. Rutas de cada módulo activo (lista en src/modules.ts)
-for (const module of modules) module.mount(app, container);
+for (const module of modules) module.mount?.(app, container);
 
 // 5. Global Error Handler
 app.onError((err, c) => {
