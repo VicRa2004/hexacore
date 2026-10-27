@@ -1,0 +1,24 @@
+# Solo desarrollo: PostgreSQL local con las credenciales de backend/.env.example.
+# En producción la BD es un servicio aparte de Dokploy (ver docker-compose.yml).
+# Uso: pnpm db:up · pnpm db:down (los datos se conservan en el volumen).
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: hexacore
+      POSTGRES_PASSWORD: cambia_esta_password
+      POSTGRES_DB: hexacore_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-dev:/var/lib/postgresql
+      # Solo se ejecuta al crear el volumen por primera vez.
+      - ./docker/dev/crear-bd-test.sql:/docker-entrypoint-initdb.d/crear-bd-test.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hexacore -d hexacore_db"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  postgres-dev:

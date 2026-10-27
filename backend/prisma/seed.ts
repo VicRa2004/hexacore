@@ -1,7 +1,11 @@
+/**
+ * Seed mínimo: catálogo de roles, permisos y su asignación. Idempotente y seguro
+ * en cualquier entorno (lo cargan los e2e y `prisma migrate`). Los usuarios de
+ * prueba y los datos de ejemplo están en `seed-demo.ts`.
+ */
 import { prisma } from "../src/core/config/prisma";
-import bcrypt from "bcrypt";
 
-async function main() {
+export async function sembrarCatalogo() {
 	console.log("🌱 Iniciando el proceso de seed...");
 
 	// ─── 1. Roles ───────────────────────────────────────────────────────────────
@@ -84,65 +88,17 @@ async function main() {
 		}
 	}
 	console.log("✅ Permisos asignados a roles");
-
-	// ─── 4. Usuarios de prueba ───────────────────────────────────────────────────
-	const passwordHash = await bcrypt.hash("SecurePass123!", 10);
-
-	const datosUsuarios = [
-		{
-			email: "admin@dev.com",
-			nombre: "Administrador",
-			password: passwordHash,
-			nombreRol: "ADMIN",
-		},
-		{
-			email: "mod@dev.com",
-			nombre: "Supermoderador",
-			password: passwordHash,
-			nombreRol: "MOD",
-		},
-		{
-			email: "usuario@dev.com",
-			nombre: "Usuario Estándar",
-			password: passwordHash,
-			nombreRol: "USUARIO",
-		},
-	];
-
-	for (const { nombreRol, ...camposUsuario } of datosUsuarios) {
-		const usuario = await prisma.usuario.upsert({
-			where: { email: camposUsuario.email },
-			update: {},
-			create: camposUsuario,
-		});
-
-		const rol = await prisma.rol.findUnique({ where: { nombre: nombreRol } });
-		if (!rol) continue;
-
-		await prisma.usuarioRol.upsert({
-			where: { usuarioId_rolId: { usuarioId: usuario.id, rolId: rol.id } },
-			update: {},
-			create: { usuarioId: usuario.id, rolId: rol.id },
-		});
-	}
-
-	console.log(
-		"✅ Usuarios de prueba creados (CONTRASEÑA PARA TODOS: SecurePass123!)",
-	);
-	console.log(
-		"   - admin@dev.com (ADMIN) → todos los permisos (usuarios, permisos, roles, asignaciones y auditoría)",
-	);
-	console.log("   - mod@dev.com   (MOD)   → crear, leer, actualizar");
-	console.log("   - usuario@dev.com  (USUARIO)  → solo leer");
 }
 
-main()
-	.then(async () => {
-		await prisma.$disconnect();
-		console.log("🏁 Seed finalizado correctamente.");
-	})
-	.catch(async (e) => {
-		console.error("❌ Error ejecutando seed:", e);
-		await prisma.$disconnect();
-		process.exit(1);
-	});
+if (import.meta.main) {
+	sembrarCatalogo()
+		.then(async () => {
+			await prisma.$disconnect();
+			console.log("🏁 Seed finalizado correctamente.");
+		})
+		.catch(async (e) => {
+			console.error("❌ Error ejecutando seed:", e);
+			await prisma.$disconnect();
+			process.exit(1);
+		});
+}

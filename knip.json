@@ -20,7 +20,8 @@
 			"entry": [
 				"scripts/**/*.ts",
 				"src/**/*.spec.ts",
-				"src/modules/*/module.ts"
+				"src/modules/*/module.ts",
+				"prisma/seed-demo.ts"
 			],
 			"project": ["src/**/*.ts", "scripts/**/*.ts", "prisma/**/*.ts"],
 			"ignoreDependencies": ["@prisma/client", "@swc/core"]

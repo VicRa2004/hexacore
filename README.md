@@ -95,17 +95,17 @@ pnpm install
 cp backend/.env.example backend/.env
 ```
 
-Ajusta `DATABASE_URL` para tu instancia de PostgreSQL. El backend lee `.env` con `dotenv`.
+Los valores de ejemplo ya apuntan al PostgreSQL de `docker-compose.dev.yml`. Si usas otra instancia, ajusta `DATABASE_URL`. El backend lee `.env` con `dotenv`.
 
-**3. Sincronizar base de datos**
+**3. Base de datos**
 
 ```bash
-pnpm db:generate
-pnpm db:push
-
-# Para migraciones formales:
-pnpm db:migrate
+pnpm db:up          # PostgreSQL local en Docker (puerto 5433, BD de dev y de e2e)
+pnpm db:migrate     # aplica las migraciones
+pnpm db:seed:demo   # roles, permisos, admin@dev.com / mod@dev.com / usuario@dev.com y usuarios de ejemplo
 ```
+
+`pnpm db:seed` carga solo el catálogo de roles y permisos (lo que necesita cualquier entorno). El de demo crea usuarios con contraseña conocida (`SecurePass123!`) y se niega a correr con `NODE_ENV=prod`. `pnpm db:down` para el contenedor sin borrar los datos.
 
 **4. Desarrollo**
 
@@ -134,7 +134,7 @@ Pensado para desplegar en **Dokploy** como servicio *Docker Compose*:
 
 Un solo contenedor sirve la API (`/api`), la documentación (`/docs`) y el frontend compilado, así que basta un dominio. En cada deploy el servicio `migrate` aplica las migraciones pendientes (`prisma migrate deploy`, nunca borra datos) antes de arrancar `app`. La imagen rechaza el `JWT_SECRET` de ejemplo.
 
-En local: `cp .env.example .env` y `docker compose up --build` (necesita una BD accesible desde el contenedor). Para desarrollo usa `pnpm dev` con tu PostgreSQL local (`backend/.env`).
+En local: `cp .env.example .env` y `docker compose up --build` (necesita una BD accesible desde el contenedor). Para desarrollo usa `pnpm db:up` + `pnpm dev`.
 
 ---
 

@@ -42,7 +42,8 @@ pnpm test:backend       # tests del backend con Bun
 pnpm test:frontend      # tests del frontend con Vitest
 pnpm test:e2e           # e2e del backend contra Postgres real (DATABASE_URL_TEST, se resetea)
 pnpm typecheck          # tsc --noEmit en backend y frontend
-pnpm gen:module <nombre> # genera un módulo CRUD del backend (ver skill crear-modulo)
+pnpm gen:module <nombre> # módulo CRUD completo: backend + gen:api + frontend (ver skill crear-modulo)
+pnpm gen:module:web <nombre> # solo el frontend de un módulo backend ya existente (tras gen:api)
 pnpm gen:api            # regenera frontend/src/core/api/schema.gen.ts desde el OpenAPI del backend
 pnpm check:api          # gen:api + falla si schema.gen.ts no estaba al día
 pnpm knip               # archivos, exports y dependencias sin uso (knip.json)
@@ -50,6 +51,9 @@ pnpm check:architecture # reglas de capas/módulos del backend (dependency-cruis
 pnpm db:generate        # prisma generate (backend)
 pnpm db:push            # prisma db push (backend)
 pnpm db:migrate         # prisma migrate dev (backend)
+pnpm db:up / db:down    # PostgreSQL de desarrollo en Docker (docker-compose.dev.yml, puerto 5433)
+pnpm db:seed            # catálogo de roles y permisos (seguro en cualquier entorno)
+pnpm db:seed:demo       # catálogo + usuarios de prueba y de ejemplo (solo desarrollo)
 pnpm init:project       # renombra el template (hexacore) a un proyecto nuevo; idempotente
 ```
 
@@ -91,6 +95,7 @@ frontend/  # Vite + React + TanStack Suite + Tailwind v4 (modular y core)
 
 - `backend/` tiene sus reglas propias en `backend/AGENTS.md`. Leerlo antes de tocar `backend/`.
 - `frontend/` tiene sus reglas propias en `frontend/AGENTS.md`. Leerlo antes de tocar `frontend/`.
-- Docker vive en la raíz y está pensado para Dokploy: un único servicio `app` (backend que también sirve `frontend/dist`, un solo dominio, puerto `3000`). La BD **no** va en el compose: es un servicio aparte de Dokploy y llega por `DATABASE_URL`. El servicio `migrate` ejecuta `prisma migrate deploy` antes de cada arranque de `app`. En desarrollo: `pnpm dev` con PostgreSQL local.
+- Docker vive en la raíz y está pensado para Dokploy: un único servicio `app` (backend que también sirve `frontend/dist`, un solo dominio, puerto `3000`). La BD **no** va en el compose: es un servicio aparte de Dokploy y llega por `DATABASE_URL`. El servicio `migrate` ejecuta `prisma migrate deploy` antes de cada arranque de `app`. En desarrollo: `pnpm db:up` (PostgreSQL de `docker-compose.dev.yml`) y `pnpm dev`.
 - Variables: `cp backend/.env.example backend/.env`.
+- Dependencias: Renovate (`renovate.json`) agrupa y fija versiones exactas; Prisma no pasa de `7.x` (ADR 0001).
 - El template asume una sola réplica. Qué cambiar para pasar a N: [docs/escalado.md](docs/escalado.md).

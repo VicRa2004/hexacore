@@ -12,6 +12,8 @@
 		"test:coverage": "bun test --coverage --path-ignore-patterns='**/*.e2e.spec.ts'",
 		"test:e2e": "bun scripts/test-e2e.ts",
 		"test:watch": "bun test --watch --path-ignore-patterns='**/*.e2e.spec.ts'",
+		"seed": "bun prisma/seed.ts",
+		"seed:demo": "bun prisma/seed-demo.ts",
 		"create:admin": "bun scripts/create-admin.ts",
 		"check:architecture": "depcruise src --config .dependency-cruiser.cjs"
 	},

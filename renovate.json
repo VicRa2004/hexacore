@@ -1,0 +1,36 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":semanticCommitTypeAll(chore)"],
+	"schedule": ["before 6am on monday"],
+	"rangeStrategy": "pin",
+	"lockFileMaintenance": { "enabled": true },
+	"packageRules": [
+		{
+			"description": "ADR 0001: Prisma fijado a 7.x. Pasar a v8 exige un ADR nuevo.",
+			"matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-pg"],
+			"allowedVersions": "<8",
+			"groupName": "prisma"
+		},
+		{
+			"matchPackageNames": ["@tanstack/**"],
+			"groupName": "tanstack"
+		},
+		{
+			"matchPackageNames": ["@biomejs/biome"],
+			"groupName": "biome",
+			"description": "Al actualizar Biome, actualizar también el $schema de biome.json."
+		},
+		{
+			"description": "Parches y menores de devDependencies: se fusionan solos si el CI pasa.",
+			"matchDepTypes": ["devDependencies"],
+			"matchUpdateTypes": ["patch", "minor"],
+			"automerge": true
+		},
+		{
+			"matchDatasources": ["docker"],
+			"matchPackageNames": ["postgres"],
+			"description": "Postgres: misma major en CI (ci.yml) y en docker-compose.dev.yml.",
+			"groupName": "postgres"
+		}
+	]
+}
