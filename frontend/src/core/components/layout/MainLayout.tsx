@@ -9,6 +9,7 @@ import {
 	LogOut,
 } from "lucide-react";
 import { useAuthStore } from "@/core/auth/store";
+import { SelectorTema } from "./SelectorTema";
 import { Badge } from "@/core/components/ui/Badge";
 import { Button } from "@/core/components/ui/Button";
 import { toast } from "sonner";
@@ -41,9 +42,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 			: "default";
 
 	return (
-		<div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+		<div className="min-h-screen flex flex-col bg-fondo text-tinta">
 			{/* Navbar Superior */}
-			<header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
+			<header className="sticky top-0 z-40 border-b border-borde bg-fondo/80 backdrop-blur-md">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="flex h-16 items-center justify-between gap-4">
 						<div className="flex items-center gap-8">
@@ -51,7 +52,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 group-hover:bg-indigo-600/20 transition-colors">
 									<Hexagon className="h-5 w-5 stroke-[2.2]" />
 								</div>
-								<span className="text-lg font-bold tracking-tight text-white group-hover:text-indigo-400 transition-colors">
+								<span className="text-lg font-bold tracking-tight text-tinta group-hover:text-indigo-400 transition-colors">
 									Hexacore
 								</span>
 							</Link>
@@ -59,28 +60,28 @@ export function MainLayout({ children }: MainLayoutProps) {
 							<nav className="hidden md:flex items-center gap-1">
 								<Link
 									to="/dashboard"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
+									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<LayoutDashboard className="h-4 w-4" />
 									Dashboard
 								</Link>
 								<Link
 									to="/usuarios"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
+									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<Users className="h-4 w-4" />
 									Usuarios
 								</Link>
 								<Link
 									to="/roles"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
+									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<ShieldCheck className="h-4 w-4" />
 									Roles
 								</Link>
 								<Link
 									to="/perfil"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
+									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<UserCheck className="h-4 w-4" />
 									Mi Perfil
@@ -89,13 +90,14 @@ export function MainLayout({ children }: MainLayoutProps) {
 						</div>
 
 						<div className="flex items-center gap-3">
+							<SelectorTema />
 							{usuario && (
 								<div className="hidden sm:flex items-center gap-2.5 pr-2">
 									<div className="text-right">
-										<p className="text-xs font-semibold text-slate-200">
+										<p className="text-xs font-semibold text-tinta">
 											{usuario.nombre}
 										</p>
-										<p className="text-[11px] text-slate-400">
+										<p className="text-[11px] text-tinta-tenue">
 											{usuario.email}
 										</p>
 									</div>
@@ -109,7 +111,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 								variant="ghost"
 								size="sm"
 								onClick={handleLogout}
-								className="text-slate-400 hover:text-rose-400 hover:bg-rose-950/20"
+								className="text-tinta-tenue hover:text-rose-400 hover:bg-rose-950/20"
 								title="Cerrar sesión"
 							>
 								<LogOut className="h-4 w-4 mr-1.5" />
@@ -126,7 +128,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 			</main>
 
 			{/* Footer */}
-			<footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+			<footer className="border-t border-borde/60 py-6 text-center text-xs text-tinta-tenue">
 				Hexacore Monorepo &copy; {new Date().getFullYear()} &mdash; Arquitectura
 				Hexagonal y Modular
 			</footer>

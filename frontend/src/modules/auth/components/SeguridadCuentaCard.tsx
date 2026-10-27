@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LogOut, MailWarning } from "lucide-react";
 import { useAuthStore } from "@/core/auth/store";
 import { Button } from "@/core/components/ui/Button";
@@ -7,6 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/core/components/ui/Card";
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import {
 	useCerrarSesionesMutation,
 	useReenviarVerificacionMutation,
@@ -20,11 +22,7 @@ export function SeguridadCuentaCard() {
 	const reenviar = useReenviarVerificacionMutation();
 	const cerrarSesiones = useCerrarSesionesMutation();
 
-	const cerrarTodas = () => {
-		if (window.confirm("¿Cerrar la sesión en todos tus dispositivos?")) {
-			cerrarSesiones.mutate();
-		}
-	};
+	const [confirmando, setConfirmando] = useState(false);
 
 	return (
 		<Card className="max-w-2xl mx-auto space-y-4">
@@ -56,13 +54,24 @@ export function SeguridadCuentaCard() {
 				<Button
 					variant="danger"
 					size="sm"
-					onClick={cerrarTodas}
+					onClick={() => setConfirmando(true)}
 					isLoading={cerrarSesiones.isPending}
 				>
 					<LogOut className="h-4 w-4" />
 					Cerrar todas las sesiones
 				</Button>
 			</div>
+
+			<ConfirmDialog
+				abierto={confirmando}
+				titulo="¿Cerrar todas las sesiones?"
+				mensaje="Tendrás que volver a iniciar sesión en todos tus dispositivos, incluido este."
+				textoConfirmar="Cerrar sesiones"
+				peligroso
+				isLoading={cerrarSesiones.isPending}
+				onCancelar={() => setConfirmando(false)}
+				onConfirmar={() => cerrarSesiones.mutate()}
+			/>
 		</Card>
 	);
 }

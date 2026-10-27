@@ -19,7 +19,7 @@ export function VerificarEmailPage({ token }: { token: string }) {
 					role="status"
 				>
 					<CheckCircle className="h-10 w-10 text-emerald-400" />
-					<p className="text-sm text-slate-300">{verificar.data.mensaje}</p>
+					<p className="text-sm text-tinta-suave">{verificar.data.mensaje}</p>
 					<Link
 						to="/dashboard"
 						className="text-sm font-medium text-indigo-400 hover:underline"

@@ -11,7 +11,7 @@ export function UsuariosPage() {
 	const [emailBusqueda, setEmailBusqueda] = useState("");
 	const [seleccionado, setSeleccionado] = useState<Usuario | null>(null);
 
-	const { data, isLoading, isError, error } = useUsuariosQuery({
+	const { data, isLoading, error } = useUsuariosQuery({
 		pagina,
 		limite: 5,
 		email: emailBusqueda.trim() ? emailBusqueda.trim() : undefined,
@@ -26,11 +26,11 @@ export function UsuariosPage() {
 						<div className="p-2 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400">
 							<UsersIcon className="h-5 w-5" />
 						</div>
-						<h1 className="text-2xl font-bold tracking-tight text-white">
+						<h1 className="text-2xl font-bold tracking-tight text-tinta">
 							Gestión de Usuarios
 						</h1>
 					</div>
-					<p className="mt-1 text-sm text-slate-400">
+					<p className="mt-1 text-sm text-tinta-tenue">
 						Consulta y administra los usuarios registrados en el sistema.
 					</p>
 				</div>
@@ -47,30 +47,25 @@ export function UsuariosPage() {
 							}}
 							className="pl-9"
 						/>
-						<Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+						<Search className="absolute left-3 top-2.5 h-4 w-4 text-tinta-tenue pointer-events-none" />
 					</div>
 				</div>
 			</div>
 
 			{/* Tabla de Usuarios con TanStack Query */}
 			<UsuariosTable
-				usuarios={data?.datos}
+				pagina={data}
 				isLoading={isLoading}
-				isError={isError}
 				error={error}
-				paginaActual={pagina}
-				totalPaginas={data?.totalPaginas ?? 1}
 				onCambioPagina={setPagina}
 				onGestionarPermisos={setSeleccionado}
 			/>
 
-			{seleccionado && (
-				<AsignacionUsuarioPanel
-					key={seleccionado.id}
-					usuario={seleccionado}
-					onCerrar={() => setSeleccionado(null)}
-				/>
-			)}
+			<AsignacionUsuarioPanel
+				key={seleccionado?.id}
+				usuario={seleccionado}
+				onCerrar={() => setSeleccionado(null)}
+			/>
 		</div>
 	);
 }

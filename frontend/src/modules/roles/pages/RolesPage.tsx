@@ -18,11 +18,11 @@ export function RolesPage() {
 					<div className="p-2 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400">
 						<ShieldCheck className="h-5 w-5" />
 					</div>
-					<h1 className="text-2xl font-bold tracking-tight text-white">
+					<h1 className="text-2xl font-bold tracking-tight text-tinta">
 						Roles y permisos
 					</h1>
 				</div>
-				<p className="mt-1 text-sm text-slate-400">
+				<p className="mt-1 text-sm text-tinta-tenue">
 					Define qué permisos concede cada rol. Los roles se asignan a cada
 					usuario desde Usuarios.
 				</p>

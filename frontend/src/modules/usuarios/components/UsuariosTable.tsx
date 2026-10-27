@@ -1,181 +1,108 @@
+import { KeyRound, Shield, User as UserIcon } from "lucide-react";
 import type { Usuario } from "@/core/auth/types";
 import { Badge } from "@/core/components/ui/Badge";
 import { Button } from "@/core/components/ui/Button";
-import { Spinner } from "@/core/components/ui/Spinner";
-import {
-	ChevronLeft,
-	ChevronRight,
-	AlertCircle,
-	KeyRound,
-	Shield,
-	User as UserIcon,
-} from "lucide-react";
+import { EmptyState } from "@/core/components/ui/EmptyState";
+import { type Columna, type Pagina, Tabla } from "@/core/components/ui/Table";
 
 interface UsuariosTableProps {
-	usuarios?: Usuario[];
+	pagina?: Pagina<Usuario>;
 	isLoading: boolean;
-	isError: boolean;
 	error?: unknown;
-	paginaActual: number;
-	totalPaginas: number;
 	onCambioPagina: (pagina: number) => void;
 	onGestionarPermisos: (usuario: Usuario) => void;
 }
 
+const varianteRol = (roles: string[]) =>
+	roles.includes("ADMIN")
+		? "purple"
+		: roles.includes("MOD")
+			? "warning"
+			: "default";
+
 export function UsuariosTable({
-	usuarios,
+	pagina,
 	isLoading,
-	isError,
 	error,
-	paginaActual,
-	totalPaginas,
 	onCambioPagina,
 	onGestionarPermisos,
 }: UsuariosTableProps) {
-	if (isLoading) {
-		return (
-			<div className="flex flex-col items-center justify-center py-16 space-y-3">
-				<Spinner size="lg" className="text-indigo-500" />
-				<p className="text-sm text-slate-400">Cargando lista de usuarios...</p>
-			</div>
-		);
-	}
-
-	if (isError) {
-		const mensaje =
-			error instanceof Error
-				? error.message
-				: "No tienes permisos suficientes o el servidor no respondió.";
-
-		return (
-			<div className="flex items-center gap-3 rounded-xl border border-rose-900/40 bg-rose-950/20 p-4 text-rose-400">
-				<AlertCircle className="h-5 w-5 shrink-0" />
-				<div className="text-sm">
-					<p className="font-semibold">Error al cargar usuarios</p>
-					<p className="text-xs text-rose-300/80 mt-0.5">{mensaje}</p>
+	const columnas: Columna<Usuario>[] = [
+		{
+			cabecera: "ID",
+			celda: (u) => `#${u.id}`,
+			className: "font-mono text-xs text-tinta-tenue",
+		},
+		{
+			cabecera: "Usuario",
+			className: "font-medium text-tinta",
+			celda: (u) => (
+				<div className="flex items-center gap-2.5">
+					{u.avatarUrl ? (
+						<img
+							src={u.avatarUrl}
+							alt=""
+							className="h-8 w-8 rounded-full object-cover"
+						/>
+					) : (
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-elevada text-xs font-semibold text-indigo-400">
+							{u.nombre.charAt(0).toUpperCase()}
+						</div>
+					)}
+					<span>{u.nombre}</span>
 				</div>
-			</div>
-		);
-	}
-
-	if (!usuarios || usuarios.length === 0) {
-		return (
-			<div className="rounded-xl border border-slate-800 bg-slate-900/40 p-12 text-center">
-				<UserIcon className="mx-auto h-10 w-10 text-slate-500" />
-				<h4 className="mt-3 text-sm font-semibold text-slate-200">
-					No se encontraron usuarios
-				</h4>
-				<p className="mt-1 text-xs text-slate-400">
-					Intenta ajustar los filtros de búsqueda.
-				</p>
-			</div>
-		);
-	}
+			),
+		},
+		{ cabecera: "Correo", celda: (u) => u.email },
+		{
+			cabecera: "Rol",
+			celda: (u) => (
+				<Badge variant={varianteRol(u.roles)} className="gap-1">
+					<Shield className="h-3 w-3" />
+					{u.roles.join(", ")}
+				</Badge>
+			),
+		},
+		{
+			cabecera: "Estado",
+			celda: (u) => (
+				<Badge variant={u.isActivo ? "success" : "danger"}>
+					{u.isActivo ? "Activo" : "Inactivo"}
+				</Badge>
+			),
+		},
+		{
+			cabecera: <span className="sr-only">Acciones</span>,
+			className: "text-right",
+			celda: (u) => (
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => onGestionarPermisos(u)}
+				>
+					<KeyRound className="h-3.5 w-3.5" />
+					Permisos
+				</Button>
+			),
+		},
+	];
 
 	return (
-		<div className="space-y-4">
-			<div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40">
-				<div className="overflow-x-auto">
-					<table className="w-full text-left text-sm">
-						<thead className="border-b border-slate-800 bg-slate-900/90 text-xs uppercase tracking-wider text-slate-400">
-							<tr>
-								<th className="px-6 py-3.5">ID</th>
-								<th className="px-6 py-3.5">Usuario</th>
-								<th className="px-6 py-3.5">Correo</th>
-								<th className="px-6 py-3.5">Rol</th>
-								<th className="px-6 py-3.5">Estado</th>
-								<th className="px-6 py-3.5">
-									<span className="sr-only">Acciones</span>
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-slate-800/60">
-							{usuarios.map((usuario) => {
-								const varianteRol = usuario.roles.includes("ADMIN")
-									? "purple"
-									: usuario.roles.includes("MOD")
-										? "warning"
-										: "default";
-
-								return (
-									<tr
-										key={usuario.id}
-										className="hover:bg-slate-800/30 transition-colors"
-									>
-										<td className="px-6 py-4 font-mono text-xs text-slate-400">
-											#{usuario.id}
-										</td>
-										<td className="px-6 py-4 font-medium text-slate-200">
-											<div className="flex items-center gap-2.5">
-												<div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-indigo-400">
-													{usuario.nombre.charAt(0).toUpperCase()}
-												</div>
-												<span>{usuario.nombre}</span>
-											</div>
-										</td>
-										<td className="px-6 py-4 text-slate-300">
-											{usuario.email}
-										</td>
-										<td className="px-6 py-4">
-											<Badge variant={varianteRol} className="gap-1">
-												<Shield className="h-3 w-3" />
-												{usuario.roles.join(", ")}
-											</Badge>
-										</td>
-										<td className="px-6 py-4">
-											<Badge variant={usuario.isActivo ? "success" : "danger"}>
-												{usuario.isActivo ? "Activo" : "Inactivo"}
-											</Badge>
-										</td>
-										<td className="px-6 py-4 text-right">
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => onGestionarPermisos(usuario)}
-											>
-												<KeyRound className="h-3.5 w-3.5" />
-												Permisos
-											</Button>
-										</td>
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
-				</div>
-			</div>
-
-			{/* Paginación */}
-			<div className="flex items-center justify-between px-1">
-				<p className="text-xs text-slate-400">
-					Página{" "}
-					<span className="font-semibold text-slate-200">{paginaActual}</span>{" "}
-					de{" "}
-					<span className="font-semibold text-slate-200">
-						{Math.max(1, totalPaginas)}
-					</span>
-				</p>
-				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={paginaActual <= 1}
-						onClick={() => onCambioPagina(paginaActual - 1)}
-					>
-						<ChevronLeft className="h-4 w-4" />
-						Anterior
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={paginaActual >= totalPaginas}
-						onClick={() => onCambioPagina(paginaActual + 1)}
-					>
-						Siguiente
-						<ChevronRight className="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
-		</div>
+		<Tabla
+			etiqueta="Usuarios"
+			columnas={columnas}
+			datos={pagina}
+			clave={(u) => u.id}
+			onCambioPagina={onCambioPagina}
+			isLoading={isLoading}
+			error={error}
+			vacio={
+				<EmptyState
+					icono={UserIcon}
+					titulo="No se encontraron usuarios"
+					descripcion="Intenta ajustar los filtros de búsqueda."
+				/>
+			}
+		/>
 	);
 }

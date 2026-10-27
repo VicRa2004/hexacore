@@ -17,7 +17,7 @@ export function LoginPage() {
 					¿Olvidaste tu contraseña?
 				</Link>
 			</div>
-			<div className="mt-6 text-center text-xs text-slate-400">
+			<div className="mt-6 text-center text-xs text-tinta-tenue">
 				¿No tienes una cuenta?{" "}
 				<Link
 					to="/registro"

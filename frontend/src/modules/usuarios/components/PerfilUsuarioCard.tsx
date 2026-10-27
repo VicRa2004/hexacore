@@ -20,7 +20,7 @@ export function PerfilUsuarioCard() {
 	if (!usuario) {
 		return (
 			<Card>
-				<p className="text-sm text-slate-400">
+				<p className="text-sm text-tinta-tenue">
 					No hay información de sesión activa.
 				</p>
 			</Card>
@@ -93,40 +93,40 @@ export function PerfilUsuarioCard() {
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-4 pt-4 border-t border-slate-800/80">
+			<CardContent className="space-y-4 pt-4 border-t border-borde/80">
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
+						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
 							<Hash className="h-3.5 w-3.5" />
 							ID de Usuario
 						</div>
-						<p className="mt-1 text-sm font-semibold text-slate-100 font-mono">
+						<p className="mt-1 text-sm font-semibold text-tinta font-mono">
 							#{usuario.id}
 						</p>
 					</div>
 
-					<div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
+						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
 							<Mail className="h-3.5 w-3.5" />
 							Correo Electrónico
 						</div>
-						<p className="mt-1 text-sm font-semibold text-slate-100 truncate">
+						<p className="mt-1 text-sm font-semibold text-tinta truncate">
 							{usuario.email}
 						</p>
 					</div>
 
-					<div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
+						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
 							<Shield className="h-3.5 w-3.5" />
 							Nivel de Autorización
 						</div>
-						<p className="mt-1 text-sm font-semibold text-slate-100">
+						<p className="mt-1 text-sm font-semibold text-tinta">
 							{usuario.roles.join(", ")} (Control Basado en Permisos)
 						</p>
 					</div>
 
-					<div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
+						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
 							<CheckCircle className="h-3.5 w-3.5" />
 							Estado de Verificación
 						</div>

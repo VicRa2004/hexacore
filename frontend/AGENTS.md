@@ -47,9 +47,13 @@ frontend/src/
 │   ├── api/                        # Cliente Axios (client.ts) y tipos generados del OpenAPI (schema.gen.ts)
 │   ├── auth/                       # Store de sesión Zustand (store.ts) y tipos de usuario
 │   ├── components/
-│   │   ├── layout/                 # Layouts principales (MainLayout.tsx, AuthLayout.tsx)
-│   │   └── ui/                     # Primitivas accesibles y reutilizables (Button, Input, Card, Badge, Spinner)
-│   ├── router/                     # Configuración de QueryClient e instancia del router
+│   │   ├── ErrorBoundary.tsx       # Última red para errores fuera de las rutas
+│   │   ├── form/                   # useAppForm + campos conectados a TanStack Form
+│   │   ├── layout/                 # MainLayout, AuthLayout y SelectorTema
+│   │   └── ui/                     # Primitivas: Button, Input, Select, Checkbox, Card, Badge, Spinner,
+│   │                               #   Dialog, ConfirmDialog, Table (Tabla + Paginacion), EmptyState
+│   ├── router/                     # QueryClient, instancia del router y pantallas de error/404 (RouteFallbacks)
+│   ├── tema.ts                     # Tema claro/oscuro/sistema (data-tema en <html>)
 │   └── utils/                      # Utilidades transversales (cn.ts)
 │
 ├── modules/                        # Lógica de dominio modular
@@ -134,6 +138,28 @@ Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind 
 - Usar Tailwind CSS v4 y la utilidad `cn(...)` para combinar clases condicionales.
 - No crear estilos CSS tradicionales en hojas externas salvo reglas globales indispensables en `index.css`.
 - Los componentes de `core/components/ui/` deben ser accesibles, recibir `className` opcional y propagar props nativas de HTML de forma segura.
+- **Colores neutros = tokens semánticos** (definidos en `index.css`, cambian con el tema): `bg-fondo` (página), `bg-superficie` (tarjetas, inputs), `bg-elevada` (hover, chips), `border-borde` / `border-borde-fuerte`, `text-tinta` (títulos, texto principal), `text-tinta-suave` (etiquetas), `text-tinta-tenue` (ayuda, metadatos). **Prohibido `slate-*`, `text-white` o `bg-black` para neutros**: no se verían en tema claro. `text-white` solo sobre fondos de acento sólidos (`bg-indigo-600`).
+- **Acentos** (`indigo`, `rose`, `amber`, `emerald`) se escriben pensando en el tema oscuro (texto `-300/-400`, fondos `-950/x`); en claro `index.css` invierte esos tonos para mantener el contraste. Si usas otro tono o color, compruébalo en los dos temas.
+- **Tema:** `data-tema="claro|oscuro"` en `<html>`. El script de `index.html` lo pone antes de pintar y `core/tema.ts` (`useTema`, `cambiarTema`) lo cambia y lo guarda; «sistema» sigue a `prefers-color-scheme`. La variante `dark:` de Tailwind responde a ese atributo.
+- **Primitivas en vez de HTML suelto:** `Dialog` (`<dialog>` nativo: foco, Esc y fondo inerte) y `ConfirmDialog` en lugar de `window.confirm`; `Tabla` recibe una lista o directamente la página del backend (`{ datos, pagina, totalPaginas, totalElementos }`) y muestra carga, error, vacío (`EmptyState`) y `Paginacion`; `Select` y `Checkbox` nativos con etiqueta y error.
+
+### 5. Formularios
+- `useAppForm` (`core/components/form/useAppForm.ts`) en lugar de `useForm`: trae los campos ya cableados (valor, `onBlur`, error de Zod tras tocar el campo, `aria-invalid`/`aria-describedby`, id único).
+  ```tsx
+  const form = useAppForm({ defaultValues, validators: { onSubmit: schema }, onSubmit });
+  <form.AppForm>
+    <form.Formulario className="space-y-4">
+      <form.AppField name="email">{(campo) => <campo.CampoTexto label="Email" type="email" />}</form.AppField>
+      <form.BotonEnviar>Guardar</form.BotonEnviar>
+    </form.Formulario>
+  </form.AppForm>
+  ```
+- Campos: `CampoTexto`, `CampoSelect` (opciones como hijos), `CampoCheckbox`. `Formulario` llama a `handleSubmit` y se traga el rechazo (el toast lo da la mutación); `BotonEnviar` se bloquea mientras `onSubmit` está en curso. Un campo nuevo se añade en `campos.tsx` y se registra en `useAppForm.ts`.
+- Un CRUD nuevo no se escribe a mano: `pnpm gen:module <nombre>` genera también su frontend (ver skill `crear-modulo` del backend).
+
+### 6. Errores de render
+- Errores dentro de una ruta: `DefaultErrorComponent` (con el layout intacto y «Reintentar»). Rutas inexistentes: `DefaultNotFoundComponent`. Ambos en `core/router/RouteFallbacks.tsx`.
+- Fuera de las rutas (providers, el propio router): `core/components/ErrorBoundary.tsx`, sin hooks del router ni primitivas.
 
 ---
 

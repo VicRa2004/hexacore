@@ -12,7 +12,7 @@ export function Badge({
 	...props
 }: BadgeProps) {
 	const variants = {
-		default: "bg-slate-800 text-slate-300 border-slate-700",
+		default: "bg-elevada text-tinta-suave border-borde-fuerte",
 		success: "bg-emerald-950/80 text-emerald-400 border-emerald-800/60",
 		warning: "bg-amber-950/80 text-amber-400 border-amber-800/60",
 		danger: "bg-rose-950/80 text-rose-400 border-rose-800/60",

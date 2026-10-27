@@ -9,7 +9,7 @@ export function RegistroPage() {
 			subtitle="Únete a la plataforma completando tus datos"
 		>
 			<RegistroForm />
-			<div className="mt-6 text-center text-xs text-slate-400">
+			<div className="mt-6 text-center text-xs text-tinta-tenue">
 				¿Ya tienes una cuenta?{" "}
 				<Link
 					to="/login"

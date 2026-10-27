@@ -1,7 +1,5 @@
-import { useForm } from "@tanstack/react-form";
 import { Plus } from "lucide-react";
-import { Button } from "@/core/components/ui/Button";
-import { Input } from "@/core/components/ui/Input";
+import { useAppForm } from "@/core/components/form/useAppForm";
 import { useCrearRolMutation } from "../hooks/useRolesMutation";
 import { type CrearRolInput, crearRolSchema } from "../schemas/rolSchemas";
 
@@ -9,7 +7,7 @@ import { type CrearRolInput, crearRolSchema } from "../schemas/rolSchemas";
 export function CrearRolForm() {
 	const crear = useCrearRolMutation();
 
-	const form = useForm({
+	const form = useAppForm({
 		defaultValues: { nombre: "", descripcion: "" } as CrearRolInput,
 		validators: { onSubmit: crearRolSchema },
 		onSubmit: async ({ value, formApi }) => {
@@ -23,46 +21,21 @@ export function CrearRolForm() {
 	});
 
 	return (
-		<form
-			onSubmit={(e) => {
-				e.preventDefault();
-				e.stopPropagation();
-				form.handleSubmit().catch(() => {
-					// El toast de error ya lo muestra la mutación.
-				});
-			}}
-			className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-start"
-		>
-			<form.Field name="nombre">
-				{(field) => (
-					<Input
-						id="nuevo-rol-nombre"
-						label="Nombre"
-						placeholder="SOPORTE"
-						value={field.state.value}
-						onBlur={field.handleBlur}
-						onChange={(e) => field.handleChange(e.target.value)}
-						error={field.state.meta.errors[0]?.message}
-					/>
-				)}
-			</form.Field>
-			<form.Field name="descripcion">
-				{(field) => (
-					<Input
-						id="nuevo-rol-descripcion"
-						label="Descripción"
-						placeholder="Opcional"
-						value={field.state.value}
-						onBlur={field.handleBlur}
-						onChange={(e) => field.handleChange(e.target.value)}
-						error={field.state.meta.errors[0]?.message}
-					/>
-				)}
-			</form.Field>
-			<Button type="submit" className="sm:mt-6" isLoading={crear.isPending}>
-				<Plus className="h-4 w-4" />
-				Crear rol
-			</Button>
-		</form>
+		<form.AppForm>
+			<form.Formulario className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-start">
+				<form.AppField name="nombre">
+					{(campo) => <campo.CampoTexto label="Nombre" placeholder="SOPORTE" />}
+				</form.AppField>
+				<form.AppField name="descripcion">
+					{(campo) => (
+						<campo.CampoTexto label="Descripción" placeholder="Opcional" />
+					)}
+				</form.AppField>
+				<form.BotonEnviar className="sm:mt-6">
+					<Plus className="h-4 w-4" />
+					Crear rol
+				</form.BotonEnviar>
+			</form.Formulario>
+		</form.AppForm>
 	);
 }

@@ -1,3 +1,4 @@
+import { Checkbox } from "@/core/components/ui/Checkbox";
 import type { PermisoDto } from "../api/rolesApi";
 import { agruparPorRecurso } from "../utils/agruparPorRecurso";
 
@@ -18,25 +19,19 @@ export function PermisosChecklist({
 			{agruparPorRecurso(permisos).map(([recurso, delRecurso]) => (
 				<fieldset
 					key={recurso}
-					className="rounded-lg border border-slate-800 bg-slate-950/40 p-3"
+					className="rounded-lg border border-borde bg-fondo/40 p-3"
 				>
-					<legend className="px-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+					<legend className="px-1 text-xs font-semibold uppercase tracking-wider text-tinta-tenue">
 						{recurso}
 					</legend>
 					<div className="flex flex-wrap gap-x-4 gap-y-2">
 						{delRecurso.map((permiso) => (
-							<label
+							<Checkbox
 								key={permiso.id}
-								className="flex items-center gap-2 text-sm text-slate-200 cursor-pointer"
-							>
-								<input
-									type="checkbox"
-									className="h-4 w-4 accent-indigo-500"
-									checked={seleccionados.has(permiso.id)}
-									onChange={() => onToggle(permiso.id)}
-								/>
-								{permiso.accion}
-							</label>
+								label={permiso.accion}
+								checked={seleccionados.has(permiso.id)}
+								onChange={() => onToggle(permiso.id)}
+							/>
 						))}
 					</div>
 				</fieldset>

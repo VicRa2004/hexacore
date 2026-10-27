@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Save, Trash2 } from "lucide-react";
 import { Button } from "@/core/components/ui/Button";
 import { Card } from "@/core/components/ui/Card";
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { Input } from "@/core/components/ui/Input";
 import type { PermisoDto, RolDto } from "../api/rolesApi";
 import {
@@ -42,11 +43,7 @@ export function RolCard({ rol, permisos }: RolCardProps) {
 			},
 		});
 
-	const borrar = () => {
-		if (window.confirm(`¿Eliminar el rol ${rol.nombre}?`)) {
-			eliminar.mutate(rol.id);
-		}
-	};
+	const [confirmando, setConfirmando] = useState(false);
 
 	return (
 		<Card className="space-y-4">
@@ -75,7 +72,7 @@ export function RolCard({ rol, permisos }: RolCardProps) {
 				<Button
 					variant="ghost"
 					size="sm"
-					onClick={borrar}
+					onClick={() => setConfirmando(true)}
 					isLoading={eliminar.isPending}
 					className="text-rose-400 hover:bg-rose-950/20 hover:text-rose-300"
 				>
@@ -92,6 +89,19 @@ export function RolCard({ rol, permisos }: RolCardProps) {
 					Guardar
 				</Button>
 			</div>
+
+			<ConfirmDialog
+				abierto={confirmando}
+				titulo={`¿Eliminar el rol ${rol.nombre}?`}
+				mensaje="Sus permisos dejan de aplicarse. No se puede eliminar si algún usuario lo tiene."
+				textoConfirmar="Eliminar"
+				peligroso
+				isLoading={eliminar.isPending}
+				onCancelar={() => setConfirmando(false)}
+				onConfirmar={() =>
+					eliminar.mutate(rol.id, { onSettled: () => setConfirmando(false) })
+				}
+			/>
 		</Card>
 	);
 }
