@@ -6,6 +6,10 @@ import { app } from "@/core/shared/infrastructure/http/server";
 
 export const PASSWORD = "SecurePass123!";
 
+// El rate limit lee X-Forwarded-For: `login` da una IP propia a cada petición.
+process.env.TRUST_PROXY = "true";
+let ultimaIp = 0;
+
 /**
  * Vacía los usuarios y, en cascada, sus roles, permisos directos y refresh tokens.
  * Conserva el catálogo de roles y permisos que carga el seed.
@@ -33,6 +37,7 @@ export async function api(
 		body?: unknown;
 		token?: string;
 		cookie?: string;
+		ip?: string;
 	} = {},
 ): Promise<Response> {
 	const headers: Record<string, string> = {
@@ -40,6 +45,7 @@ export async function api(
 	};
 	if (init.token) headers.Authorization = `Bearer ${init.token}`;
 	if (init.cookie) headers.Cookie = init.cookie;
+	if (init.ip) headers["X-Forwarded-For"] = init.ip;
 
 	return app.request(path, {
 		method: init.method ?? "GET",
@@ -57,12 +63,13 @@ export function refreshCookie(res: Response): string {
 	return cookie.split(";")[0] as string;
 }
 
-// shortcut: el rate limit de /login (5 cada 15 min por IP) es en memoria y compartido
-// por todos los e2e del proceso; si se superan, darles una IP distinta por petición.
+/** Login de preparación: con IP propia para no gastar el cupo de /login de los tests de auth. */
 export async function login(email: string): Promise<string> {
+	ultimaIp++;
 	const res = await api("/api/auth/login", {
 		method: "POST",
 		body: { email, password: PASSWORD },
+		ip: `10.0.0.${ultimaIp}`,
 	});
 	if (res.status !== 200) throw new Error(`Login fallido: ${res.status}`);
 	return ((await res.json()) as { accessToken: string }).accessToken;
