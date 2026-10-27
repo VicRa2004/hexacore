@@ -13,7 +13,9 @@ pnpm gen:module producto   # camelCase y en singular
 
 Crea `src/modules/producto/` con CRUD completo (entidad, error, repo + Prisma, DTOs, mapper, 5 casos de uso con specs, un controlador, schemas, router con OpenAPI y permisos `productos:*` y `module.ts`), lo añade a `src/modules.ts`, añade un modelo `Producto` mínimo a `prisma/schema.prisma` y ejecuta `prisma generate`. Compila y pasa tests, knip y `check:architecture` sin tocar nada.
 
-Después, personalizar: campos de la entidad/modelo, `pnpm db:migrate`, permisos en `prisma/seed.ts` y `pnpm gen:api`. Las plantillas viven en `backend/scripts/gen-module.ts` (su test, `gen-module.spec.ts`, comprueba que el módulo generado compila). El resto de esta guía explica qué genera y cómo ampliarlo a mano.
+Después regenera el contrato (`pnpm gen:api`) y crea el frontend desde él (`scripts/gen-module-web.ts`): en `frontend/src/modules/productos/` `api/`, hooks de query y mutación, schema Zod del formulario, `ProductoForm` (con `useAppForm`), `ProductosTable` (con `Tabla` y paginación) y `ProductosPage` (alta/edición en `Dialog`, borrado con `ConfirmDialog`), más la ruta `routes/_authenticated/productos.tsx`. `--solo-backend` se salta el frontend; `pnpm gen:module:web producto` lo genera más tarde (tras cambiar campos: borrar la carpeta y volver a generar, o editar a mano).
+
+Personalizar: campos de la entidad/modelo, `pnpm db:migrate`, permisos en `prisma/seed.ts`, `pnpm gen:api` y el enlace en `MainLayout.tsx`. El formulario sale de las propiedades del cuerpo del POST (texto, número, booleano y enum; arrays y objetos quedan para hacerlos a mano) y la tabla de las de `ProductoDto`; al editar no se muestran ni se envían los campos que el DTO no devuelve, para no pisarlos. Plantillas en `backend/scripts/gen-module.ts` y `scripts/gen-module-web.ts`; `gen-module.spec.ts` genera las dos mitades en una copia temporal y comprueba que compilan. El resto de esta guía explica qué genera y cómo ampliarlo a mano.
 
 ## Estructura base
 
