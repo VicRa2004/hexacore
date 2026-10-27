@@ -29,17 +29,23 @@ export const usuarioModule: AppModule = {
 		const hasher = container.get(USUARIO_TOKENS.PasswordHasher);
 		// En mount y no en register: el bus real lo registra el módulo `eventos`, que puede ir después.
 		const eventBus = container.get(TOKENS.EventBus);
+		const uow = container.get(TOKENS.UnitOfWork);
 		new EnviarEmailBienvenida(eventBus).suscribir();
 
 		const router = new UsuarioRouter(
 			container.get(AUTH_TOKENS.AuthMiddleware),
 			container.get(TOKENS.PermisoGuard),
 			new UsuarioController({
-				crear: new CrearUsuarioUseCase(usuarios, hasher, eventBus),
+				crear: new CrearUsuarioUseCase(usuarios, hasher, eventBus, uow),
 				obtenerTodos: new ObtenerUsuariosUseCase(usuarios),
 				obtenerUno: new ObtenerUsuarioUseCase(usuarios),
-				actualizar: new ActualizarUsuarioUseCase(usuarios, hasher),
-				eliminar: new EliminarUsuarioUseCase(usuarios),
+				actualizar: new ActualizarUsuarioUseCase(
+					usuarios,
+					hasher,
+					eventBus,
+					uow,
+				),
+				eliminar: new EliminarUsuarioUseCase(usuarios, eventBus, uow),
 			}),
 		);
 		app.route("/api/usuarios", router.router);

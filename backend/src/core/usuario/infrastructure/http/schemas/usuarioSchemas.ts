@@ -54,6 +54,10 @@ export const usuarioDtoSchema = z
 		isActivo: z.boolean().openapi({ example: true }),
 		roles: z.array(z.string()).openapi({ example: ["USUARIO"] }),
 		emailVerificado: z.boolean().openapi({ example: true }),
+		avatarUrl: z
+			.string()
+			.nullable()
+			.openapi({ example: "/api/avatares/1?v=avatares%2F1-abc.png" }),
 	})
 	.openapi("UsuarioDto");
 

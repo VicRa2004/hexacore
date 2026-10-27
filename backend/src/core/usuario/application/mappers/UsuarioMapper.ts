@@ -10,6 +10,10 @@ export const UsuarioMapper = {
 			isActivo: usuario.getIsActivo(),
 			roles: usuario.getRoles(),
 			emailVerificado: usuario.getEmailVerificado(),
+			// La clave cambia con cada subida: la URL nueva invalida la caché del navegador.
+			avatarUrl: usuario.getAvatar()
+				? `/api/avatares/${usuario.getId()}?v=${encodeURIComponent(usuario.getAvatar() ?? "")}`
+				: null,
 		};
 	},
 };

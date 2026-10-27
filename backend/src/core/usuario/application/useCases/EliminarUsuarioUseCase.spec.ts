@@ -14,7 +14,11 @@ describe("EliminarUsuarioUseCase", () => {
 	beforeEach(() => {
 		mockUsuarioRepository.buscarPorId.mockClear();
 		mockUsuarioRepository.eliminar.mockClear();
-		useCase = new EliminarUsuarioUseCase(mockUsuarioRepository as never);
+		useCase = new EliminarUsuarioUseCase(
+			mockUsuarioRepository as never,
+			{ publishAll: mock(async () => {}) } as never,
+			{ ejecutar: (trabajo: () => Promise<unknown>) => trabajo() } as never,
+		);
 	});
 
 	it("debería borrar el usuario si existe", async () => {

@@ -10,5 +10,6 @@ export interface UsuarioRepository {
 	crear: (data: Usuario) => Promise<Usuario>;
 	actualizar: (data: Usuario) => Promise<Usuario>;
 
+	/** Borrado lógico (`deletedAt`): deja de aparecer en todas las búsquedas. */
 	eliminar: (id: number) => Promise<void>;
 }

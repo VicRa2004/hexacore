@@ -15,6 +15,7 @@ interface PrismaUsuarioRecord {
 	password: string;
 	isActivo: boolean;
 	emailVerificadoEn: Date | null;
+	avatar: string | null;
 	roles: {
 		rol: { nombre: string };
 	}[];
@@ -34,6 +35,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 			raw.id,
 			raw.roles.map(({ rol }) => rol.nombre),
 			raw.emailVerificadoEn !== null,
+			raw.avatar,
 		);
 	}
 
@@ -46,6 +48,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 		const skip = (pagina - 1) * limite;
 
 		const where = {
+			deletedAt: null,
 			...(email && {
 				email: { contains: email, mode: "insensitive" as const },
 			}),
@@ -76,7 +79,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 	 */
 	async buscarPorId(id: number): Promise<Usuario | null> {
 		const registro = await prisma.usuario.findUnique({
-			where: { id },
+			where: { id, deletedAt: null },
 			include: { roles: { include: { rol: true } } },
 		});
 
@@ -90,7 +93,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 	 */
 	async buscarPorEmail(email: string): Promise<Usuario | null> {
 		const registro = await prisma.usuario.findUnique({
-			where: { email },
+			where: { email, deletedAt: null },
 			include: { roles: { include: { rol: true } } },
 		});
 
@@ -135,6 +138,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 				email: data.getEmail(),
 				password: data.getPasswordHash(),
 				isActivo: data.getIsActivo(),
+				avatar: data.getAvatar(),
 			},
 			include: { roles: { include: { rol: true } } },
 		});
@@ -143,11 +147,13 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 	}
 
 	/**
-	 * Elimina un usuario por su ID.
+	 * Borrado lógico: marca `deletedAt` y desactiva. Las filas siguen en la BD
+	 * (y su email sigue ocupado), pero ninguna consulta del repositorio las devuelve.
 	 */
 	async eliminar(id: number): Promise<void> {
-		await prisma.usuario.delete({
+		await prisma.usuario.update({
 			where: { id },
+			data: { deletedAt: new Date(), isActivo: false },
 		});
 	}
 }

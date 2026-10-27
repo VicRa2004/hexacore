@@ -6,12 +6,14 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 import { UsuarioMapper } from "../mappers/UsuarioMapper";
 import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
+import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
 
 export class CrearUsuarioUseCase {
 	constructor(
 		private readonly usuarioRepository: UsuarioRepository,
 		private readonly passwordHasher: PasswordHasher,
 		private readonly eventBus: EventBus,
+		private readonly uow: UnitOfWork,
 	) {}
 
 	async ejecutar(dto: CrearUsuarioDto): Promise<UsuarioDto> {
@@ -24,11 +26,14 @@ export class CrearUsuarioUseCase {
 
 		const passwordHash = await this.passwordHasher.hash(dto.password);
 		const usuario = Usuario.crear(dto.nombre, dto.email, passwordHash);
-		const usuarioCreado = await this.usuarioRepository.crear(usuario);
 
-		usuarioCreado.agregarEventoCreado();
-
-		await this.eventBus.publishAll(usuarioCreado.pullDomainEvents());
+		// Usuario y evento en la misma transacción: con el outbox, o ambos o ninguno.
+		const usuarioCreado = await this.uow.ejecutar(async () => {
+			const creado = await this.usuarioRepository.crear(usuario);
+			creado.agregarEventoCreado();
+			await this.eventBus.publishAll(creado.pullDomainEvents());
+			return creado;
+		});
 
 		return UsuarioMapper.toDto(usuarioCreado);
 	}

@@ -25,6 +25,11 @@ model Usuario {
   intentosFallidos  Int       @default(0) @map("usr_intentos_fallidos")
   bloqueadoHasta    DateTime? @map("usr_bloqueado_hasta")
 
+  /// Clave del avatar en el almacenamiento de archivos
+  avatar    String?   @map("usr_avatar") @db.VarChar(255)
+  /// Borrado lógico: los repositorios ignoran las filas con fecha
+  deletedAt DateTime? @map("deleted_at")
+
   // Relaciones N-a-N gestionadas por tablas intermedias explícitas
   roles            UsuarioRol[]
   permisosDirectos UsuarioPermiso[]
@@ -147,4 +152,43 @@ model TokenCuenta {
 
   @@index([usuarioId, tipo])
   @@map("token_cuenta")
+}
+
+// ─────────────────────────────────────────────
+//  5. Outbox de eventos (módulo opcional eventos-outbox)
+// ─────────────────────────────────────────────
+
+/// Eventos de dominio guardados en la misma transacción que los datos; una tarea los entrega.
+model EventoOutbox {
+  id             Int       @id @default(autoincrement()) @map("evo_id")
+  nombre         String    @map("evo_nombre") @db.VarChar(150)
+  datos          Json      @map("evo_datos")
+  ocurridoEn     DateTime  @map("evo_ocurrido_en")
+  requestId      String?   @map("evo_request_id") @db.VarChar(100)
+  usuarioId      Int?      @map("evo_usuario_id")
+  procesadoEn    DateTime? @map("evo_procesado_en")
+  reservadoHasta DateTime? @map("evo_reservado_hasta")
+  intentos       Int       @default(0) @map("evo_intentos")
+  ultimoError    String?   @map("evo_ultimo_error") @db.Text
+
+  @@index([procesadoEn, id])
+  @@map("evento_outbox")
+}
+
+// ─────────────────────────────────────────────
+//  6. Auditoría (módulo opcional auditoria)
+// ─────────────────────────────────────────────
+
+/// Un registro por evento de dominio. Sin FK a usuario: el rastro sobrevive al borrado.
+model Auditoria {
+  id         Int      @id @default(autoincrement()) @map("aud_id")
+  evento     String   @map("aud_evento") @db.VarChar(150)
+  datos      Json     @map("aud_datos")
+  usuarioId  Int?     @map("aud_usuario_id")
+  requestId  String?  @map("aud_request_id") @db.VarChar(100)
+  ocurridoEn DateTime @map("aud_ocurrido_en")
+
+  @@index([ocurridoEn])
+  @@index([evento])
+  @@map("auditoria")
 }

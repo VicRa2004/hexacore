@@ -5,4 +5,5 @@ export interface UsuarioDto {
 	isActivo: boolean;
 	roles: string[];
 	emailVerificado: boolean;
+	avatarUrl: string | null;
 }

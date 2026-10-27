@@ -23,6 +23,8 @@ describe("ActualizarUsuarioUseCase", () => {
 		useCase = new ActualizarUsuarioUseCase(
 			mockUsuarioRepository as never,
 			mockPasswordHasher as never,
+			{ publishAll: mock(async () => {}) } as never,
+			{ ejecutar: (trabajo: () => Promise<unknown>) => trabajo() } as never,
 		);
 	});
 

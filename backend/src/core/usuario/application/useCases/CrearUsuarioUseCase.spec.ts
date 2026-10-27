@@ -36,6 +36,7 @@ describe("CrearUsuarioUseCase", () => {
 			mockUsuarioRepository as never,
 			mockPasswordHasher as never,
 			mockEventBus as never,
+			{ ejecutar: (trabajo: () => Promise<unknown>) => trabajo() } as never,
 		);
 	});
 
