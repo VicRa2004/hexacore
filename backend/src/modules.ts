@@ -2,6 +2,7 @@ import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
 import { usuarioModule } from "@/core/usuario/module";
 import { authModule } from "@/modules/auth/module";
 import { autorizacionModule } from "@/modules/autorizacion/module";
+import { auditoriaModule } from "@/modules/auditoria/module";
 import { eventosModule } from "@/modules/eventos/module";
 
 /**
@@ -13,4 +14,5 @@ export const modules: AppModule[] = [
 	authModule,
 	autorizacionModule,
 	eventosModule,
+	auditoriaModule,
 ];

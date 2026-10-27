@@ -36,6 +36,7 @@ async function main() {
 		{ recurso: "roles", accion: "eliminar" },
 		{ recurso: "asignaciones", accion: "leer" },
 		{ recurso: "asignaciones", accion: "actualizar" },
+		{ recurso: "auditoria", accion: "leer" },
 	];
 
 	for (const p of datosPermisos) {
@@ -129,7 +130,7 @@ async function main() {
 		"✅ Usuarios de prueba creados (CONTRASEÑA PARA TODOS: SecurePass123!)",
 	);
 	console.log(
-		"   - admin@dev.com (ADMIN) → todos los permisos (usuarios, permisos, roles y asignaciones)",
+		"   - admin@dev.com (ADMIN) → todos los permisos (usuarios, permisos, roles, asignaciones y auditoría)",
 	);
 	console.log("   - mod@dev.com   (MOD)   → crear, leer, actualizar");
 	console.log("   - usuario@dev.com  (USUARIO)  → solo leer");
