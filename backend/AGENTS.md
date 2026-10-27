@@ -90,6 +90,7 @@ Cada módulo tiene un `module.ts` que exporta un `AppModule` (`src/core/shared/i
 
 - **Núcleo (siempre presentes):** `core/usuario`, `modules/auth`.
 - **Opcionales:** `modules/autorizacion`, `modules/eventos`.
+- **`autorizacion` expone:** `/api/permisos` (CRUD + permisos efectivos), `/api/roles` (CRUD de roles con sus permisos; no se borra un rol con usuarios) y `/api/asignaciones/usuarios/{id}` (roles y permisos directos del usuario, reemplazo completo). Permisos: `roles:*` y `asignaciones:leer|actualizar`. Los roles cambian en el JWT al renovar el token; los permisos se consultan en BD en cada petición.
 - **Permisos sin `autorizacion`:** las rutas usan el contrato `PermisoGuard` (`TOKENS.PermisoGuard`, en `core/shared/infrastructure/http/permisoGuard.ts`). El núcleo registra `PermitirAutenticadoGuard` (solo exige estar autenticado) y `autorizacion` lo sustituye por `RequierePermisoMiddleware` al registrarse. Sin `autorizacion`, **cualquier usuario autenticado** pasa los `requierePermiso`.
 - **Eventos sin `eventos`:** los casos de uso publican en `TOKENS.EventBus` y los módulos se suscriben en su `mount` (no en `register`: el bus real puede registrarse después). El núcleo registra `NoopEventBus` (no entrega nada) y `eventos` lo sustituye por `InMemoryEventBus`. Quitar `eventos` = borrar su carpeta y su línea en `src/modules.ts`; no hay schema ni casos de uso que tocar. Añadirlo = lo inverso.
 
@@ -102,7 +103,7 @@ Ejemplo con `autorizacion` (probado: `pnpm verify` pasa tras estos pasos):
 3. **Schema:** borrar sus modelos y las relaciones inversas en otros modelos de `prisma/schema.prisma`. Para `autorizacion`: `Permiso`, `RolPermiso`, `UsuarioPermiso`, `Usuario.permisosDirectos` y `Rol.permisos` (`Rol` y `UsuarioRol` son del núcleo: los roles van en el usuario y en el JWT).
 4. **Migración:** `pnpm db:migrate` (crea una migración nueva que elimina las tablas) y `pnpm db:generate`.
 5. **Seed / scripts:** quitar lo que use esos modelos en `prisma/seed.ts` y `scripts/` (para `autorizacion`: secciones 2 y 3 del seed, permisos y su asignación a roles).
-6. **Frontend:** quitar sus rutas en `frontend/src/routes/`, sus enlaces en `MainLayout.tsx` y su carpeta en `frontend/src/modules/` (ver `frontend/AGENTS.md`). `autorizacion` no tiene UI hoy.
+6. **Frontend:** quitar sus rutas en `frontend/src/routes/`, sus enlaces en `MainLayout.tsx` y su carpeta en `frontend/src/modules/` (ver `frontend/AGENTS.md`). Para `autorizacion`: `modules/roles/`, `routes/_authenticated/roles.tsx`, el enlace «Roles» y el botón «Permisos» de `UsuariosTable` con su `AsignacionUsuarioPanel` en `UsuariosPage`.
 7. **Contrato API:** `pnpm gen:api` y commitear `schema.gen.ts`.
 8. **Cierre:** `pnpm verify`.
 

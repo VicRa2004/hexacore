@@ -7,13 +7,26 @@ import { ObtenerPermisosUseCase } from "./application/useCases/ObtenerPermisosUs
 import { ObtenerPermisoUseCase } from "./application/useCases/ObtenerPermisoUseCase";
 import { ObtenerPermisosUsuarioUseCase } from "./application/useCases/ObtenerPermisosUsuarioUseCase";
 import { ActualizarPermisoUseCase } from "./application/useCases/ActualizarPermisoUseCase";
+import { ActualizarAsignacionUsuarioUseCase } from "./application/useCases/ActualizarAsignacionUsuarioUseCase";
+import { ActualizarRolUseCase } from "./application/useCases/ActualizarRolUseCase";
+import { CrearRolUseCase } from "./application/useCases/CrearRolUseCase";
+import { EliminarRolUseCase } from "./application/useCases/EliminarRolUseCase";
+import { ObtenerAsignacionUsuarioUseCase } from "./application/useCases/ObtenerAsignacionUsuarioUseCase";
+import { ObtenerRolesUseCase } from "./application/useCases/ObtenerRolesUseCase";
+import { ObtenerRolUseCase } from "./application/useCases/ObtenerRolUseCase";
+import { AsignacionController } from "./infrastructure/http/controllers/AsignacionController";
+import { RolController } from "./infrastructure/http/controllers/RolController";
 import { PermisoController } from "./infrastructure/http/controllers/PermisoController";
 import { RequierePermisoMiddleware } from "./infrastructure/http/middlewares/RequierePermisoMiddleware";
+import { AsignacionRouter } from "./infrastructure/http/routes/AsignacionRouter";
 import { PermisoRouter } from "./infrastructure/http/routes/PermisoRouter";
+import { RolRouter } from "./infrastructure/http/routes/RolRouter";
 import { PrismaAutorizacionRepository } from "./infrastructure/repository/PrismaAutorizacionRepository";
+import { PrismaRolRepository } from "./infrastructure/repository/PrismaRolRepository";
 
-// Interno del módulo: no se comparte, así que no pasa por el contenedor.
+// Internos del módulo: no se comparten, así que no pasan por el contenedor.
 const repo = new PrismaAutorizacionRepository();
+const rolRepo = new PrismaRolRepository();
 const obtenerPermisosUsuario = new ObtenerPermisosUsuarioUseCase(repo);
 
 export const autorizacionModule: AppModule = {
@@ -25,9 +38,12 @@ export const autorizacionModule: AppModule = {
 		);
 	},
 	mount(app, container) {
+		const auth = container.get(AUTH_TOKENS.AuthMiddleware);
+		const guard = container.get(TOKENS.PermisoGuard);
+
 		const router = new PermisoRouter(
-			container.get(AUTH_TOKENS.AuthMiddleware),
-			container.get(TOKENS.PermisoGuard),
+			auth,
+			guard,
 			new PermisoController({
 				obtenerTodos: new ObtenerPermisosUseCase(repo),
 				obtenerUno: new ObtenerPermisoUseCase(repo),
@@ -38,5 +54,28 @@ export const autorizacionModule: AppModule = {
 			}),
 		);
 		app.route("/api/permisos", router.router);
+
+		const rolRouter = new RolRouter(
+			auth,
+			guard,
+			new RolController({
+				obtenerTodos: new ObtenerRolesUseCase(rolRepo),
+				obtenerUno: new ObtenerRolUseCase(rolRepo),
+				crear: new CrearRolUseCase(rolRepo),
+				actualizar: new ActualizarRolUseCase(rolRepo),
+				eliminar: new EliminarRolUseCase(rolRepo),
+			}),
+		);
+		app.route("/api/roles", rolRouter.router);
+
+		const asignacionRouter = new AsignacionRouter(
+			auth,
+			guard,
+			new AsignacionController({
+				obtener: new ObtenerAsignacionUsuarioUseCase(rolRepo),
+				actualizar: new ActualizarAsignacionUsuarioUseCase(rolRepo),
+			}),
+		);
+		app.route("/api/asignaciones", asignacionRouter.router);
 	},
 };
