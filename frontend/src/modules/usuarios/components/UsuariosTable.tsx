@@ -6,6 +6,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	AlertCircle,
+	KeyRound,
 	Shield,
 	User as UserIcon,
 } from "lucide-react";
@@ -18,6 +19,7 @@ interface UsuariosTableProps {
 	paginaActual: number;
 	totalPaginas: number;
 	onCambioPagina: (pagina: number) => void;
+	onGestionarPermisos: (usuario: Usuario) => void;
 }
 
 export function UsuariosTable({
@@ -28,6 +30,7 @@ export function UsuariosTable({
 	paginaActual,
 	totalPaginas,
 	onCambioPagina,
+	onGestionarPermisos,
 }: UsuariosTableProps) {
 	if (isLoading) {
 		return (
@@ -81,6 +84,9 @@ export function UsuariosTable({
 								<th className="px-6 py-3.5">Correo</th>
 								<th className="px-6 py-3.5">Rol</th>
 								<th className="px-6 py-3.5">Estado</th>
+								<th className="px-6 py-3.5">
+									<span className="sr-only">Acciones</span>
+								</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-800/60">
@@ -120,6 +126,16 @@ export function UsuariosTable({
 											<Badge variant={usuario.isActivo ? "success" : "danger"}>
 												{usuario.isActivo ? "Activo" : "Inactivo"}
 											</Badge>
+										</td>
+										<td className="px-6 py-4 text-right">
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => onGestionarPermisos(usuario)}
+											>
+												<KeyRound className="h-3.5 w-3.5" />
+												Permisos
+											</Button>
 										</td>
 									</tr>
 								);

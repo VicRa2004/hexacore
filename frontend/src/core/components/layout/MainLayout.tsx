@@ -4,6 +4,7 @@ import {
 	Hexagon,
 	LayoutDashboard,
 	Users,
+	ShieldCheck,
 	UserCheck,
 	LogOut,
 } from "lucide-react";
@@ -69,6 +70,13 @@ export function MainLayout({ children }: MainLayoutProps) {
 								>
 									<Users className="h-4 w-4" />
 									Usuarios
+								</Link>
+								<Link
+									to="/roles"
+									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
+								>
+									<ShieldCheck className="h-4 w-4" />
+									Roles
 								</Link>
 								<Link
 									to="/perfil"

@@ -59,6 +59,11 @@ frontend/src/
 │   │   ├── pages/                  # Vistas del módulo (LoginPage.tsx, RegistroPage.tsx)
 │   │   └── schemas/                # Validaciones Zod (authSchemas.ts)
 │   │
+│   ├── roles/                      # Roles, permisos y su asignación a usuarios (módulo backend `autorizacion`)
+│   │   ├── api/ hooks/ schemas/ utils/
+│   │   ├── components/             # RolCard, CrearRolForm, PermisosChecklist, AsignacionUsuarioPanel
+│   │   └── pages/                  # RolesPage.tsx
+│   │
 │   └── usuarios/                      # Módulo de Usuarios
 │       ├── api/                    # Llamadas a la API de usuarios (usuariosApi.ts)
 │       ├── components/             # Tablas y tarjetas (UsuariosTable.tsx, PerfilUsuarioCard.tsx)
@@ -74,6 +79,7 @@ frontend/src/
 │   └── _authenticated/             # Rutas hijas protegidas
 │       ├── dashboard.tsx           # Vista /dashboard
 │       ├── usuarios.tsx               # Vista /usuarios
+│       ├── roles.tsx               # Vista /roles
 │       └── perfil.tsx              # Vista /perfil
 │
 ├── routeTree.gen.ts                # Árbol de rutas generado automáticamente por TanStack Router

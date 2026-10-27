@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useUsuariosQuery } from "../hooks/useUsuariosQuery";
 import { UsuariosTable } from "../components/UsuariosTable";
 import { Input } from "@/core/components/ui/Input";
+import type { Usuario } from "@/core/auth/types";
+import { AsignacionUsuarioPanel } from "@/modules/roles/components/AsignacionUsuarioPanel";
 import { Search, Users as UsersIcon } from "lucide-react";
 
 export function UsuariosPage() {
 	const [pagina, setPagina] = useState(1);
 	const [emailBusqueda, setEmailBusqueda] = useState("");
+	const [seleccionado, setSeleccionado] = useState<Usuario | null>(null);
 
 	const { data, isLoading, isError, error } = useUsuariosQuery({
 		pagina,
@@ -58,7 +61,16 @@ export function UsuariosPage() {
 				paginaActual={pagina}
 				totalPaginas={data?.totalPaginas ?? 1}
 				onCambioPagina={setPagina}
+				onGestionarPermisos={setSeleccionado}
 			/>
+
+			{seleccionado && (
+				<AsignacionUsuarioPanel
+					key={seleccionado.id}
+					usuario={seleccionado}
+					onCerrar={() => setSeleccionado(null)}
+				/>
+			)}
 		</div>
 	);
 }

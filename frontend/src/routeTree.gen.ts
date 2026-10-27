@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 
 const IndexRoute = IndexRouteImport.update({
@@ -46,6 +47,11 @@ const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRolesRoute = AuthenticatedRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/registro': typeof RegistroRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/roles': typeof AuthenticatedRolesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/registro': typeof RegistroRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/roles': typeof AuthenticatedRolesRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
 }
 export interface FileRoutesById {
@@ -76,14 +84,28 @@ export interface FileRoutesById {
   '/registro': typeof RegistroRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/registro' | '/dashboard' | '/perfil' | '/usuarios'
+    | '/'
+    | '/login'
+    | '/registro'
+    | '/dashboard'
+    | '/perfil'
+    | '/roles'
+    | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/registro' | '/dashboard' | '/perfil' | '/usuarios'
+  to:
+    | '/'
+    | '/login'
+    | '/registro'
+    | '/dashboard'
+    | '/perfil'
+    | '/roles'
+    | '/usuarios'
   id:
     | '__root__'
     | '/'
@@ -92,6 +114,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
+    | '/_authenticated/roles'
     | '/_authenticated/usuarios'
   fileRoutesById: FileRoutesById
 }
@@ -146,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/roles': {
+      id: '/_authenticated/roles'
+      path: '/roles'
+      fullPath: '/roles'
+      preLoaderRoute: typeof AuthenticatedRolesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/usuarios': {
       id: '/_authenticated/usuarios'
       path: '/usuarios'
@@ -159,12 +189,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
 }
 
