@@ -17,7 +17,11 @@
 			"entry": ["scripts/*.ts"]
 		},
 		"backend": {
-			"entry": ["scripts/**/*.ts", "src/**/*.spec.ts"],
+			"entry": [
+				"scripts/**/*.ts",
+				"src/**/*.spec.ts",
+				"src/modules/*/module.ts"
+			],
 			"project": ["src/**/*.ts", "scripts/**/*.ts", "prisma/**/*.ts"],
 			"ignoreDependencies": ["@prisma/client", "@swc/core"]
 		},
