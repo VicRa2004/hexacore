@@ -5,76 +5,74 @@ async function main() {
 	console.log("🌱 Iniciando el proceso de seed...");
 
 	// ─── 1. Roles ───────────────────────────────────────────────────────────────
-	const rolesData = [
-		{ name: "USER", description: "Standard system user" },
-		{ name: "ADMIN", description: "Administrator with full access" },
-		{ name: "MOD", description: "Moderator with partial access" },
+	const datosRoles = [
+		{ nombre: "USUARIO", descripcion: "Usuario estándar del sistema" },
+		{ nombre: "ADMIN", descripcion: "Administrador con acceso total" },
+		{ nombre: "MOD", descripcion: "Moderador con acceso parcial" },
 	];
 
-	for (const role of rolesData) {
-		await prisma.role.upsert({
-			where: { name: role.name },
-			update: { description: role.description },
-			create: role,
+	for (const rol of datosRoles) {
+		await prisma.rol.upsert({
+			where: { nombre: rol.nombre },
+			update: { descripcion: rol.descripcion },
+			create: rol,
 		});
 	}
 	console.log("✅ Roles inicializados");
 
 	// ─── 2. Permisos atómicos ────────────────────────────────────────────────────
-	const permissionsData = [
-		{ resource: "users", action: "create" },
-		{ resource: "users", action: "read" },
-		{ resource: "users", action: "update" },
-		{ resource: "users", action: "delete" },
-		{ resource: "permissions", action: "create" },
-		{ resource: "permissions", action: "read" },
-		{ resource: "permissions", action: "update" },
-		{ resource: "permissions", action: "delete" },
+	const datosPermisos = [
+		{ recurso: "usuarios", accion: "crear" },
+		{ recurso: "usuarios", accion: "leer" },
+		{ recurso: "usuarios", accion: "actualizar" },
+		{ recurso: "usuarios", accion: "eliminar" },
+		{ recurso: "permisos", accion: "crear" },
+		{ recurso: "permisos", accion: "leer" },
+		{ recurso: "permisos", accion: "actualizar" },
+		{ recurso: "permisos", accion: "eliminar" },
 	];
 
-	for (const perm of permissionsData) {
-		await prisma.permission.upsert({
+	for (const p of datosPermisos) {
+		await prisma.permiso.upsert({
 			where: {
-				resource_action: { resource: perm.resource, action: perm.action },
+				recurso_accion: { recurso: p.recurso, accion: p.accion },
 			},
 			update: {},
-			create: perm,
+			create: p,
 		});
 	}
 	console.log("✅ Permisos atómicos inicializados");
 
 	// ─── 3. Asignación de permisos a roles ──────────────────────────────────────
-	const rolePermissionsMap: Record<
-		string,
-		{ resource: string; action: string }[]
-	> = {
-		ADMIN: permissionsData,
-		MOD: [
-			{ resource: "users", action: "create" },
-			{ resource: "users", action: "read" },
-			{ resource: "users", action: "update" },
-		],
-		USER: [{ resource: "users", action: "read" }],
-	};
+	const permisosPorRol: Record<string, { recurso: string; accion: string }[]> =
+		{
+			ADMIN: datosPermisos,
+			MOD: [
+				{ recurso: "usuarios", accion: "crear" },
+				{ recurso: "usuarios", accion: "leer" },
+				{ recurso: "usuarios", accion: "actualizar" },
+			],
+			USUARIO: [{ recurso: "usuarios", accion: "leer" }],
+		};
 
-	for (const [roleName, permissions] of Object.entries(rolePermissionsMap)) {
-		const role = await prisma.role.findUnique({ where: { name: roleName } });
-		if (!role) continue;
+	for (const [nombreRol, permisos] of Object.entries(permisosPorRol)) {
+		const rol = await prisma.rol.findUnique({ where: { nombre: nombreRol } });
+		if (!rol) continue;
 
-		for (const perm of permissions) {
-			const permission = await prisma.permission.findUnique({
+		for (const p of permisos) {
+			const permiso = await prisma.permiso.findUnique({
 				where: {
-					resource_action: { resource: perm.resource, action: perm.action },
+					recurso_accion: { recurso: p.recurso, accion: p.accion },
 				},
 			});
-			if (!permission) continue;
+			if (!permiso) continue;
 
-			await prisma.rolePermission.upsert({
+			await prisma.rolPermiso.upsert({
 				where: {
-					roleId_permissionId: { roleId: role.id, permissionId: permission.id },
+					rolId_permisoId: { rolId: rol.id, permisoId: permiso.id },
 				},
 				update: {},
-				create: { roleId: role.id, permissionId: permission.id },
+				create: { rolId: rol.id, permisoId: permiso.id },
 			});
 		}
 	}
@@ -83,41 +81,41 @@ async function main() {
 	// ─── 4. Usuarios de prueba ───────────────────────────────────────────────────
 	const passwordHash = await bcrypt.hash("SecurePass123!", 10);
 
-	const usersData = [
+	const datosUsuarios = [
 		{
 			email: "admin@dev.com",
-			name: "Administrator",
+			nombre: "Administrador",
 			password: passwordHash,
-			roleName: "ADMIN",
+			nombreRol: "ADMIN",
 		},
 		{
 			email: "mod@dev.com",
-			name: "Super Moderator",
+			nombre: "Supermoderador",
 			password: passwordHash,
-			roleName: "MOD",
+			nombreRol: "MOD",
 		},
 		{
-			email: "user@dev.com",
-			name: "Standard User",
+			email: "usuario@dev.com",
+			nombre: "Usuario Estándar",
 			password: passwordHash,
-			roleName: "USER",
+			nombreRol: "USUARIO",
 		},
 	];
 
-	for (const { roleName, ...userFields } of usersData) {
-		const user = await prisma.user.upsert({
-			where: { email: userFields.email },
+	for (const { nombreRol, ...camposUsuario } of datosUsuarios) {
+		const usuario = await prisma.usuario.upsert({
+			where: { email: camposUsuario.email },
 			update: {},
-			create: userFields,
+			create: camposUsuario,
 		});
 
-		const role = await prisma.role.findUnique({ where: { name: roleName } });
-		if (!role) continue;
+		const rol = await prisma.rol.findUnique({ where: { nombre: nombreRol } });
+		if (!rol) continue;
 
-		await prisma.userRole.upsert({
-			where: { userId_roleId: { userId: user.id, roleId: role.id } },
+		await prisma.usuarioRol.upsert({
+			where: { usuarioId_rolId: { usuarioId: usuario.id, rolId: rol.id } },
 			update: {},
-			create: { userId: user.id, roleId: role.id },
+			create: { usuarioId: usuario.id, rolId: rol.id },
 		});
 	}
 
@@ -125,10 +123,10 @@ async function main() {
 		"✅ Usuarios de prueba creados (CONTRASEÑA PARA TODOS: SecurePass123!)",
 	);
 	console.log(
-		"   - admin@dev.com (ADMIN) → todos los permisos (users y permissions)",
+		"   - admin@dev.com (ADMIN) → todos los permisos (usuarios y permisos)",
 	);
 	console.log("   - mod@dev.com   (MOD)   → crear, leer, actualizar");
-	console.log("   - user@dev.com  (USER)  → solo leer");
+	console.log("   - usuario@dev.com  (USUARIO)  → solo leer");
 }
 
 main()

@@ -6,30 +6,32 @@ async function main() {
 
 	const args = process.argv.slice(2);
 	const email = args[0] || prompt("Email del administrador: ");
-	const name = args[1] || prompt("Nombre completo: ");
+	const nombre = args[1] || prompt("Nombre completo: ");
 	const password = args[2] || prompt("Contraseña: ");
 
-	if (!email || !name || !password) {
+	if (!email || !nombre || !password) {
 		console.log("❌ Error: Todos los campos son obligatorios.");
 		process.exit(1);
 	}
 
 	try {
 		// 1. Verificar si el rol ADMIN existe
-		let role = await prisma.role.findUnique({ where: { name: "ADMIN" } });
-		if (!role) {
+		let rol = await prisma.rol.findUnique({ where: { nombre: "ADMIN" } });
+		if (!rol) {
 			console.log("⚙️  El rol ADMIN no existe. Creándolo globalmente...");
-			role = await prisma.role.create({
+			rol = await prisma.rol.create({
 				data: {
-					name: "ADMIN",
-					description: "Administrator with full access",
+					nombre: "ADMIN",
+					descripcion: "Administrador con acceso total",
 				},
 			});
 		}
 
 		// 2. Verificar si el usuario ya existe
-		const existingUser = await prisma.user.findUnique({ where: { email } });
-		if (existingUser) {
+		const usuarioExistente = await prisma.usuario.findUnique({
+			where: { email },
+		});
+		if (usuarioExistente) {
 			console.log("❌ Error: Ya existe un usuario con ese email.");
 			process.exit(1);
 		}
@@ -38,21 +40,21 @@ async function main() {
 		const passwordHash = await bcrypt.hash(password, 10);
 
 		// 4. Crear el usuario y asignar el rol
-		const user = await prisma.user.create({
+		const usuario = await prisma.usuario.create({
 			data: {
 				email,
-				name,
+				nombre,
 				password: passwordHash,
 				roles: {
 					create: {
-						roleId: role.id,
+						rolId: rol.id,
 					},
 				},
 			},
 		});
 
 		console.log(`\n✅ ¡Éxito! Usuario administrador creado correctamente.`);
-		console.log(`   Email: ${user.email}`);
+		console.log(`   Email: ${usuario.email}`);
 		console.log(`   Rol:   ADMIN`);
 	} catch (error) {
 		console.error("❌ Error inesperado creando administrador:", error);

@@ -9,10 +9,10 @@ description: "Flujo de autenticación del backend: access token JWT + refresh to
 
 | Método | Ruta | Body | Respuesta |
 |--------|------|------|-----------|
-| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, user }` + cookie |
-| POST | `/api/auth/register` | `{ name, email, password }` | `{ accessToken, user }` + cookie |
+| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, usuario }` + cookie |
+| POST | `/api/auth/registro` | `{ nombre, email, password }` | `{ accessToken, usuario }` + cookie |
 | POST | `/api/auth/refresh` | — (lee la cookie) | `{ accessToken }` + cookie nueva |
-| POST | `/api/auth/logout` | — (lee la cookie) | `{ message }` y borra la cookie |
+| POST | `/api/auth/logout` | — (lee la cookie) | `{ mensaje }` y borra la cookie |
 
 El refresh token **nunca** viaja en el body: el servidor lo fija en la cookie
 `refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/auth`, `Secure` en
@@ -75,7 +75,7 @@ const res = await fetch("/api/auth/login", {
 });
 
 // El refresh token llega en la cookie httpOnly; aquí sólo el access token
-const { accessToken, user } = await res.json();
+const { accessToken, usuario } = await res.json();
 
 let currentAccessToken = accessToken;
 ```
@@ -87,7 +87,7 @@ let currentAccessToken = accessToken;
 Enviar el access token en el header `Authorization`:
 
 ```typescript
-const res = await fetch("/api/users", {
+const res = await fetch("/api/usuarios", {
   headers: {
     Authorization: `Bearer ${currentAccessToken}`,
   },
@@ -253,7 +253,7 @@ api.interceptors.response.use(
 | Token | Duración | Configurable en |
 |-------|----------|-----------------|
 | Access Token | 15 min | `JwtService.ts` → opción `expiresIn` |
-| Refresh Token | 7 días | `REFRESH_TOKEN_EXPIRY_DAYS` en cada Use Case y `maxAge` en `refreshTokenCookie.ts` |
+| Refresh Token | 7 días | `DIAS_EXPIRACION_REFRESH_TOKEN` en cada Use Case y `maxAge` en `refreshTokenCookie.ts` |
 
 ---
 

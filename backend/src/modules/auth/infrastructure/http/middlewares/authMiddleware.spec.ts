@@ -2,10 +2,10 @@ import { describe, expect, it } from "bun:test";
 import { Hono } from "hono";
 import { AuthMiddleware, type AuthEnv } from "./authMiddleware";
 
-const payload = { id: 1, email: "a@x.com", roles: ["USER"] };
+const payload = { id: 1, email: "a@x.com", roles: ["USUARIO"] };
 
 const tokenService = {
-	verifyToken: (token: string) => {
+	verificarToken: (token: string) => {
 		if (token !== "valido") throw new Error("jwt malformed");
 		return payload;
 	},
@@ -13,12 +13,12 @@ const tokenService = {
 
 const app = new Hono<AuthEnv>();
 app.get("/", new AuthMiddleware(tokenService as never).handle, (c) =>
-	c.json(c.get("user")),
+	c.json(c.get("usuario")),
 );
 
-const request = (authorization?: string) =>
+const request = (autorizacion?: string) =>
 	app.request("/", {
-		headers: authorization ? { Authorization: authorization } : {},
+		headers: autorizacion ? { Authorization: autorizacion } : {},
 	});
 
 describe("AuthMiddleware", () => {
@@ -34,8 +34,8 @@ describe("AuthMiddleware", () => {
 		["sin esquema Bearer", "valido"],
 		["Bearer vacío", "Bearer "],
 		["token inválido", "Bearer otro"],
-	])("debería responder 401 %s", async (_, authorization) => {
-		const res = await request(authorization);
+	])("debería responder 401 %s", async (_, autorizacion) => {
+		const res = await request(autorizacion);
 
 		expect(res.status).toBe(401);
 	});

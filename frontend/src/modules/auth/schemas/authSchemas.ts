@@ -13,11 +13,11 @@ export const loginSchema = z.object({
 	password: z.string().min(1, "La contraseña es requerida"),
 });
 
-export const registerSchema = z.object({
-	name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+export const registroSchema = z.object({
+	nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
 	email: z.string().email("Ingresa un correo electrónico válido"),
 	password: passwordSchema,
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
-export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegistroInput = z.infer<typeof registroSchema>;

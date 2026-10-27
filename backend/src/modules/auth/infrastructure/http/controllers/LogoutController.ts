@@ -14,15 +14,15 @@ export class LogoutController extends BaseController {
 		super();
 	}
 
-	run = async (c: Context): Promise<Response> => {
+	ejecutar = async (c: Context): Promise<Response> => {
 		return this.executeSafely(c, async () => {
 			const dto = validate(refreshTokenSchema, {
 				refreshToken: getRefreshTokenCookie(c),
 			});
 			clearRefreshTokenCookie(c);
-			await this.logoutUseCase.run(dto.refreshToken);
+			await this.logoutUseCase.ejecutar(dto.refreshToken);
 
-			return this.ok(c, { message: "Sesión cerrada correctamente" });
+			return this.ok(c, { mensaje: "Sesión cerrada correctamente" });
 		});
 	};
 }

@@ -13,14 +13,15 @@ export class LogoutUseCase {
 	 * El access token seguirá siendo válido hasta que expire (máx 15 min),
 	 * pero no se podrá obtener uno nuevo sin un refresh token válido.
 	 */
-	async run(refreshToken: string): Promise<void> {
-		const tokenHash = this.tokenService.hashRefreshToken(refreshToken);
-		const storedToken = await this.refreshTokenRepo.findValidByHash(tokenHash);
+	async ejecutar(refreshToken: string): Promise<void> {
+		const tokenHash = this.tokenService.hashearRefreshToken(refreshToken);
+		const tokenGuardado =
+			await this.refreshTokenRepo.buscarValidoPorHash(tokenHash);
 
-		if (!storedToken) {
-			throw new BaseError("Invalid refresh token", 400);
+		if (!tokenGuardado) {
+			throw new BaseError("Refresh token inválido", 400);
 		}
 
-		await this.refreshTokenRepo.revokeById(storedToken.id);
+		await this.refreshTokenRepo.revocarPorId(tokenGuardado.id);
 	}
 }

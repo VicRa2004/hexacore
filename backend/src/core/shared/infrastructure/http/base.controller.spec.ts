@@ -8,7 +8,7 @@ class ThrowingController extends BaseController {
 		super();
 	}
 
-	run = (c: Parameters<BaseController["ok"]>[0]) =>
+	ejecutar = (c: Parameters<BaseController["ok"]>[0]) =>
 		this.executeSafely(c, async () => {
 			throw this.error;
 		});
@@ -16,14 +16,14 @@ class ThrowingController extends BaseController {
 
 const request = (error: unknown) => {
 	const app = new Hono();
-	app.get("/", new ThrowingController(error).run);
+	app.get("/", new ThrowingController(error).ejecutar);
 	return app.request("/");
 };
 
 describe("BaseController.handleError", () => {
 	it("debería propagar los errores inesperados al onError global", async () => {
 		const app = new Hono();
-		app.get("/", new ThrowingController(new Error("boom")).run);
+		app.get("/", new ThrowingController(new Error("boom")).ejecutar);
 		app.onError((err, c) => c.json({ error: err.message }, 500));
 
 		const res = await app.request("/");

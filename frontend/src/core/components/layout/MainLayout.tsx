@@ -19,7 +19,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
 	const navigate = useNavigate();
-	const { user, logout } = useAuthStore();
+	const { usuario, logout } = useAuthStore();
 
 	const handleLogout = async () => {
 		try {
@@ -33,9 +33,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 		}
 	};
 
-	const roleVariant = user?.roles.includes("ADMIN")
+	const varianteRol = usuario?.roles.includes("ADMIN")
 		? "purple"
-		: user?.roles.includes("MOD")
+		: usuario?.roles.includes("MOD")
 			? "warning"
 			: "default";
 
@@ -64,14 +64,14 @@ export function MainLayout({ children }: MainLayoutProps) {
 									Dashboard
 								</Link>
 								<Link
-									to="/users"
+									to="/usuarios"
 									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<Users className="h-4 w-4" />
 									Usuarios
 								</Link>
 								<Link
-									to="/profile"
+									to="/perfil"
 									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
 								>
 									<UserCheck className="h-4 w-4" />
@@ -81,15 +81,19 @@ export function MainLayout({ children }: MainLayoutProps) {
 						</div>
 
 						<div className="flex items-center gap-3">
-							{user && (
+							{usuario && (
 								<div className="hidden sm:flex items-center gap-2.5 pr-2">
 									<div className="text-right">
 										<p className="text-xs font-semibold text-slate-200">
-											{user.name}
+											{usuario.nombre}
 										</p>
-										<p className="text-[11px] text-slate-400">{user.email}</p>
+										<p className="text-[11px] text-slate-400">
+											{usuario.email}
+										</p>
 									</div>
-									<Badge variant={roleVariant}>{user.roles.join(", ")}</Badge>
+									<Badge variant={varianteRol}>
+										{usuario.roles.join(", ")}
+									</Badge>
 								</div>
 							)}
 

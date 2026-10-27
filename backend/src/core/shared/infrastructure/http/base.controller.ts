@@ -25,7 +25,7 @@ export abstract class BaseController {
 		if (error instanceof ZodError) {
 			return c.json(
 				{
-					error: "Validation error",
+					error: "Error de validación",
 					details: z.treeifyError(error),
 				},
 				400,
@@ -44,7 +44,7 @@ export abstract class BaseController {
 			error instanceof Prisma.PrismaClientKnownRequestError &&
 			CONFLICT_CODES.has(error.code)
 		) {
-			return c.json({ error: "Conflict with existing data" }, 409);
+			return c.json({ error: "Conflicto con datos existentes" }, 409);
 		}
 
 		// Lo inesperado sube al `onError` global: log con request id y 500 genérico.

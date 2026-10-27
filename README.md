@@ -60,8 +60,8 @@ Este proyecto está bajo la Licencia MIT - mira el archivo [LICENCE.md](LICENCE.
 biome.json / package.json / pnpm-workspace.yaml  # raíz
 backend/
 ├── src/                     # Servidor, base compartida y módulos de negocio
-│   ├── core/                # Abstracciones base, user (transversal), config
-│   └── modules/             # auth, authorization, ... (domain/application/infrastructure)
+│   ├── core/                # Abstracciones base, usuario (transversal), config
+│   └── modules/             # auth, autorizacion, ... (domain/application/infrastructure)
 ├── prisma/                  # Esquemas y migraciones
 ├── scripts/                 # create-admin.ts, ...
 ├── docs/                    # guías (crear módulo, auth, testing)

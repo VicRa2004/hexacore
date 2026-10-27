@@ -1,5 +1,5 @@
 ---
-name: crear-modulo
+nombre: crear-modulo
 description: "Guía paso a paso para crear un módulo nuevo del backend (domain → application → infrastructure, cableado en su module.ts y checklist). Úsala al crear o ampliar un módulo en src/modules/ o src/core/, o al añadir una entidad, caso de uso, repositorio, controlador o router."
 ---
 
@@ -48,27 +48,27 @@ Un modulo puede ir dentro de core si va ser usando por otros modulos o tiene muc
 
 ### 1. Domain
 
-- **Entidad** — clase con constructor privado (`create` / `reconstitute`), getters, sin frameworks
+- **Entidad** — clase con constructor privado (`crear` / `reconstituir`), getters, sin frameworks
 - **Repository interface** — contrato de persistencia (qué operaciones existen, no cómo)
 - **Service interface** — contratos para servicios externos (ej: `PasswordHasher`)
-- **Errores** — clases que extienden `BaseError` (ej: `UserNotFoundError`)
+- **Errores** — clases que extienden `BaseError` (ej: `UsuarioNoEncontradoError`)
 
 ### 2. Application
 
-- **DTOs** — definen qué datos entran y salen de cada caso de uso cuando tienen forma; un único primitivo va como parámetro (`run(id: number)`)
+- **DTOs** — definen qué datos entran y salen de cada caso de uso cuando tienen forma; un único primitivo va como parámetro (`ejecutar(id: number)`)
 - **Mappers** — transforman Entidad → DTO
-- **Use Cases** — método obligatorio `run`. Reciben las interfaces del dominio por constructor (sin decoradores)
+- **Use Cases** — método obligatorio `ejecutar`. Reciben las interfaces del dominio por constructor (sin decoradores)
 
 ```typescript
-export class CreateUserUseCase {
+export class CrearUsuarioUseCase {
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly usuarioRepository: UsuarioRepository,
   ) {}
 
-  async run(dto: CreateUserDto): Promise<UserDto> {
-    const user = User.create(dto);
-    await this.userRepository.save(user);
-    return UserMapper.toDto(user);
+  async ejecutar(dto: CrearUsuarioDto): Promise<UsuarioDto> {
+    const usuario = Usuario.crear(dto);
+    await this.usuarioRepository.crear(usuario);
+    return UsuarioMapper.toDto(usuario);
   }
 }
 ```
@@ -78,53 +78,53 @@ export class CreateUserUseCase {
 **Repositorios y servicios** — implementan las interfaces del dominio:
 
 ```typescript
-export class PrismaUserRepository implements UserRepository {
+export class PrismaUsuarioRepository implements UsuarioRepository {
   // implementación con PrismaClient
 }
 ```
 
-**Controladores** — heredan `BaseController`; por defecto **uno por recurso** (`UserController` con `create`, `getAll`, `getOne`, `update`, `delete`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token):
+**Controladores** — heredan `BaseController`; por defecto **uno por recurso** (`UsuarioController` con `crear`, `obtenerTodos`, `obtenerUno`, `actualizar`, `eliminar`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token):
 
 ```typescript
-export class UserController extends BaseController {
-  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`run(id)`).
+export class UsuarioController extends BaseController {
+  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`ejecutar(id)`).
   constructor(
-    private readonly useCases: { create: CreateUserUseCase; getOne: GetOneUserUseCase },
+    private readonly useCases: { crear: CrearUsuarioUseCase; obtenerUno: ObtenerUsuarioUseCase },
   ) {
     super();
   }
 
-  create = (c: Context): Promise<Response> =>
+  crear = (c: Context): Promise<Response> =>
     this.executeSafely(c, async () => {
-      const dto = validate(createUserSchema, await c.req.json());
-      return this.created(c, await this.useCases.create.run(dto));
+      const dto = validate(crearUsuarioSchema, await c.req.json());
+      return this.created(c, await this.useCases.crear.ejecutar(dto));
     });
 
-  getOne = (c: Context): Promise<Response> =>
+  obtenerUno = (c: Context): Promise<Response> =>
     this.executeSafely(c, async () => {
-      const { id } = validate(userIdSchema, c.req.param());
-      return this.ok(c, await this.useCases.getOne.run(id));
+      const { id } = validate(usuarioIdSchema, c.req.param());
+      return this.ok(c, await this.useCases.obtenerUno.ejecutar(id));
     });
 }
 ```
 
-**Rutas** — clase que recibe controladores y middlewares por constructor y registra los métodos flecha del controlador (`this.controller.create`, sin `.bind()`):
+**Rutas** — clase que recibe controladores y middlewares por constructor y registra los métodos flecha del controlador (`this.controller.crear`, sin `.bind()`):
 
 ```typescript
-export class UserRouter {
+export class UsuarioRouter {
   public readonly router = new OpenAPIHono();
 
-  constructor(private readonly controller: UserController) {
+  constructor(private readonly controller: UsuarioController) {
     // Documentación OpenAPI generada desde los mismos schemas Zod del controlador
     this.router.openAPIRegistry.registerPath({
       method: "post",
       path: "/",
-      tags: ["Users"],
+      tags: ["Usuarios"],
       summary: "Crear un nuevo usuario",
-      request: { body: { content: { "application/json": { schema: createUserSchema } } } },
-      responses: { 201: jsonResponse(userDtoSchema, "Usuario creado") },
+      request: { body: { content: { "application/json": { schema: crearUsuarioSchema } } } },
+      responses: { 201: jsonResponse(usuarioDtoSchema, "Usuario creado") },
     });
-    this.router.post("/", this.controller.create);
+    this.router.post("/", this.controller.crear);
   }
 }
 ```
@@ -147,7 +147,7 @@ export const turnosModule: AppModule = {
 		const repo = new PrismaTurnoRepository();
 		const router = new TurnoRouter(
 			container.get(AUTH_TOKENS.AuthMiddleware),
-			container.get(TOKENS.PermissionGuard),
+			container.get(TOKENS.PermisoGuard),
 			new CreateTurnoController(new CreateTurnoUseCase(repo)),
 			// ...
 		);
@@ -158,18 +158,18 @@ export const turnosModule: AppModule = {
 
 Si otro módulo necesita algo de éste, se crea un token tipado en `infrastructure/tokens.ts` (`token<TurnoRepository>("TurnoRepository")`), se exporta por `index.ts` y se registra en `register(container)` con `container.set(TOKEN, () => new ...)`. `register` es opcional.
 
-Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas protegidas reciben `container.get(AUTH_TOKENS.AuthMiddleware)` (de `@/modules/auth`) y `container.get(TOKENS.PermissionGuard)` (tipo `PermissionGuard`), nunca `RequirePermissionMiddleware`: así funcionan aunque `authorization` no esté instalado.
+Activarlo añadiendo `turnosModule` a la lista de `src/modules.ts`. Las rutas protegidas reciben `container.get(AUTH_TOKENS.AuthMiddleware)` (de `@/modules/auth`) y `container.get(TOKENS.PermisoGuard)` (tipo `PermisoGuard`), nunca `RequierePermisoMiddleware`: así funcionan aunque `autorizacion` no esté instalado.
 
 ---
 
 ## Checklist por módulo nuevo
 
-- [ ] Entidad con `create` / `reconstitute`
+- [ ] Entidad con `crear` / `reconstituir`
 - [ ] Interface de repositorio en `domain/repository/`
 - [ ] Errores extendiendo `BaseError`
-- [ ] DTOs de entrada (create/update/filtros) y de salida; nada de DTO para un solo `id`
+- [ ] DTOs de entrada (crear/actualizar/filtros) y de salida; nada de DTO para un solo `id`
 - [ ] Mapper Entidad → DTO
-- [ ] Use Case con método `run` (dependencias por constructor)
+- [ ] Use Case con método `ejecutar` (dependencias por constructor)
 - [ ] Repositorio Prisma implementando la interface
 - [ ] Controlador por recurso extendiendo `BaseController` (varios solo si hace falta)
 - [ ] Router con `registerPath` + `this.controller.<handler>` en cada endpoint

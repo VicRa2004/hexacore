@@ -1,15 +1,15 @@
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/core/user";
+import type { UsuarioRepository } from "@/core/usuario";
 import type { TokenService } from "../../domain/service/TokenService";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
-import { SessionIssuer } from "../services/SessionIssuer";
+import { EmisorSesion } from "../services/EmisorSesion";
 
 export class RefreshTokenUseCase {
 	constructor(
 		private readonly tokenService: TokenService,
 		private readonly refreshTokenRepo: RefreshTokenRepository,
-		private readonly userRepository: UserRepository,
-		private readonly sessionIssuer: SessionIssuer,
+		private readonly usuarioRepository: UsuarioRepository,
+		private readonly emisorSesion: EmisorSesion,
 	) {}
 
 	/**
@@ -19,38 +19,43 @@ export class RefreshTokenUseCase {
 	 * Implementa "Refresh Token Rotation" — si alguien reutiliza un token
 	 * ya revocado, se asume robo y se revocan TODOS los tokens del usuario.
 	 */
-	async run(
-		currentRefreshToken: string,
+	async ejecutar(
+		refreshTokenActual: string,
 	): Promise<{ accessToken: string; refreshToken: string }> {
-		const tokenHash = this.tokenService.hashRefreshToken(currentRefreshToken);
+		const tokenHash = this.tokenService.hashearRefreshToken(refreshTokenActual);
 
-		const storedToken = await this.refreshTokenRepo.findValidByHash(tokenHash);
+		const tokenGuardado =
+			await this.refreshTokenRepo.buscarValidoPorHash(tokenHash);
 
-		if (!storedToken) {
+		if (!tokenGuardado) {
 			// Si el token existe pero ya estaba revocado, fue reutilizado → posible
 			// robo: se revocan todas las sesiones del usuario.
-			const reused = await this.refreshTokenRepo.findByHash(tokenHash);
-			if (reused?.revoked) {
-				await this.refreshTokenRepo.revokeAllByUserId(reused.userId);
+			const reutilizado = await this.refreshTokenRepo.buscarPorHash(tokenHash);
+			if (reutilizado?.revocado) {
+				await this.refreshTokenRepo.revocarTodosPorUsuarioId(
+					reutilizado.usuarioId,
+				);
 			}
-			throw new BaseError("Invalid or expired refresh token", 401);
+			throw new BaseError("Refresh token inválido o expirado", 401);
 		}
 
 		// Revocar el token usado (rotación). Si otra petición concurrente ya lo
 		// revocó, ésta pierde la carrera y no emite una segunda sesión.
-		const revoked = await this.refreshTokenRepo.revokeById(storedToken.id);
+		const revocado = await this.refreshTokenRepo.revocarPorId(tokenGuardado.id);
 
-		if (!revoked) {
-			throw new BaseError("Invalid or expired refresh token", 401);
+		if (!revocado) {
+			throw new BaseError("Refresh token inválido o expirado", 401);
 		}
 
 		// Verificar que el usuario exista y esté activo
-		const user = await this.userRepository.findById(storedToken.userId);
+		const usuario = await this.usuarioRepository.buscarPorId(
+			tokenGuardado.usuarioId,
+		);
 
-		if (!user?.getIsActive()) {
-			throw new BaseError("User not found or inactive", 401);
+		if (!usuario?.getIsActivo()) {
+			throw new BaseError("Usuario no encontrado o inactivo", 401);
 		}
 
-		return this.sessionIssuer.issue(user);
+		return this.emisorSesion.emitir(usuario);
 	}
 }

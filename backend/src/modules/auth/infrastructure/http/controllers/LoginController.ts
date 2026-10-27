@@ -11,11 +11,12 @@ export class LoginController extends BaseController {
 		super();
 	}
 
-	run = async (c: Context): Promise<Response> => {
+	ejecutar = async (c: Context): Promise<Response> => {
 		return this.executeSafely(c, async () => {
 			const body = await c.req.json();
 			const dto = validate(loginSchema, body);
-			const { refreshToken, ...session } = await this.loginUseCase.run(dto);
+			const { refreshToken, ...session } =
+				await this.loginUseCase.ejecutar(dto);
 
 			setRefreshTokenCookie(c, refreshToken);
 			return this.ok(c, session);

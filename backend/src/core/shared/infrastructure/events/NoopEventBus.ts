@@ -1,7 +1,7 @@
 import type { EventBus } from "../../domain/events/EventBus";
 
 /**
- * Bus por defecto sin el módulo `events`: publicar no hace nada y nadie recibe.
+ * Bus por defecto sin el módulo `eventos`: publicar no hace nada y nadie recibe.
  * Así los casos de uso publican igual, esté o no el módulo instalado.
  */
 export class NoopEventBus implements EventBus {

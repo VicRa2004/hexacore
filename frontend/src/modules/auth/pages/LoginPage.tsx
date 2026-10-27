@@ -12,7 +12,7 @@ export function LoginPage() {
 			<div className="mt-6 text-center text-xs text-slate-400">
 				¿No tienes una cuenta?{" "}
 				<Link
-					to="/register"
+					to="/registro"
 					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
 				>
 					Regístrate aquí

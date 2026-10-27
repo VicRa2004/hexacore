@@ -5,7 +5,7 @@ import type {
 } from "../../../domain/service/TokenService";
 
 /** Variables de contexto que publica este middleware para los siguientes handlers. */
-export type AuthEnv = { Variables: { user: AccessTokenPayload } };
+export type AuthEnv = { Variables: { usuario: AccessTokenPayload } };
 
 /**
  * Middleware de autenticación mediante JWT.
@@ -14,7 +14,7 @@ export type AuthEnv = { Variables: { user: AccessTokenPayload } };
  *
  * @example
  * app.use("/api/*", authMiddleware.handle);
- * app.get("/api/perfil", authMiddleware.handle, controller.run.bind(controller));
+ * app.get("/api/perfil", authMiddleware.handle, controller.ejecutar.bind(controller));
  */
 export class AuthMiddleware {
 	constructor(private readonly tokenService: TokenService) {}
@@ -32,9 +32,9 @@ export class AuthMiddleware {
 		next: Next,
 	): Promise<Response | undefined> => {
 		// En Hono, los headers se obtienen a través de c.req.header()
-		const authHeader = c.req.header("Authorization");
+		const headerAuth = c.req.header("Authorization");
 
-		if (!authHeader?.startsWith("Bearer ")) {
+		if (!headerAuth?.startsWith("Bearer ")) {
 			return c.json(
 				{
 					success: false,
@@ -44,7 +44,7 @@ export class AuthMiddleware {
 			);
 		}
 
-		const token = authHeader.split(" ")[1];
+		const token = headerAuth.split(" ")[1];
 
 		if (!token) {
 			return c.json({ success: false, error: "Token inválido" }, 401);
@@ -52,9 +52,9 @@ export class AuthMiddleware {
 
 		// next() queda fuera del try: un error del controlador no es un token inválido.
 		try {
-			// En lugar de mutar req (ej. req.user), en Hono guardamos datos en el contexto
+			// En lugar de mutar req (ej. req.usuario), en Hono guardamos datos en el contexto
 			// usando c.set() para que otros middlewares/controladores puedan leerlo con c.get()
-			c.set("user", this.tokenService.verifyToken(token));
+			c.set("usuario", this.tokenService.verificarToken(token));
 		} catch {
 			return c.json(
 				{ success: false, error: "Token inválido o expirado" },

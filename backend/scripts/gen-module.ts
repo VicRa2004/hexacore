@@ -1,5 +1,5 @@
 // Genera un módulo CRUD hexagonal en src/modules/<nombre> a partir de plantillas
-// basadas en src/core/user, lo registra en src/modules.ts y añade su modelo Prisma.
+// basadas en src/core/usuario, lo registra en src/modules.ts y añade su modelo Prisma.
 // Uso: bun scripts/gen-module.ts <nombre> [--root <dir-backend>]
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -9,31 +9,32 @@ const rootFlag = args.indexOf("--root");
 const root = resolve(
 	rootFlag >= 0 ? (args[rootFlag + 1] ?? "") : join(import.meta.dir, ".."),
 );
-const name = args.find(
+const nombre = args.find(
 	(a, i) => !a.startsWith("--") && args[i - 1] !== "--root",
 );
 
-if (!name || !/^[a-z][a-zA-Z0-9]*$/.test(name)) {
+if (!nombre || !/^[a-z][a-zA-Z0-9]*$/.test(nombre)) {
 	console.error(
 		"Uso: pnpm gen:module <nombre>  (camelCase y en singular, p. ej. producto u ordenCompra)",
 	);
 	process.exit(1);
 }
 
-const moduleDir = join(root, "src/modules", name);
+const moduleDir = join(root, "src/modules", nombre);
 if (existsSync(moduleDir)) {
 	console.error(`Ya existe ${moduleDir}`);
 	process.exit(1);
 }
 
 // ── Variantes del nombre ─────────────────────────────────────────────────────
-const n = name; // producto
+const n = nombre; // producto
 const N = n[0]?.toUpperCase() + n.slice(1); // Producto
-// shortcut: plural ingenuo (+s); renombrar a mano si el plural es irregular.
-const ns = `${n}s`; // productos
-const Ns = `${N}s`; // Productos
+// shortcut: plural ingenuo (+s tras vocal, +es tras consonante); renombrar a mano si es irregular.
+const plural = (s: string) => (/[aeiou]$/i.test(s) ? `${s}s` : `${s}es`);
+const ns = plural(n); // productos
+const Ns = plural(N); // Productos
 const snake = n.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`); // orden_compra
-const kebabs = `${snake.replaceAll("_", "-")}s`; // ordenes-compra → URL y recurso
+const kebabs = plural(snake.replaceAll("_", "-")); // orden-compras → URL y recurso
 const Repo = `${N}Repository`;
 
 // ── Plantillas ───────────────────────────────────────────────────────────────
@@ -42,78 +43,78 @@ const files: Record<string, string> = {
 import { EntityId } from "@/core/shared/domain/EntityId";
 
 export class ${N} extends Entity {
-	private name: string;
+	private nombre: string;
 
-	private constructor(id: EntityId, name: string) {
+	private constructor(id: EntityId, nombre: string) {
 		super(id);
-		this.name = name;
+		this.nombre = nombre;
 	}
 
-	public static create(name: string): ${N} {
-		return new ${N}(new EntityId(), name);
+	public static crear(nombre: string): ${N} {
+		return new ${N}(new EntityId(), nombre);
 	}
 
-	public static reconstitute(id: number, name: string): ${N} {
-		return new ${N}(new EntityId(id), name);
+	public static reconstituir(id: number, nombre: string): ${N} {
+		return new ${N}(new EntityId(id), nombre);
 	}
 
-	getName() {
-		return this.name;
+	getNombre() {
+		return this.nombre;
 	}
 
-	public update(changes: { name?: string }): void {
-		if (changes.name !== undefined) this.name = changes.name;
+	public actualizar(cambios: { nombre?: string }): void {
+		if (cambios.nombre !== undefined) this.nombre = cambios.nombre;
 	}
 }
 `,
 
-	[`domain/error/${N}NotFoundError.ts`]: `import { BaseError } from "@/core/shared/domain/error/BaseError";
+	[`domain/error/${N}NoEncontradoError.ts`]: `import { BaseError } from "@/core/shared/domain/error/BaseError";
 
-export class ${N}NotFoundError extends BaseError {
+export class ${N}NoEncontradoError extends BaseError {
 	constructor() {
-		super("${N} not found", 404);
+		super("${N} no encontrado", 404);
 	}
 }
 `,
 
-	[`domain/repository/${Repo}.ts`]: `import type { Pagination } from "@/core/shared/domain/Pagination";
+	[`domain/repository/${Repo}.ts`]: `import type { Paginacion } from "@/core/shared/domain/Paginacion";
 import type { ${N} } from "../${N}";
 
-export interface ${N}Filters {
-	page: number;
-	limit: number;
-	name?: string;
+export interface ${N}Filtros {
+	pagina: number;
+	limite: number;
+	nombre?: string;
 }
 
 export interface ${Repo} {
-	find: (filters: ${N}Filters) => Promise<Pagination<${N}>>;
-	findById: (id: number) => Promise<${N} | null>;
-	create: (data: ${N}) => Promise<${N}>;
-	update: (data: ${N}) => Promise<${N}>;
-	delete: (id: number) => Promise<void>;
+	buscar: (filtros: ${N}Filtros) => Promise<Paginacion<${N}>>;
+	buscarPorId: (id: number) => Promise<${N} | null>;
+	crear: (data: ${N}) => Promise<${N}>;
+	actualizar: (data: ${N}) => Promise<${N}>;
+	eliminar: (id: number) => Promise<void>;
 }
 `,
 
 	[`application/dtos/${N}Dto.ts`]: `export interface ${N}Dto {
 	id: number;
-	name: string;
+	nombre: string;
 }
 `,
 
-	[`application/dtos/Create${N}Dto.ts`]: `export interface Create${N}Dto {
-	name: string;
+	[`application/dtos/Crear${N}Dto.ts`]: `export interface Crear${N}Dto {
+	nombre: string;
 }
 `,
 
-	[`application/dtos/Update${N}Dto.ts`]: `export interface Update${N}Dto {
-	name?: string;
+	[`application/dtos/Actualizar${N}Dto.ts`]: `export interface Actualizar${N}Dto {
+	nombre?: string;
 }
 `,
 
-	[`application/dtos/GetAll${Ns}Dto.ts`]: `export interface GetAll${Ns}Dto {
-	page: number;
-	limit: number;
-	name?: string;
+	[`application/dtos/Obtener${Ns}Dto.ts`]: `export interface Obtener${Ns}Dto {
+	pagina: number;
+	limite: number;
+	nombre?: string;
 }
 `,
 
@@ -124,237 +125,237 @@ export const ${N}Mapper = {
 	toDto(${n}: ${N}): ${N}Dto {
 		return {
 			id: ${n}.getId(),
-			name: ${n}.getName(),
+			nombre: ${n}.getNombre(),
 		};
 	},
 };
 `,
 
-	[`application/useCases/Create${N}UseCase.ts`]: `import type { Create${N}Dto } from "../dtos/Create${N}Dto";
+	[`application/useCases/Crear${N}UseCase.ts`]: `import type { Crear${N}Dto } from "../dtos/Crear${N}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 import { ${N} } from "../../domain/${N}";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-export class Create${N}UseCase {
+export class Crear${N}UseCase {
 	constructor(
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
-	async run(dto: Create${N}Dto): Promise<${N}Dto> {
-		const created = await this.${n}Repository.create(${N}.create(dto.name));
-		return ${N}Mapper.toDto(created);
+	async ejecutar(dto: Crear${N}Dto): Promise<${N}Dto> {
+		const creado = await this.${n}Repository.crear(${N}.crear(dto.nombre));
+		return ${N}Mapper.toDto(creado);
 	}
 }
 `,
 
-	[`application/useCases/GetAll${Ns}UseCase.ts`]: `import type { ${Repo} } from "../../domain/repository/${Repo}";
-import type { GetAll${Ns}Dto } from "../dtos/GetAll${Ns}Dto";
+	[`application/useCases/Obtener${Ns}UseCase.ts`]: `import type { ${Repo} } from "../../domain/repository/${Repo}";
+import type { Obtener${Ns}Dto } from "../dtos/Obtener${Ns}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
-import type { Pagination } from "@/core/shared/domain/Pagination";
+import type { Paginacion } from "@/core/shared/domain/Paginacion";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-export class GetAll${Ns}UseCase {
+export class Obtener${Ns}UseCase {
 	constructor(
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
-	async run(dto: GetAll${Ns}Dto): Promise<Pagination<${N}Dto>> {
-		const result = await this.${n}Repository.find(dto);
-		return { ...result, data: result.data.map(${N}Mapper.toDto) };
+	async ejecutar(dto: Obtener${Ns}Dto): Promise<Paginacion<${N}Dto>> {
+		const resultado = await this.${n}Repository.buscar(dto);
+		return { ...resultado, datos: resultado.datos.map(${N}Mapper.toDto) };
 	}
 }
 `,
 
-	[`application/useCases/GetOne${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/Obtener${N}UseCase.ts`]: `import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-export class GetOne${N}UseCase {
+export class Obtener${N}UseCase {
 	constructor(
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
-	async run(id: number): Promise<${N}Dto> {
-		const ${n} = await this.${n}Repository.findById(id);
+	async ejecutar(id: number): Promise<${N}Dto> {
+		const ${n} = await this.${n}Repository.buscarPorId(id);
 		if (!${n}) {
-			throw new ${N}NotFoundError();
+			throw new ${N}NoEncontradoError();
 		}
 		return ${N}Mapper.toDto(${n});
 	}
 }
 `,
 
-	[`application/useCases/Update${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/Actualizar${N}UseCase.ts`]: `import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
-import type { Update${N}Dto } from "../dtos/Update${N}Dto";
+import type { Actualizar${N}Dto } from "../dtos/Actualizar${N}Dto";
 import type { ${N}Dto } from "../dtos/${N}Dto";
 import { ${N}Mapper } from "../mappers/${N}Mapper";
 
-export class Update${N}UseCase {
+export class Actualizar${N}UseCase {
 	constructor(
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
-	async run(id: number, dto: Update${N}Dto): Promise<${N}Dto> {
-		const ${n} = await this.${n}Repository.findById(id);
+	async ejecutar(id: number, dto: Actualizar${N}Dto): Promise<${N}Dto> {
+		const ${n} = await this.${n}Repository.buscarPorId(id);
 		if (!${n}) {
-			throw new ${N}NotFoundError();
+			throw new ${N}NoEncontradoError();
 		}
-		${n}.update(dto);
-		return ${N}Mapper.toDto(await this.${n}Repository.update(${n}));
+		${n}.actualizar(dto);
+		return ${N}Mapper.toDto(await this.${n}Repository.actualizar(${n}));
 	}
 }
 `,
 
-	[`application/useCases/Delete${N}UseCase.ts`]: `import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+	[`application/useCases/Eliminar${N}UseCase.ts`]: `import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 import type { ${Repo} } from "../../domain/repository/${Repo}";
 
-export class Delete${N}UseCase {
+export class Eliminar${N}UseCase {
 	constructor(
 		private readonly ${n}Repository: ${Repo},
 	) {}
 
-	async run(id: number): Promise<void> {
-		const ${n} = await this.${n}Repository.findById(id);
+	async ejecutar(id: number): Promise<void> {
+		const ${n} = await this.${n}Repository.buscarPorId(id);
 		if (!${n}) {
-			throw new ${N}NotFoundError();
+			throw new ${N}NoEncontradoError();
 		}
-		await this.${n}Repository.delete(id);
+		await this.${n}Repository.eliminar(id);
 	}
 }
 `,
 
 	// ── Specs ──
-	[`application/useCases/Create${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
-import { Create${N}UseCase } from "./Create${N}UseCase";
+	[`application/useCases/Crear${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
+import { Crear${N}UseCase } from "./Crear${N}UseCase";
 import { ${N} } from "../../domain/${N}";
 
-describe("Create${N}UseCase", () => {
+describe("Crear${N}UseCase", () => {
 	it("debería crear y devolver el DTO", async () => {
 		const repo = {
-			create: mock(async (e: ${N}) => ${N}.reconstitute(1, e.getName())),
+			crear: mock(async (e: ${N}) => ${N}.reconstituir(1, e.getNombre())),
 		};
-		const useCase = new Create${N}UseCase(repo as never);
+		const useCase = new Crear${N}UseCase(repo as never);
 
-		const result = await useCase.run({ name: "Ejemplo" });
+		const result = await useCase.ejecutar({ nombre: "Ejemplo" });
 
-		expect(repo.create).toHaveBeenCalled();
-		expect(result).toEqual({ id: 1, name: "Ejemplo" });
+		expect(repo.crear).toHaveBeenCalled();
+		expect(result).toEqual({ id: 1, nombre: "Ejemplo" });
 	});
 });
 `,
 
-	[`application/useCases/GetAll${Ns}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
-import { GetAll${Ns}UseCase } from "./GetAll${Ns}UseCase";
+	[`application/useCases/Obtener${Ns}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
+import { Obtener${Ns}UseCase } from "./Obtener${Ns}UseCase";
 import { ${N} } from "../../domain/${N}";
 
-describe("GetAll${Ns}UseCase", () => {
+describe("Obtener${Ns}UseCase", () => {
 	it("debería devolver la página mapeada a DTOs", async () => {
 		const repo = {
-			find: mock(async () => ({
-				data: [${N}.reconstitute(1, "Ejemplo")],
-				page: 1,
-				totalItems: 1,
-				totalPages: 1,
+			buscar: mock(async () => ({
+				datos: [${N}.reconstituir(1, "Ejemplo")],
+				pagina: 1,
+				totalElementos: 1,
+				totalPaginas: 1,
 			})),
 		};
-		const useCase = new GetAll${Ns}UseCase(repo as never);
+		const useCase = new Obtener${Ns}UseCase(repo as never);
 
-		const result = await useCase.run({ page: 1, limit: 10 });
+		const result = await useCase.ejecutar({ pagina: 1, limite: 10 });
 
-		expect(result.data).toEqual([{ id: 1, name: "Ejemplo" }]);
-		expect(result.totalItems).toBe(1);
+		expect(result.datos).toEqual([{ id: 1, nombre: "Ejemplo" }]);
+		expect(result.totalElementos).toBe(1);
 	});
 });
 `,
 
-	[`application/useCases/GetOne${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
-import { GetOne${N}UseCase } from "./GetOne${N}UseCase";
+	[`application/useCases/Obtener${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
+import { Obtener${N}UseCase } from "./Obtener${N}UseCase";
 import { ${N} } from "../../domain/${N}";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 
-describe("GetOne${N}UseCase", () => {
+describe("Obtener${N}UseCase", () => {
 	it("debería devolver el DTO si existe", async () => {
-		const repo = { findById: mock(async () => ${N}.reconstitute(1, "Ejemplo")) };
-		const useCase = new GetOne${N}UseCase(repo as never);
+		const repo = { buscarPorId: mock(async () => ${N}.reconstituir(1, "Ejemplo")) };
+		const useCase = new Obtener${N}UseCase(repo as never);
 
-		expect(await useCase.run(1)).toEqual({ id: 1, name: "Ejemplo" });
+		expect(await useCase.ejecutar(1)).toEqual({ id: 1, nombre: "Ejemplo" });
 	});
 
-	it("debería lanzar ${N}NotFoundError si no existe", async () => {
-		const repo = { findById: mock(async () => null) };
-		const useCase = new GetOne${N}UseCase(repo as never);
+	it("debería lanzar ${N}NoEncontradoError si no existe", async () => {
+		const repo = { buscarPorId: mock(async () => null) };
+		const useCase = new Obtener${N}UseCase(repo as never);
 
-		expect(useCase.run(999)).rejects.toThrow(${N}NotFoundError);
+		expect(useCase.ejecutar(999)).rejects.toThrow(${N}NoEncontradoError);
 	});
 });
 `,
 
-	[`application/useCases/Update${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
-import { Update${N}UseCase } from "./Update${N}UseCase";
+	[`application/useCases/Actualizar${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
+import { Actualizar${N}UseCase } from "./Actualizar${N}UseCase";
 import { ${N} } from "../../domain/${N}";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 
-describe("Update${N}UseCase", () => {
+describe("Actualizar${N}UseCase", () => {
 	it("debería actualizar si existe", async () => {
 		const repo = {
-			findById: mock(async () => ${N}.reconstitute(1, "Viejo")),
-			update: mock(async (e: ${N}) => e),
+			buscarPorId: mock(async () => ${N}.reconstituir(1, "Viejo")),
+			actualizar: mock(async (e: ${N}) => e),
 		};
-		const useCase = new Update${N}UseCase(repo as never);
+		const useCase = new Actualizar${N}UseCase(repo as never);
 
-		expect(await useCase.run(1, { name: "Nuevo" })).toEqual({
+		expect(await useCase.ejecutar(1, { nombre: "Nuevo" })).toEqual({
 			id: 1,
-			name: "Nuevo",
+			nombre: "Nuevo",
 		});
 	});
 
-	it("debería lanzar ${N}NotFoundError si no existe", async () => {
-		const repo = { findById: mock(async () => null), update: mock() };
-		const useCase = new Update${N}UseCase(repo as never);
+	it("debería lanzar ${N}NoEncontradoError si no existe", async () => {
+		const repo = { buscarPorId: mock(async () => null), actualizar: mock() };
+		const useCase = new Actualizar${N}UseCase(repo as never);
 
-		expect(useCase.run(999, { name: "Nuevo" })).rejects.toThrow(
-			${N}NotFoundError,
+		expect(useCase.ejecutar(999, { nombre: "Nuevo" })).rejects.toThrow(
+			${N}NoEncontradoError,
 		);
-		expect(repo.update).not.toHaveBeenCalled();
+		expect(repo.actualizar).not.toHaveBeenCalled();
 	});
 });
 `,
 
-	[`application/useCases/Delete${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
-import { Delete${N}UseCase } from "./Delete${N}UseCase";
+	[`application/useCases/Eliminar${N}UseCase.spec.ts`]: `import { describe, expect, it, mock } from "bun:test";
+import { Eliminar${N}UseCase } from "./Eliminar${N}UseCase";
 import { ${N} } from "../../domain/${N}";
-import { ${N}NotFoundError } from "../../domain/error/${N}NotFoundError";
+import { ${N}NoEncontradoError } from "../../domain/error/${N}NoEncontradoError";
 
-describe("Delete${N}UseCase", () => {
+describe("Eliminar${N}UseCase", () => {
 	it("debería borrar si existe", async () => {
 		const repo = {
-			findById: mock(async () => ${N}.reconstitute(1, "Ejemplo")),
-			delete: mock(async () => {}),
+			buscarPorId: mock(async () => ${N}.reconstituir(1, "Ejemplo")),
+			eliminar: mock(async () => {}),
 		};
-		const useCase = new Delete${N}UseCase(repo as never);
+		const useCase = new Eliminar${N}UseCase(repo as never);
 
-		await useCase.run(1);
+		await useCase.ejecutar(1);
 
-		expect(repo.delete).toHaveBeenCalledWith(1);
+		expect(repo.eliminar).toHaveBeenCalledWith(1);
 	});
 
-	it("debería lanzar ${N}NotFoundError si no existe", async () => {
-		const repo = { findById: mock(async () => null), delete: mock() };
-		const useCase = new Delete${N}UseCase(repo as never);
+	it("debería lanzar ${N}NoEncontradoError si no existe", async () => {
+		const repo = { buscarPorId: mock(async () => null), eliminar: mock() };
+		const useCase = new Eliminar${N}UseCase(repo as never);
 
-		expect(useCase.run(999)).rejects.toThrow(${N}NotFoundError);
-		expect(repo.delete).not.toHaveBeenCalled();
+		expect(useCase.ejecutar(999)).rejects.toThrow(${N}NoEncontradoError);
+		expect(repo.eliminar).not.toHaveBeenCalled();
 	});
 });
 `,
 
 	// ── Infraestructura ──
-	[`infrastructure/repository/Prisma${Repo}.ts`]: `import type { Pagination } from "@/core/shared/domain/Pagination";
+	[`infrastructure/repository/Prisma${Repo}.ts`]: `import type { Paginacion } from "@/core/shared/domain/Paginacion";
 import type {
-	${N}Filters,
+	${N}Filtros,
 	${Repo},
 } from "../../domain/repository/${Repo}";
 import { prisma } from "@/core/config/prisma";
@@ -362,59 +363,59 @@ import { ${N} } from "../../domain/${N}";
 
 interface Prisma${N}Record {
 	id: number;
-	name: string;
+	nombre: string;
 }
 
 export class Prisma${Repo} implements ${Repo} {
 	private toDomain(raw: Prisma${N}Record): ${N} {
-		return ${N}.reconstitute(raw.id, raw.name);
+		return ${N}.reconstituir(raw.id, raw.nombre);
 	}
 
-	async find(filters: ${N}Filters): Promise<Pagination<${N}>> {
-		const { page, limit, name } = filters;
+	async buscar(filtros: ${N}Filtros): Promise<Paginacion<${N}>> {
+		const { pagina, limite, nombre } = filtros;
 		const where = {
-			...(name && { name: { contains: name, mode: "insensitive" as const } }),
+			...(nombre && { nombre: { contains: nombre, mode: "insensitive" as const } }),
 		};
 
-		const [data, totalItems] = await prisma.$transaction([
+		const [registros, totalElementos] = await prisma.$transaction([
 			prisma.${n}.findMany({
 				where,
-				skip: (page - 1) * limit,
-				take: limit,
+				skip: (pagina - 1) * limite,
+				take: limite,
 				orderBy: { id: "asc" },
 			}),
 			prisma.${n}.count({ where }),
 		]);
 
 		return {
-			data: data.map((record) => this.toDomain(record)),
-			page,
-			totalItems,
-			totalPages: Math.ceil(totalItems / limit),
+			datos: registros.map((registro) => this.toDomain(registro)),
+			pagina,
+			totalElementos,
+			totalPaginas: Math.ceil(totalElementos / limite),
 		};
 	}
 
-	async findById(id: number): Promise<${N} | null> {
-		const record = await prisma.${n}.findUnique({ where: { id } });
-		return record ? this.toDomain(record) : null;
+	async buscarPorId(id: number): Promise<${N} | null> {
+		const registro = await prisma.${n}.findUnique({ where: { id } });
+		return registro ? this.toDomain(registro) : null;
 	}
 
-	async create(data: ${N}): Promise<${N}> {
-		const record = await prisma.${n}.create({
-			data: { name: data.getName() },
+	async crear(data: ${N}): Promise<${N}> {
+		const registro = await prisma.${n}.create({
+			data: { nombre: data.getNombre() },
 		});
-		return this.toDomain(record);
+		return this.toDomain(registro);
 	}
 
-	async update(data: ${N}): Promise<${N}> {
-		const record = await prisma.${n}.update({
+	async actualizar(data: ${N}): Promise<${N}> {
+		const registro = await prisma.${n}.update({
 			where: { id: data.getId() },
-			data: { name: data.getName() },
+			data: { nombre: data.getNombre() },
 		});
-		return this.toDomain(record);
+		return this.toDomain(registro);
 	}
 
-	async delete(id: number): Promise<void> {
+	async eliminar(id: number): Promise<void> {
 		await prisma.${n}.delete({ where: { id } });
 	}
 }
@@ -422,22 +423,22 @@ export class Prisma${Repo} implements ${Repo} {
 
 	[`infrastructure/http/schemas/${n}Schemas.ts`]: `import { z } from "@hono/zod-openapi";
 
-export const create${N}Schema = z.object({
-	name: z.string().trim().min(1, "Name is required"),
+export const crear${N}Schema = z.object({
+	nombre: z.string().trim().min(1, "El nombre es obligatorio"),
 });
 
-export const update${N}Schema = z.object({
-	name: z.string().trim().min(1, "Name is required").optional(),
+export const actualizar${N}Schema = z.object({
+	nombre: z.string().trim().min(1, "El nombre es obligatorio").optional(),
 });
 
 export const ${n}IdSchema = z.object({
-	id: z.string().regex(/^\\d+$/, "ID must be a valid number").transform(Number),
+	id: z.string().regex(/^\\d+$/, "El ID debe ser un número válido").transform(Number),
 });
 
-export const getAll${Ns}Schema = z.object({
-	page: z.string().regex(/^\\d+$/).transform(Number).optional().default(1),
-	limit: z.string().regex(/^\\d+$/).transform(Number).optional().default(10),
-	name: z.string().trim().min(1).max(128).optional(),
+export const obtener${Ns}Schema = z.object({
+	pagina: z.string().regex(/^\\d+$/).transform(Number).optional().default(1),
+	limite: z.string().regex(/^\\d+$/).transform(Number).optional().default(10),
+	nombre: z.string().trim().min(1).max(128).optional(),
 });
 
 // ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────
@@ -445,76 +446,76 @@ export const getAll${Ns}Schema = z.object({
 export const ${n}DtoSchema = z
 	.object({
 		id: z.number().int().openapi({ example: 1 }),
-		name: z.string().openapi({ example: "Ejemplo" }),
+		nombre: z.string().openapi({ example: "Ejemplo" }),
 	})
 	.openapi("${N}Dto");
 
-export const ${n}PageSchema = z.object({
-	data: z.array(${n}DtoSchema),
-	page: z.number().int().openapi({ example: 1 }),
-	totalItems: z.number().int().openapi({ example: 10 }),
-	totalPages: z.number().int().openapi({ example: 1 }),
+export const ${n}PaginaSchema = z.object({
+	datos: z.array(${n}DtoSchema),
+	pagina: z.number().int().openapi({ example: 1 }),
+	totalElementos: z.number().int().openapi({ example: 10 }),
+	totalPaginas: z.number().int().openapi({ example: 1 }),
 });
 `,
 
 	[`infrastructure/http/controllers/${N}Controller.ts`]: `import type { Context } from "hono";
-import type { Create${N}UseCase } from "../../../application/useCases/Create${N}UseCase";
-import type { Delete${N}UseCase } from "../../../application/useCases/Delete${N}UseCase";
-import type { GetAll${Ns}UseCase } from "../../../application/useCases/GetAll${Ns}UseCase";
-import type { GetOne${N}UseCase } from "../../../application/useCases/GetOne${N}UseCase";
-import type { Update${N}UseCase } from "../../../application/useCases/Update${N}UseCase";
+import type { Actualizar${N}UseCase } from "../../../application/useCases/Actualizar${N}UseCase";
+import type { Crear${N}UseCase } from "../../../application/useCases/Crear${N}UseCase";
+import type { Eliminar${N}UseCase } from "../../../application/useCases/Eliminar${N}UseCase";
+import type { Obtener${N}UseCase } from "../../../application/useCases/Obtener${N}UseCase";
+import type { Obtener${Ns}UseCase } from "../../../application/useCases/Obtener${Ns}UseCase";
 import {
-	create${N}Schema,
-	getAll${Ns}Schema,
-	update${N}Schema,
+	actualizar${N}Schema,
+	crear${N}Schema,
+	obtener${Ns}Schema,
 	${n}IdSchema,
 } from "../schemas/${n}Schemas";
 import { BaseController } from "@/core/shared/infrastructure/http/base.controller";
 import { validate } from "@/core/shared/infrastructure/libs/validate";
 
 export class ${N}Controller extends BaseController {
-	// Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (\`run(id)\`).
+	// Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (\`ejecutar(id)\`).
 	constructor(
 		private readonly useCases: {
-			create: Create${N}UseCase;
-			getAll: GetAll${Ns}UseCase;
-			getOne: GetOne${N}UseCase;
-			update: Update${N}UseCase;
-			delete: Delete${N}UseCase;
+			crear: Crear${N}UseCase;
+			obtenerTodos: Obtener${Ns}UseCase;
+			obtenerUno: Obtener${N}UseCase;
+			actualizar: Actualizar${N}UseCase;
+			eliminar: Eliminar${N}UseCase;
 		},
 	) {
 		super();
 	}
 
-	create = (c: Context): Promise<Response> =>
+	crear = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
-			const dto = validate(create${N}Schema, await c.req.json());
-			return this.created(c, await this.useCases.create.run(dto));
+			const dto = validate(crear${N}Schema, await c.req.json());
+			return this.created(c, await this.useCases.crear.ejecutar(dto));
 		});
 
-	getAll = (c: Context): Promise<Response> =>
+	obtenerTodos = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
-			const dto = validate(getAll${Ns}Schema, c.req.query());
-			return this.ok(c, await this.useCases.getAll.run(dto));
+			const dto = validate(obtener${Ns}Schema, c.req.query());
+			return this.ok(c, await this.useCases.obtenerTodos.ejecutar(dto));
 		});
 
-	getOne = (c: Context): Promise<Response> =>
+	obtenerUno = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
 			const { id } = validate(${n}IdSchema, c.req.param());
-			return this.ok(c, await this.useCases.getOne.run(id));
+			return this.ok(c, await this.useCases.obtenerUno.ejecutar(id));
 		});
 
-	update = (c: Context): Promise<Response> =>
+	actualizar = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
 			const { id } = validate(${n}IdSchema, c.req.param());
-			const dto = validate(update${N}Schema, await c.req.json());
-			return this.ok(c, await this.useCases.update.run(id, dto));
+			const dto = validate(actualizar${N}Schema, await c.req.json());
+			return this.ok(c, await this.useCases.actualizar.ejecutar(id, dto));
 		});
 
-	delete = (c: Context): Promise<Response> =>
+	eliminar = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
 			const { id } = validate(${n}IdSchema, c.req.param());
-			await this.useCases.delete.run(id);
+			await this.useCases.eliminar.ejecutar(id);
 			return c.body(null, 204);
 		});
 }
@@ -527,27 +528,27 @@ import {
 	protectedErrorResponses,
 } from "@/core/shared/infrastructure/http/openapi";
 import type { AuthMiddleware } from "@/modules/auth";
-import type { PermissionGuard } from "@/core/shared/infrastructure/http/permissionGuard";
+import type { PermisoGuard } from "@/core/shared/infrastructure/http/permisoGuard";
 import { ${N}Controller } from "../controllers/${N}Controller";
 import {
-	create${N}Schema,
-	getAll${Ns}Schema,
-	update${N}Schema,
+	actualizar${N}Schema,
+	crear${N}Schema,
+	obtener${Ns}Schema,
 	${n}DtoSchema,
 	${n}IdSchema,
-	${n}PageSchema,
+	${n}PaginaSchema,
 } from "../schemas/${n}Schemas";
 
 const tags = ["${Ns}"];
 const security = [{ bearerAuth: [] }];
-const resource = "${kebabs}";
+const recurso = "${kebabs}";
 
 export class ${N}Router {
 	public readonly router = new OpenAPIHono();
 
 	constructor(
 		authMiddleware: AuthMiddleware,
-		guard: PermissionGuard,
+		guard: PermisoGuard,
 		controller: ${N}Controller,
 	) {
 		const docs = this.router.openAPIRegistry;
@@ -562,16 +563,16 @@ export class ${N}Router {
 			request: {
 				body: {
 					required: true,
-					content: { "application/json": { schema: create${N}Schema } },
+					content: { "application/json": { schema: crear${N}Schema } },
 				},
 			},
 			responses: {
 				201: jsonResponse(${n}DtoSchema, "${N} creado"),
 				400: errorResponse("Validación fallida"),
-				...protectedErrorResponses(\`\${resource}:create\`),
+				...protectedErrorResponses(\`\${recurso}:crear\`),
 			},
 		});
-		this.router.post("/", guard.handle(resource, "create"), controller.create);
+		this.router.post("/", guard.handle(recurso, "crear"), controller.crear);
 
 		docs.registerPath({
 			method: "get",
@@ -579,14 +580,14 @@ export class ${N}Router {
 			tags,
 			security,
 			summary: "Listar ${ns} (paginado)",
-			request: { query: getAll${Ns}Schema },
+			request: { query: obtener${Ns}Schema },
 			responses: {
-				200: jsonResponse(${n}PageSchema, "Lista paginada"),
+				200: jsonResponse(${n}PaginaSchema, "Lista paginada"),
 				400: errorResponse("Parámetros inválidos"),
-				...protectedErrorResponses(\`\${resource}:read\`),
+				...protectedErrorResponses(\`\${recurso}:leer\`),
 			},
 		});
-		this.router.get("/", guard.handle(resource, "read"), controller.getAll);
+		this.router.get("/", guard.handle(recurso, "leer"), controller.obtenerTodos);
 
 		docs.registerPath({
 			method: "get",
@@ -597,11 +598,11 @@ export class ${N}Router {
 			request: { params: ${n}IdSchema },
 			responses: {
 				200: jsonResponse(${n}DtoSchema, "${N} encontrado"),
-				...protectedErrorResponses(\`\${resource}:read\`),
+				...protectedErrorResponses(\`\${recurso}:leer\`),
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.get("/:id", guard.handle(resource, "read"), controller.getOne);
+		this.router.get("/:id", guard.handle(recurso, "leer"), controller.obtenerUno);
 
 		docs.registerPath({
 			method: "put",
@@ -613,17 +614,17 @@ export class ${N}Router {
 				params: ${n}IdSchema,
 				body: {
 					required: true,
-					content: { "application/json": { schema: update${N}Schema } },
+					content: { "application/json": { schema: actualizar${N}Schema } },
 				},
 			},
 			responses: {
 				200: jsonResponse(${n}DtoSchema, "${N} actualizado"),
 				400: errorResponse("Validación fallida"),
-				...protectedErrorResponses(\`\${resource}:update\`),
+				...protectedErrorResponses(\`\${recurso}:actualizar\`),
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.put("/:id", guard.handle(resource, "update"), controller.update);
+		this.router.put("/:id", guard.handle(recurso, "actualizar"), controller.actualizar);
 
 		docs.registerPath({
 			method: "delete",
@@ -634,11 +635,11 @@ export class ${N}Router {
 			request: { params: ${n}IdSchema },
 			responses: {
 				204: { description: "${N} eliminado" },
-				...protectedErrorResponses(\`\${resource}:delete\`),
+				...protectedErrorResponses(\`\${recurso}:eliminar\`),
 				404: errorResponse("${N} no encontrado"),
 			},
 		});
-		this.router.delete("/:id", guard.handle(resource, "delete"), controller.delete);
+		this.router.delete("/:id", guard.handle(recurso, "eliminar"), controller.eliminar);
 	}
 }
 `,
@@ -646,11 +647,11 @@ export class ${N}Router {
 	"module.ts": `import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
 import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
 import { AUTH_TOKENS } from "@/modules/auth";
-import { Create${N}UseCase } from "./application/useCases/Create${N}UseCase";
-import { Delete${N}UseCase } from "./application/useCases/Delete${N}UseCase";
-import { GetAll${Ns}UseCase } from "./application/useCases/GetAll${Ns}UseCase";
-import { GetOne${N}UseCase } from "./application/useCases/GetOne${N}UseCase";
-import { Update${N}UseCase } from "./application/useCases/Update${N}UseCase";
+import { Actualizar${N}UseCase } from "./application/useCases/Actualizar${N}UseCase";
+import { Crear${N}UseCase } from "./application/useCases/Crear${N}UseCase";
+import { Eliminar${N}UseCase } from "./application/useCases/Eliminar${N}UseCase";
+import { Obtener${N}UseCase } from "./application/useCases/Obtener${N}UseCase";
+import { Obtener${Ns}UseCase } from "./application/useCases/Obtener${Ns}UseCase";
 import { ${N}Controller } from "./infrastructure/http/controllers/${N}Controller";
 import { ${N}Router } from "./infrastructure/http/routes/${N}Router";
 import { Prisma${Repo} } from "./infrastructure/repository/Prisma${Repo}";
@@ -660,13 +661,13 @@ export const ${n}Module: AppModule = {
 		const repo = new Prisma${Repo}();
 		const router = new ${N}Router(
 			container.get(AUTH_TOKENS.AuthMiddleware),
-			container.get(TOKENS.PermissionGuard),
+			container.get(TOKENS.PermisoGuard),
 			new ${N}Controller({
-				create: new Create${N}UseCase(repo),
-				getAll: new GetAll${Ns}UseCase(repo),
-				getOne: new GetOne${N}UseCase(repo),
-				update: new Update${N}UseCase(repo),
-				delete: new Delete${N}UseCase(repo),
+				crear: new Crear${N}UseCase(repo),
+				obtenerTodos: new Obtener${Ns}UseCase(repo),
+				obtenerUno: new Obtener${N}UseCase(repo),
+				actualizar: new Actualizar${N}UseCase(repo),
+				eliminar: new Eliminar${N}UseCase(repo),
 			}),
 		);
 		app.route("/api/${kebabs}", router.router);
@@ -704,7 +705,7 @@ writeFileSync(
 // Generado por gen:module: ajustar campos y @map a las convenciones de la tabla.
 model ${N} {
   id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(255)
+  nombre    String    @db.VarChar(255)
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
@@ -748,6 +749,6 @@ console.log(`
 Módulo ${n} creado en src/modules/${n} y registrado en src/modules.ts.
 Siguientes pasos:
   1. Ajustar el modelo ${N} en prisma/schema.prisma y crear la migración: pnpm db:migrate
-  2. Añadir los permisos "${kebabs}:{create,read,update,delete}" en prisma/seed.ts
+  2. Añadir los permisos "${kebabs}:{crear,leer,actualizar,eliminar}" en prisma/seed.ts
   3. Regenerar el contrato del frontend: pnpm gen:api
 `);

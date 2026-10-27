@@ -34,18 +34,18 @@ Esta skill establece la metodología, patrones y estándares para construir suit
 Estructura cada test bajo el patrón **Arrange - Act - Assert**:
 
 ```typescript
-describe("CreateUserUseCase", () => {
+describe("CrearUsuarioUseCase", () => {
   it("debería crear un usuario exitosamente cuando los datos son válidos y el email no existe", async () => {
     // Arrange (Preparar)
-    const dto = { name: "Test", email: "test@hexacore.io", password: "StrongPassword123!" };
-    mockUserRepository.findByEmail.mockResolvedValue(null);
+    const dto = { nombre: "Test", email: "test@hexacore.io", password: "StrongPassword123!" };
+    mockUsuarioRepository.buscarPorEmail.mockResolvedValue(null);
 
     // Act (Ejecutar)
-    const result = await useCase.run(dto);
+    const result = await useCase.ejecutar(dto);
 
     // Assert (Verificar)
     expect(result.email).toBe(dto.email);
-    expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
+    expect(mockUsuarioRepository.save).toHaveBeenCalledTimes(1);
   });
 });
 ```
@@ -67,8 +67,8 @@ import { BaseError } from "@/core/shared/domain/error/BaseError";
 
 describe("Email Value Object", () => {
   it("debería instanciarse correctamente con un formato de email válido", () => {
-    const email = Email.create("user@hexacore.io");
-    expect(email.value).toBe("user@hexacore.io");
+    const email = Email.create("usuario@hexacore.io");
+    expect(email.value).toBe("usuario@hexacore.io");
   });
 
   it("debería lanzar BaseError si el email no contiene arroba", () => {
@@ -85,13 +85,13 @@ describe("Email Value Object", () => {
 
 ```typescript
 import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { CreateUserUseCase } from "./CreateUserUseCase";
+import { CrearUsuarioUseCase } from "./CrearUsuarioUseCase";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 
-const mockUserRepository = {
-  find: mock(),
-  create: mock(),
-  findById: mock(),
+const mockUsuarioRepository = {
+  buscar: mock(),
+  crear: mock(),
+  buscarPorId: mock(),
 };
 
 const mockPasswordHasher = {
@@ -99,25 +99,25 @@ const mockPasswordHasher = {
   compare: mock(),
 };
 
-describe("CreateUserUseCase", () => {
-  let useCase: CreateUserUseCase;
+describe("CrearUsuarioUseCase", () => {
+  let useCase: CrearUsuarioUseCase;
 
   beforeEach(() => {
-    mockUserRepository.find.mockClear();
-    mockUserRepository.create.mockClear();
+    mockUsuarioRepository.buscar.mockClear();
+    mockUsuarioRepository.crear.mockClear();
     mockPasswordHasher.hash.mockClear();
 
-    useCase = new CreateUserUseCase(mockUserRepository as any, mockPasswordHasher as any);
+    useCase = new CrearUsuarioUseCase(mockUsuarioRepository as any, mockPasswordHasher as any);
   });
 
   it("debería lanzar BaseError (400) si el usuario ya existe", async () => {
-    mockUserRepository.find.mockResolvedValue({ data: [{ id: 1 }], total: 1 });
+    mockUsuarioRepository.buscar.mockResolvedValue({ datos: [{ id: 1 }], totalElementos: 1 });
 
     await expect(
-      useCase.run({ name: "User", email: "existing@test.com", password: "123" })
+      useCase.ejecutar({ nombre: "Usuario", email: "existing@test.com", password: "123" })
     ).rejects.toThrow(BaseError);
 
-    expect(mockUserRepository.create).not.toHaveBeenCalled();
+    expect(mockUsuarioRepository.crear).not.toHaveBeenCalled();
   });
 });
 ```
@@ -136,9 +136,9 @@ Para probar la integración HTTP, middlewares de autenticación/autorización y 
 import { describe, expect, it } from "bun:test";
 import { app } from "@/core/shared/infrastructure/http/server";
 
-describe("POST /api/users (E2E)", () => {
+describe("POST /api/usuarios (E2E)", () => {
   it("debería retornar 400 con detalles de validación cuando el body no cumple el schema Zod", async () => {
-    const res = await app.request("/api/users", {
+    const res = await app.request("/api/usuarios", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,10 +153,10 @@ describe("POST /api/users (E2E)", () => {
   });
 
   it("debería retornar 401 si no se envía cabecera de autorización", async () => {
-    const res = await app.request("/api/users", {
+    const res = await app.request("/api/usuarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "admin@test.com", name: "Admin", password: "123" }),
+      body: JSON.stringify({ email: "admin@test.com", nombre: "Admin", password: "123" }),
     });
 
     expect(res.status).toBe(401);

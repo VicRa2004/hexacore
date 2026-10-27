@@ -34,27 +34,27 @@ frontend/
 │   │
 │   ├── modules/                        # Lógica de dominio modular
 │   │   ├── auth/                       # Módulo de Autenticación
-│   │   │   ├── api/                    # authApi (login, register, refresh, logout)
-│   │   │   ├── components/             # LoginForm, RegisterForm (TanStack Form + Zod)
-│   │   │   ├── pages/                  # LoginPage, RegisterPage
+│   │   │   ├── api/                    # authApi (login, registro, refresh, logout)
+│   │   │   ├── components/             # LoginForm, RegistroForm (TanStack Form + Zod)
+│   │   │   ├── pages/                  # LoginPage, RegistroPage
 │   │   │   └── schemas/                # Esquemas de validación Zod
 │   │   │
-│   │   └── users/                      # Módulo de Usuarios
-│   │       ├── api/                    # usersApi (getUsers, getUserById)
-│   │       ├── components/             # UsersTable, UserProfileCard
-│   │       ├── hooks/                  # useUsersQuery (TanStack Query)
-│   │       └── pages/                  # DashboardPage, UsersPage, ProfilePage
+│   │   └── usuarios/                      # Módulo de Usuarios
+│   │       ├── api/                    # usuariosApi (obtenerUsuarios, obtenerUsuarioPorId)
+│   │       ├── components/             # UsuariosTable, PerfilUsuarioCard
+│   │       ├── hooks/                  # useUsuariosQuery (TanStack Query)
+│   │       └── pages/                  # DashboardPage, UsuariosPage, PerfilPage
 │   │
 │   ├── routes/                         # Árbol de rutas tipadas por archivos
 │   │   ├── __root.tsx                  # Ruta raíz con Toaster de Sonner
 │   │   ├── index.tsx                   # Redirección inteligente
 │   │   ├── login.tsx                   # Ruta pública de login
-│   │   ├── register.tsx                # Ruta pública de registro
+│   │   ├── registro.tsx                # Ruta pública de registro
 │   │   └── _authenticated/             # Layout protegido por autenticación
 │   │       ├── route.tsx               # Guardián de sesión
 │   │       ├── dashboard.tsx           # Vista /dashboard
-│   │       ├── users.tsx               # Vista /users
-│   │       └── profile.tsx             # Vista /profile
+│   │       ├── usuarios.tsx               # Vista /usuarios
+│   │       └── perfil.tsx              # Vista /perfil
 │   │
 │   ├── routeTree.gen.ts                # Árbol de rutas generado automáticamente
 │   ├── index.css                       # Estilos base con Tailwind CSS v4

@@ -21,8 +21,8 @@ export const jsonResponse = (schema: z.ZodType, description: string) => ({
 export const errorResponse = (description: string) =>
 	jsonResponse(errorResponseSchema, description);
 
-/** Respuestas de error comunes a las rutas con `authMiddleware` + `requirePermission`. */
-export const protectedErrorResponses = (permission: string) => ({
+/** Respuestas de error comunes a las rutas con `authMiddleware` + `requierePermiso`. */
+export const protectedErrorResponses = (permiso: string) => ({
 	401: errorResponse("No autenticado"),
-	403: errorResponse(`Permiso denegado (requiere ${permission})`),
+	403: errorResponse(`Permiso denegado (requiere ${permiso})`),
 });

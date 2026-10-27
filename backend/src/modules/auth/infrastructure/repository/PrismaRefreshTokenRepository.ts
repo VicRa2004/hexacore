@@ -2,71 +2,71 @@ import { prisma } from "@/core/config/prisma";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
-	async create(data: {
+	async crear(data: {
 		tokenHash: string;
-		userId: number;
-		expiresAt: Date;
+		usuarioId: number;
+		expiraEn: Date;
 	}): Promise<void> {
 		await prisma.refreshToken.create({
 			data: {
 				tokenHash: data.tokenHash,
-				userId: data.userId,
-				expiresAt: data.expiresAt,
+				usuarioId: data.usuarioId,
+				expiraEn: data.expiraEn,
 			},
 		});
 	}
 
-	async findValidByHash(
+	async buscarValidoPorHash(
 		tokenHash: string,
-	): Promise<{ id: number; userId: number; expiresAt: Date } | null> {
-		const record = await prisma.refreshToken.findUnique({
+	): Promise<{ id: number; usuarioId: number; expiraEn: Date } | null> {
+		const registro = await prisma.refreshToken.findUnique({
 			where: {
 				tokenHash,
-				revoked: false,
-				expiresAt: { gt: new Date() },
+				revocado: false,
+				expiraEn: { gt: new Date() },
 			},
 		});
 
-		if (!record) return null;
+		if (!registro) return null;
 
 		return {
-			id: record.id,
-			userId: record.userId,
-			expiresAt: record.expiresAt,
+			id: registro.id,
+			usuarioId: registro.usuarioId,
+			expiraEn: registro.expiraEn,
 		};
 	}
 
-	async findByHash(
+	async buscarPorHash(
 		tokenHash: string,
-	): Promise<{ id: number; userId: number; revoked: boolean } | null> {
-		const record = await prisma.refreshToken.findUnique({
+	): Promise<{ id: number; usuarioId: number; revocado: boolean } | null> {
+		const registro = await prisma.refreshToken.findUnique({
 			where: { tokenHash },
-			select: { id: true, userId: true, revoked: true },
+			select: { id: true, usuarioId: true, revocado: true },
 		});
 
-		return record;
+		return registro;
 	}
 
-	async revokeById(id: number): Promise<boolean> {
+	async revocarPorId(id: number): Promise<boolean> {
 		const { count } = await prisma.refreshToken.updateMany({
-			where: { id, revoked: false },
-			data: { revoked: true },
+			where: { id, revocado: false },
+			data: { revocado: true },
 		});
 
 		return count === 1;
 	}
 
-	async revokeAllByUserId(userId: number): Promise<void> {
+	async revocarTodosPorUsuarioId(usuarioId: number): Promise<void> {
 		await prisma.refreshToken.updateMany({
-			where: { userId, revoked: false },
-			data: { revoked: true },
+			where: { usuarioId, revocado: false },
+			data: { revocado: true },
 		});
 	}
 
-	async deleteExpired(): Promise<void> {
+	async eliminarExpirados(): Promise<void> {
 		// Los revocados aún vigentes se conservan: detectan la reutilización de tokens.
 		await prisma.refreshToken.deleteMany({
-			where: { expiresAt: { lt: new Date() } },
+			where: { expiraEn: { lt: new Date() } },
 		});
 	}
 }

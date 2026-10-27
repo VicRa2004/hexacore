@@ -59,7 +59,10 @@ export function rateLimit({
 
 		if (entry.count > limit) {
 			c.header("Retry-After", String(Math.ceil((entry.resetAt - now) / 1000)));
-			return c.json({ error: "Too many requests, try again later" }, 429);
+			return c.json(
+				{ error: "Demasiadas peticiones, inténtalo más tarde" },
+				429,
+			);
 		}
 
 		await next();

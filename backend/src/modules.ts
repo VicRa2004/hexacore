@@ -1,16 +1,16 @@
 import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
-import { userModule } from "@/core/user/module";
+import { usuarioModule } from "@/core/usuario/module";
 import { authModule } from "@/modules/auth/module";
-import { authorizationModule } from "@/modules/authorization/module";
-import { eventsModule } from "@/modules/events/module";
+import { autorizacionModule } from "@/modules/autorizacion/module";
+import { eventosModule } from "@/modules/eventos/module";
 
 /**
  * Módulos activos, en orden de registro. Añadir o quitar un módulo = tocar esta lista
  * (checklist completa en `backend/AGENTS.md`, "Cómo quitar un módulo").
  */
 export const modules: AppModule[] = [
-	userModule,
+	usuarioModule,
 	authModule,
-	authorizationModule,
-	eventsModule,
+	autorizacionModule,
+	eventosModule,
 ];

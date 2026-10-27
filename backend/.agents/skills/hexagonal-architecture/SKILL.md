@@ -1,5 +1,5 @@
 ---
-name: hexagonal-architecture
+nombre: hexagonal-architecture
 description: Guía integral y estándares para diseñar e implementar la Arquitectura Hexagonal (Puertos y Adaptadores) en aplicaciones backend TypeScript con Bun, Hono y Prisma. Úsalo al crear nuevos módulos, casos de uso, entidades, puertos, adaptadores o al refactorizar lógica de negocio e infraestructura.
 ---
 
@@ -27,8 +27,8 @@ El objetivo de la Arquitectura Hexagonal es aislar la lógica de negocio central
 ## 2. Estructura de Módulos
 
 El proyecto organiza el código en dos niveles:
-1. `src/core/`: Componentes transversales, utilidades compartidas, configuración y módulos de dominio compartidos por múltiples características (por ejemplo `src/core/user`, `src/core/shared`).
-2. `src/modules/<nombre>/`: Módulos de funcionalidad de negocio delimitada (por ejemplo `src/modules/auth`, `src/modules/authorization`).
+1. `src/core/`: Componentes transversales, utilidades compartidas, configuración y módulos de dominio compartidos por múltiples características (por ejemplo `src/core/usuario`, `src/core/shared`).
+2. `src/modules/<nombre>/`: Módulos de funcionalidad de negocio delimitada (por ejemplo `src/modules/auth`, `src/modules/autorizacion`).
 
 Cada módulo sigue rigurosamente esta estructura de capas:
 
@@ -70,49 +70,49 @@ src/modules/<nombre>/ (o src/core/<nombre>/)
 
 ### 3.1 Entidades
 - Constructor privado para proteger las invariantes.
-- Método estático `create()` para instanciar nuevas entidades (asigna ID provisional/generado y añade eventos de dominio si aplica).
-- Método estático `reconstitute()` para hidratar entidades existentes desde la base de datos (sin disparar validaciones de creación ni eventos).
+- Método estático `crear()` para instanciar nuevas entidades (asigna ID provisional/generado y añade eventos de dominio si aplica).
+- Método estático `reconstituir()` para hidratar entidades existentes desde la base de datos (sin disparar validaciones de creación ni eventos).
 - Métodos de negocio explícitos que modifican el estado interno (evitar setters genéricos o entidades anémicas).
 
 ```typescript
-export class User extends Entity<number> {
+export class Usuario extends Entity<number> {
   private constructor(
-    private _name: string,
+    private _nombre: string,
     private _email: string,
     private _passwordHash: string,
-    private _isActive: boolean,
+    private _isActivo: boolean,
     id?: number,
   ) {
     super(id);
   }
 
-  static create(name: string, email: string, passwordHash: string): User {
-    const user = new User(name, email, passwordHash, true);
-    user.addDomainEvent(new UserCreatedEvent(user));
-    return user;
+  static crear(nombre: string, email: string, passwordHash: string): Usuario {
+    const usuario = new Usuario(nombre, email, passwordHash, true);
+    usuario.addDomainEvent(new UsuarioCreadoEvent(usuario));
+    return usuario;
   }
 
-  static reconstitute(name: string, email: string, passwordHash: string, isActive: boolean, id: number): User {
-    return new User(name, email, passwordHash, isActive, id);
+  static reconstituir(nombre: string, email: string, passwordHash: string, isActivo: boolean, id: number): Usuario {
+    return new Usuario(nombre, email, passwordHash, isActivo, id);
   }
 
-  deactivate(): void {
-    this._isActive = false;
+  desactivar(): void {
+    this._isActivo = false;
   }
 
   get email(): string { return this._email; }
-  get name(): string { return this._name; }
+  get nombre(): string { return this._nombre; }
 }
 ```
 
 ### 3.2 Value Objects
-- Objetos inmutables cuyo valor define su identidad (`Email`, `EntityId`, `Role`).
+- Objetos inmutables cuyo valor define su identidad (`Email`, `EntityId`, `Rol`).
 - Validación en su fábrica o constructor.
 - Comparación por valor mediante `equals()`.
 
 ### 3.3 Puertos (Interfaces)
 - Definen qué necesita el dominio sin especificar cómo se resuelve:
-  - `UserRepository`: Contrato con métodos como `save(user: User): Promise<void>`, `findById(id: number): Promise<User | null>`.
+  - `UsuarioRepository`: Contrato con métodos como `crear(usuario: Usuario): Promise<void>`, `buscarPorId(id: number): Promise<Usuario | null>`.
   - `PasswordHasher`: Contrato con `hash(plain: string): Promise<string>` y `compare(plain: string, hash: string): Promise<boolean>`.
 
 ### 3.4 Errores de Dominio
@@ -124,34 +124,34 @@ export class User extends Entity<number> {
 ## 4. Capa de Aplicación (Application)
 
 ### 4.1 Casos de Uso (Use Cases)
-- **Regla estricta:** El método principal debe llamarse **`run`** (nunca `execute`).
+- **Regla estricta:** El método principal debe llamarse **`ejecutar`** (nunca `execute`).
 - Reciben las interfaces del dominio por constructor (sin decoradores); se construyen con `new` en el `module.ts`.
 - Un caso de uso representa un único flujo o intención de usuario.
 - Orquestan el flujo: validan reglas de negocio, llaman al dominio, persisten en el repositorio, emiten eventos y retornan DTOs.
 - **Prohibición absoluta:** Nunca devolver entidades de dominio hacia el exterior o controladores HTTP.
 
 ```typescript
-import type { UserRepository } from "../../domain/repository/UserRepository";
-import type { CreateUserDto } from "../dtos/CreateUserDto";
-import type { UserDto } from "../dtos/UserDto";
-import { User } from "../../domain/User";
-import { UserMapper } from "../mappers/UserMapper";
+import type { UsuarioRepository } from "../../domain/repository/UsuarioRepository";
+import type { CrearUsuarioDto } from "../dtos/CrearUsuarioDto";
+import type { UsuarioDto } from "../dtos/UsuarioDto";
+import { Usuario } from "../../domain/Usuario";
+import { UsuarioMapper } from "../mappers/UsuarioMapper";
 
-export class CreateUserUseCase {
+export class CrearUsuarioUseCase {
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly usuarioRepository: UsuarioRepository,
   ) {}
 
-  async run(dto: CreateUserDto): Promise<UserDto> {
-    const existing = await this.userRepository.findByEmail(dto.email);
+  async ejecutar(dto: CrearUsuarioDto): Promise<UsuarioDto> {
+    const existing = await this.usuarioRepository.buscarPorEmail(dto.email);
     if (existing) {
       throw new UserAlreadyExistsError(dto.email);
     }
 
-    const user = User.create(dto.name, dto.email, dto.password);
-    await this.userRepository.save(user);
+    const usuario = Usuario.crear(dto.nombre, dto.email, dto.password);
+    await this.usuarioRepository.crear(usuario);
 
-    return UserMapper.toDto(user);
+    return UsuarioMapper.toDto(usuario);
   }
 }
 ```
@@ -171,20 +171,20 @@ export class CreateUserUseCase {
 
 ```typescript
 import { prisma } from "@/core/config/prisma";
-import type { UserRepository } from "../../domain/repository/UserRepository";
-import { User } from "../../domain/User";
+import type { UsuarioRepository } from "../../domain/repository/UsuarioRepository";
+import { Usuario } from "../../domain/Usuario";
 
-export class PrismaUserRepository implements UserRepository {
-  async findById(id: number): Promise<User | null> {
-    const record = await prisma.user.findUnique({ where: { id } });
+export class PrismaUsuarioRepository implements UsuarioRepository {
+  async buscarPorId(id: number): Promise<Usuario | null> {
+    const record = await prisma.usuario.findUnique({ where: { id } });
     if (!record) return null;
-    return User.reconstitute(record.name, record.email, record.password, record.isActive, record.id);
+    return Usuario.reconstituir(record.nombre, record.email, record.password, record.isActivo, record.id);
   }
 }
 ```
 
 ### 5.2 Adaptadores Primarios: Controladores Hono
-- En `http/controllers/`, por defecto **uno por recurso** (`UserController` con `create`, `getAll`, `getOne`, `update`, `delete`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token).
+- En `http/controllers/`, por defecto **uno por recurso** (`UsuarioController` con `crear`, `obtenerTodos`, `obtenerUno`, `actualizar`, `eliminar`). Separar en varios cuando pase de ~6 handlers, cuando los handlers necesiten dependencias muy distintas o cuando tengan un ciclo HTTP propio (p. ej. `auth`: 4 controladores por las cookies del refresh token).
 - Heredan de `BaseController` (`src/core/shared/infrastructure/http/base.controller.ts`).
 - Usan `this.executeSafely(c, async () => { ... })` para captura centralizada de errores.
 - Cada handler es un método flecha `nombre = (c: Context): Promise<Response> => ...`.
@@ -192,24 +192,24 @@ export class PrismaUserRepository implements UserRepository {
 - Respuestas estandarizadas: `this.ok(c, result)` (200), `this.created(c, result)` (201).
 
 ```typescript
-export class UserController extends BaseController {
-  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`run(id)`).
+export class UsuarioController extends BaseController {
+  // Objeto con nombres y no posicional: varios casos de uso tienen la misma forma (`ejecutar(id)`).
   constructor(
-    private readonly useCases: { create: CreateUserUseCase; getOne: GetOneUserUseCase },
+    private readonly useCases: { crear: CrearUsuarioUseCase; obtenerUno: ObtenerUsuarioUseCase },
   ) {
     super();
   }
 
-  create = (c: Context): Promise<Response> =>
+  crear = (c: Context): Promise<Response> =>
     this.executeSafely(c, async () => {
-      const dto = validate(createUserSchema, await c.req.json());
-      return this.created(c, await this.useCases.create.run(dto));
+      const dto = validate(crearUsuarioSchema, await c.req.json());
+      return this.created(c, await this.useCases.crear.ejecutar(dto));
     });
 
-  getOne = (c: Context): Promise<Response> =>
+  obtenerUno = (c: Context): Promise<Response> =>
     this.executeSafely(c, async () => {
-      const { id } = validate(userIdSchema, c.req.param());
-      return this.ok(c, await this.useCases.getOne.run(id));
+      const { id } = validate(usuarioIdSchema, c.req.param());
+      return this.ok(c, await this.useCases.obtenerUno.ejecutar(id));
     });
 }
 ```
@@ -230,11 +230,11 @@ Sin decoradores ni librería de DI (ver ADR 0006).
 1. **Dentro del módulo:** el `module.ts` construye todo con `new` y pasa las dependencias por constructor.
 2. **Entre módulos o sustituible:** contenedor mínimo `DependencyContainer` (`core/shared/infrastructure/di/`) con tokens tipados:
    ```typescript
-   export const USER_TOKENS = { UserRepository: token<UserRepository>("UserRepository") } as const;
-   container.set(USER_TOKENS.UserRepository, () => new PrismaUserRepository());
-   const users = container.get(USER_TOKENS.UserRepository); // tipado, sin casts
+   export const USUARIO_TOKENS = { UsuarioRepository: token<UsuarioRepository>("UsuarioRepository") } as const;
+   container.set(USUARIO_TOKENS.UsuarioRepository, () => new PrismaUsuarioRepository());
+   const usuarios = container.get(USUARIO_TOKENS.UsuarioRepository); // tipado, sin casts
    ```
-   Todo es singleton y se resuelve en diferido. Registrar de nuevo un token lo sustituye (así `authorization` pisa `TOKENS.PermissionGuard`).
+   Todo es singleton y se resuelve en diferido. Registrar de nuevo un token lo sustituye (así `autorizacion` pisa `TOKENS.PermisoGuard`).
 3. **Tokens:** los del núcleo compartido en `core/shared/infrastructure/di/tokens.ts` (`TOKENS`); los de cada módulo en su `infrastructure/tokens.ts`, exportados por `index.ts`.
 
 ---
@@ -242,13 +242,13 @@ Sin decoradores ni librería de DI (ver ADR 0006).
 ## 7. Checklist para Crear un Módulo Nuevo
 
 1. **Domain:**
-   - [ ] Crear entidad en `domain/<Entidad>.ts` con `create()` y `reconstitute()`.
+   - [ ] Crear entidad en `domain/<Entidad>.ts` con `crear()` y `reconstituir()`.
    - [ ] Crear interface de repositorio en `domain/repository/<Entidad>Repository.ts`.
    - [ ] Crear errores específicos en `domain/error/` extendiendo `BaseError`.
 2. **Application:**
    - [ ] Crear DTOs de entrada y salida en `application/dtos/`.
    - [ ] Crear Mapper Entidad → DTO en `application/mappers/`.
-   - [ ] Crear caso de uso con método `run()` en `application/useCases/`.
+   - [ ] Crear caso de uso con método `ejecutar()` en `application/useCases/`.
 3. **Infrastructure:**
    - [ ] Crear implementación de repositorio con Prisma en `infrastructure/repository/`.
    - [ ] Crear esquema Zod de validación en `infrastructure/http/schemas/`.

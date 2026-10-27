@@ -12,7 +12,7 @@ export class DependencyContainer {
 	private factories = new Map<symbol, (c: DependencyContainer) => unknown>();
 	private instances = new Map<symbol, unknown>();
 
-	/** Registrar de nuevo un token lo sustituye (así `authorization` pisa el guard por defecto). */
+	/** Registrar de nuevo un token lo sustituye (así `autorizacion` pisa el guard por defecto). */
 	set<T>(key: Token<T>, factory: (c: DependencyContainer) => T): void {
 		this.factories.set(key, factory);
 		this.instances.delete(key);

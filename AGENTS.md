@@ -57,6 +57,14 @@ Bun solo ejecuta el backend: `dev`, `test`, `start`, `scripts/*`, `prisma.seed`.
 
 - **Cierre de tarea:** `pnpm verify` (debe pasar). El CI ejecuta además `prisma migrate deploy`, `pnpm test:e2e` (Postgres real) y el build de la imagen Docker con smoke test de `/health`.
 
+## Idioma del código
+
+El código se escribe en **español** para que lo lea cualquiera del equipo; solo lo estándar o técnico queda en inglés.
+
+- **Español:** dominio y negocio. Clases, tipos, variables, constantes, archivos, métodos y propiedades (`Usuario`, `Permiso`, `nombre`, `recurso`, `accion`, `buscarPorId`, `ejecutar`), tablas y columnas (`usuario`, `usr_nombre`), rutas y campos de la API (`/api/usuarios`, `{ datos, pagina, totalElementos, totalPaginas }`), permisos (`usuarios:leer`) y mensajes de error/UI.
+- **Inglés (estándar):** sufijos de patrón (`CrearUsuarioUseCase`, `UsuarioRepository`, `UsuarioController`, `UsuarioDto`, `UsuarioMapper`, `…Router`, `…Middleware`, `…Error`, `…Event`), carpetas de capas (`domain`, `application`, `infrastructure`, `useCases`…), núcleo técnico (`Entity`, `ValueObject`, `EventBus`, `BaseController`, `DependencyContainer`, `AppModule`), prefijos de booleanos (`isActivo`), y términos sin traducción natural: `email`, `password`, `token`, `refreshToken`, `login`/`logout`, `id`, `roles`, `createdAt`/`updatedAt`, `dashboard`, primitivas de UI (`Button`, `Card`) y `use…` de React.
+- Verbos de CRUD: `crear`, `obtenerTodos`/`obtenerUno`, `actualizar`, `eliminar`; repositorios `buscar`, `buscarPorId`, `buscarPorEmail`. `pnpm gen:module` ya genera con esta convención.
+
 ## Skills y docs para IA
 
 - `AGENTS.md` es la guía real; cada `CLAUDE.md` contiene solo `@AGENTS.md`.

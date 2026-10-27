@@ -1,26 +1,26 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { api, PASSWORD, refreshCookie, resetUsers } from "@/test/e2e";
+import { api, PASSWORD, refreshCookie, vaciarUsuarios } from "@/test/e2e";
 
 const refresh = (cookie: string) =>
 	api("/api/auth/refresh", { method: "POST", cookie });
 
 describe("Auth (e2e)", () => {
-	beforeAll(resetUsers);
+	beforeAll(vaciarUsuarios);
 
 	it("registro → logout: el refresh token queda revocado", async () => {
-		const body = { name: "Ana", email: "ana@e2e.dev", password: PASSWORD };
+		const body = { nombre: "Ana", email: "ana@e2e.dev", password: PASSWORD };
 
-		const register = await api("/api/auth/register", { method: "POST", body });
-		expect(register.status).toBe(201);
-		expect((await register.json()).user.email).toBe("ana@e2e.dev");
+		const registro = await api("/api/auth/registro", { method: "POST", body });
+		expect(registro.status).toBe(201);
+		expect((await registro.json()).usuario.email).toBe("ana@e2e.dev");
 
-		const duplicated = await api("/api/auth/register", {
+		const duplicado = await api("/api/auth/registro", {
 			method: "POST",
 			body,
 		});
-		expect(duplicated.status).toBe(400);
+		expect(duplicado.status).toBe(400);
 
-		const cookie = refreshCookie(register);
+		const cookie = refreshCookie(registro);
 		const logout = await api("/api/auth/logout", { method: "POST", cookie });
 		expect(logout.status).toBe(200);
 		expect((await refresh(cookie)).status).toBe(401);
@@ -32,15 +32,15 @@ describe("Auth (e2e)", () => {
 			body: { email: "ana@e2e.dev", password: PASSWORD },
 		});
 		expect(login.status).toBe(200);
-		const oldCookie = refreshCookie(login);
+		const cookieVieja = refreshCookie(login);
 
-		const rotated = await refresh(oldCookie);
-		expect(rotated.status).toBe(200);
-		expect((await rotated.json()).accessToken).toBeString();
-		const newCookie = refreshCookie(rotated);
+		const rotado = await refresh(cookieVieja);
+		expect(rotado.status).toBe(200);
+		expect((await rotado.json()).accessToken).toBeString();
+		const cookieNueva = refreshCookie(rotado);
 
-		expect((await refresh(oldCookie)).status).toBe(401);
-		expect((await refresh(newCookie)).status).toBe(401);
+		expect((await refresh(cookieVieja)).status).toBe(401);
+		expect((await refresh(cookieNueva)).status).toBe(401);
 	});
 
 	it("login con contraseña incorrecta → 401", async () => {

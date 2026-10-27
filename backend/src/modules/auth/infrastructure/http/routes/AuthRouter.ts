@@ -1,7 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
 import { LoginController } from "../controllers/LoginController";
-import { RegisterController } from "../controllers/RegisterController";
+import { RegistroController } from "../controllers/RegistroController";
 import { RefreshTokenController } from "../controllers/RefreshTokenController";
 import { LogoutController } from "../controllers/LogoutController";
 import { rateLimit } from "@/core/shared/infrastructure/http/rateLimit";
@@ -12,9 +12,9 @@ import {
 import {
 	authResponseSchema,
 	loginSchema,
-	messageResponseSchema,
+	mensajeResponseSchema,
 	refreshResponseSchema,
-	registerSchema,
+	registroSchema,
 } from "../schemas/authSchemas";
 
 const MINUTE = 60 * 1000;
@@ -28,22 +28,22 @@ export class AuthRouter {
 
 	constructor(
 		private readonly loginController: LoginController,
-		private readonly registerController: RegisterController,
+		private readonly registroController: RegistroController,
 		private readonly refreshTokenController: RefreshTokenController,
 		private readonly logoutController: LogoutController,
 	) {
 		this.router = new OpenAPIHono();
-		this.initRoutes();
+		this.iniciarRutas();
 	}
 
-	private initRoutes() {
+	private iniciarRutas() {
 		// La documentación OpenAPI se genera desde los mismos schemas Zod que
 		// validan los controladores.
 		const docs = this.router.openAPIRegistry;
 
 		// Freno a fuerza bruta y altas masivas: límites por IP.
-		const loginLimit = rateLimit({ windowMs: 15 * MINUTE, limit: 5 });
-		const registerLimit = rateLimit({ windowMs: 60 * MINUTE, limit: 4 });
+		const limiteLogin = rateLimit({ windowMs: 15 * MINUTE, limit: 5 });
+		const limiteRegistro = rateLimit({ windowMs: 60 * MINUTE, limit: 4 });
 
 		docs.registerPath({
 			method: "post",
@@ -69,18 +69,18 @@ export class AuthRouter {
 				},
 			},
 		});
-		this.router.post("/login", loginLimit, this.loginController.run);
+		this.router.post("/login", limiteLogin, this.loginController.ejecutar);
 
 		docs.registerPath({
 			method: "post",
-			path: "/register",
+			path: "/registro",
 			tags,
 			security,
 			summary: "Registrar un nuevo usuario",
 			request: {
 				body: {
 					required: true,
-					content: { "application/json": { schema: registerSchema } },
+					content: { "application/json": { schema: registroSchema } },
 				},
 			},
 			responses: {
@@ -92,7 +92,11 @@ export class AuthRouter {
 				429: { description: "Demasiados registros (máx. 4 por IP cada hora)" },
 			},
 		});
-		this.router.post("/register", registerLimit, this.registerController.run);
+		this.router.post(
+			"/registro",
+			limiteRegistro,
+			this.registroController.ejecutar,
+		);
 
 		docs.registerPath({
 			method: "post",
@@ -111,7 +115,7 @@ export class AuthRouter {
 				401: errorResponse("Refresh token inválido o expirado"),
 			},
 		});
-		this.router.post("/refresh", this.refreshTokenController.run);
+		this.router.post("/refresh", this.refreshTokenController.ejecutar);
 
 		docs.registerPath({
 			method: "post",
@@ -123,12 +127,12 @@ export class AuthRouter {
 				"Revoca el refresh token de la cookie httpOnly `refresh_token` y la borra. El access token seguirá siendo válido hasta que expire (máx 15 min).",
 			responses: {
 				200: jsonResponse(
-					messageResponseSchema,
+					mensajeResponseSchema,
 					"Sesión cerrada correctamente",
 				),
 				400: errorResponse("Refresh token inválido"),
 			},
 		});
-		this.router.post("/logout", this.logoutController.run);
+		this.router.post("/logout", this.logoutController.ejecutar);
 	}
 }

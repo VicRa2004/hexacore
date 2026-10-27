@@ -42,7 +42,7 @@ describe("server", () => {
 
 		expect(res.status).toBe(500);
 		expect(body).toEqual({
-			error: "Internal Server Error",
+			error: "Error interno del servidor",
 			requestId: res.headers.get("X-Request-Id"),
 		});
 		expect(body.requestId).toBeString();

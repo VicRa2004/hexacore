@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/users": {
+    "/api/usuarios": {
         parameters: {
             query?: never;
             header?: never;
@@ -15,8 +15,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    page?: string;
-                    limit?: string;
+                    pagina?: string;
+                    limite?: string;
                     email?: string;
                 };
                 header?: never;
@@ -32,13 +32,13 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            data: components["schemas"]["UserDto"][];
+                            datos: components["schemas"]["UsuarioDto"][];
                             /** @example 1 */
-                            page: number;
+                            pagina: number;
                             /** @example 10 */
-                            totalItems: number;
+                            totalElementos: number;
                             /** @example 1 */
-                            totalPages: number;
+                            totalPaginas: number;
                         };
                     };
                 };
@@ -60,7 +60,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere users:read) */
+                /** @description Permiso denegado (requiere usuarios:leer) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -85,7 +85,7 @@ export interface paths {
                     "application/json": {
                         /** Format: email */
                         email: string;
-                        name: string;
+                        nombre: string;
                         password: string;
                     };
                 };
@@ -97,7 +97,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["UserDto"];
+                        "application/json": components["schemas"]["UsuarioDto"];
                     };
                 };
                 /** @description Validación fallida o usuario existente */
@@ -118,7 +118,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere users:create) */
+                /** @description Permiso denegado (requiere usuarios:crear) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -135,7 +135,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}": {
+    "/api/usuarios/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -160,7 +160,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["UserDto"];
+                        "application/json": components["schemas"]["UsuarioDto"];
                     };
                 };
                 /** @description No autenticado */
@@ -172,7 +172,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere users:read) */
+                /** @description Permiso denegado (requiere usuarios:leer) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -207,7 +207,7 @@ export interface paths {
                     "application/json": {
                         /** Format: email */
                         email?: string;
-                        name?: string;
+                        nombre?: string;
                         password?: string;
                     };
                 };
@@ -219,7 +219,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["UserDto"];
+                        "application/json": components["schemas"]["UsuarioDto"];
                     };
                 };
                 /** @description Validación fallida */
@@ -240,7 +240,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere users:update) */
+                /** @description Permiso denegado (requiere usuarios:actualizar) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -289,7 +289,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere users:delete) */
+                /** @description Permiso denegado (requiere usuarios:eliminar) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -395,7 +395,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/register": {
+    "/api/auth/registro": {
         parameters: {
             query?: never;
             header?: never;
@@ -415,7 +415,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        name: string;
+                        nombre: string;
                         /** Format: email */
                         email: string;
                         password: string;
@@ -546,7 +546,7 @@ export interface paths {
                     content: {
                         "application/json": {
                             /** @example Sesión cerrada correctamente */
-                            message: string;
+                            mensaje: string;
                         };
                     };
                 };
@@ -567,7 +567,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/permissions/users/{userId}": {
+    "/api/permisos/usuarios/{usuarioId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -580,7 +580,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    userId: string;
+                    usuarioId: string;
                 };
                 cookie?: never;
             };
@@ -592,7 +592,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PermissionDto"][];
+                        "application/json": components["schemas"]["PermisoDto"][];
                     };
                 };
                 /** @description No autenticado */
@@ -604,7 +604,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:read) */
+                /** @description Permiso denegado (requiere permisos:leer) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -623,7 +623,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/permissions": {
+    "/api/permisos": {
         parameters: {
             query?: never;
             header?: never;
@@ -646,7 +646,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PermissionDto"][];
+                        "application/json": components["schemas"]["PermisoDto"][];
                     };
                 };
                 /** @description No autenticado */
@@ -658,7 +658,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:read) */
+                /** @description Permiso denegado (requiere permisos:leer) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -681,8 +681,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        resource: string;
-                        action: string;
+                        recurso: string;
+                        accion: string;
                     };
                 };
             };
@@ -693,7 +693,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PermissionDto"];
+                        "application/json": components["schemas"]["PermisoDto"];
                     };
                 };
                 /** @description Validación fallida o permiso duplicado */
@@ -714,7 +714,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:create) */
+                /** @description Permiso denegado (requiere permisos:crear) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -731,7 +731,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/permissions/{id}": {
+    "/api/permisos/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -756,7 +756,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PermissionDto"];
+                        "application/json": components["schemas"]["PermisoDto"];
                     };
                 };
                 /** @description No autenticado */
@@ -768,7 +768,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:read) */
+                /** @description Permiso denegado (requiere permisos:leer) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -801,8 +801,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        resource: string;
-                        action: string;
+                        recurso: string;
+                        accion: string;
                     };
                 };
             };
@@ -813,7 +813,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PermissionDto"];
+                        "application/json": components["schemas"]["PermisoDto"];
                     };
                 };
                 /** @description Validación fallida o conflicto */
@@ -834,7 +834,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:update) */
+                /** @description Permiso denegado (requiere permisos:actualizar) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -883,7 +883,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Permiso denegado (requiere permissions:delete) */
+                /** @description Permiso denegado (requiere permisos:eliminar) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -912,21 +912,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UserDto: {
+        UsuarioDto: {
             /** @example 1 */
             id: number;
-            /** @example John Doe */
-            name: string;
+            /** @example Juan Pérez */
+            nombre: string;
             /**
              * Format: email
-             * @example user@example.com
+             * @example usuario@example.com
              */
             email: string;
             /** @example true */
-            isActive: boolean;
+            isActivo: boolean;
             /**
              * @example [
-             *       "USER"
+             *       "USUARIO"
              *     ]
              */
             roles: string[];
@@ -942,15 +942,15 @@ export interface components {
         AuthResponse: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
             accessToken: string;
-            user: components["schemas"]["UserDto"];
+            usuario: components["schemas"]["UsuarioDto"];
         };
-        PermissionDto: {
+        PermisoDto: {
             /** @example 1 */
             id: number;
-            /** @example users */
-            resource: string;
-            /** @example read */
-            action: string;
+            /** @example usuarios */
+            recurso: string;
+            /** @example leer */
+            accion: string;
         };
     };
     responses: never;
@@ -959,9 +959,9 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-export type UserDto = components['schemas']['UserDto'];
+export type UsuarioDto = components['schemas']['UsuarioDto'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type AuthResponse = components['schemas']['AuthResponse'];
-export type PermissionDto = components['schemas']['PermissionDto'];
+export type PermisoDto = components['schemas']['PermisoDto'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

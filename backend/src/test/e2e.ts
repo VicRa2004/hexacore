@@ -10,18 +10,18 @@ export const PASSWORD = "SecurePass123!";
  * Vacía los usuarios y, en cascada, sus roles, permisos directos y refresh tokens.
  * Conserva el catálogo de roles y permisos que carga el seed.
  */
-export async function resetUsers(): Promise<void> {
-	await prisma.$executeRawUnsafe('TRUNCATE "user" RESTART IDENTITY CASCADE');
+export async function vaciarUsuarios(): Promise<void> {
+	await prisma.$executeRawUnsafe('TRUNCATE "usuario" RESTART IDENTITY CASCADE');
 }
 
 /** Crea un usuario directamente en BD, con el rol indicado o sin ninguno. */
-export async function createUser(email: string, role?: string) {
-	return prisma.user.create({
+export async function crearUsuario(email: string, rol?: string) {
+	return prisma.usuario.create({
 		data: {
 			email,
-			name: "E2E User",
+			nombre: "Usuario E2E",
 			password: await bcrypt.hash(PASSWORD, 4),
-			roles: role ? { create: { role: { connect: { name: role } } } } : {},
+			roles: rol ? { create: { rol: { connect: { nombre: rol } } } } : {},
 		},
 	});
 }

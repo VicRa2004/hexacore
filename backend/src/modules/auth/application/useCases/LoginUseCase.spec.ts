@@ -1,41 +1,41 @@
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { LoginUseCase } from "./LoginUseCase";
-import { SessionIssuer } from "../services/SessionIssuer";
-import { User } from "@/core/user";
+import { EmisorSesion } from "../services/EmisorSesion";
+import { Usuario } from "@/core/usuario";
 
-const mockUserRepository = {
-	findByEmail: mock(),
+const mockUsuarioRepository = {
+	buscarPorEmail: mock(),
 };
 
 const mockPasswordHasher = {
 	hash: mock(),
-	compare: mock(),
+	comparar: mock(),
 };
 
 const mockTokenService = {
-	generateToken: mock(() => "access"),
-	generateRefreshToken: mock(() => "refresh"),
-	hashRefreshToken: mock(() => "refresh_hash"),
+	generarToken: mock(() => "access"),
+	generarRefreshToken: mock(() => "refresh"),
+	hashearRefreshToken: mock(() => "refresh_hash"),
 };
 
 const mockRefreshTokenRepo = {
-	create: mock(),
+	crear: mock(),
 };
 
-const buildUser = (isActive: boolean) =>
-	User.reconstitute("Ana", "a@x.com", "hash", isActive, 5, ["USER"]);
+const construirUsuario = (isActivo: boolean) =>
+	Usuario.reconstituir("Ana", "a@x.com", "hash", isActivo, 5, ["USUARIO"]);
 
 describe("LoginUseCase", () => {
 	let useCase: LoginUseCase;
 
 	beforeEach(() => {
-		mockUserRepository.findByEmail.mockReset();
-		mockPasswordHasher.compare.mockReset();
-		mockRefreshTokenRepo.create.mockClear();
+		mockUsuarioRepository.buscarPorEmail.mockReset();
+		mockPasswordHasher.comparar.mockReset();
+		mockRefreshTokenRepo.crear.mockClear();
 		useCase = new LoginUseCase(
-			mockUserRepository as never,
+			mockUsuarioRepository as never,
 			mockPasswordHasher as never,
-			new SessionIssuer(
+			new EmisorSesion(
 				mockTokenService as never,
 				mockRefreshTokenRepo as never,
 			),
@@ -43,34 +43,43 @@ describe("LoginUseCase", () => {
 	});
 
 	it("debería buscar el usuario por email exacto y emitir la sesión", async () => {
-		mockUserRepository.findByEmail.mockResolvedValue(buildUser(true));
-		mockPasswordHasher.compare.mockResolvedValue(true);
+		mockUsuarioRepository.buscarPorEmail.mockResolvedValue(
+			construirUsuario(true),
+		);
+		mockPasswordHasher.comparar.mockResolvedValue(true);
 
-		const result = await useCase.run({ email: "a@x.com", password: "pass" });
+		const resultado = await useCase.ejecutar({
+			email: "a@x.com",
+			password: "pass",
+		});
 
-		expect(mockUserRepository.findByEmail).toHaveBeenCalledWith("a@x.com");
-		expect(result.user.id).toBe(5);
-		expect(mockRefreshTokenRepo.create).toHaveBeenCalled();
+		expect(mockUsuarioRepository.buscarPorEmail).toHaveBeenCalledWith(
+			"a@x.com",
+		);
+		expect(resultado.usuario.id).toBe(5);
+		expect(mockRefreshTokenRepo.crear).toHaveBeenCalled();
 	});
 
 	it("debería lanzar 401 si el email no existe, comparando igualmente el hash", async () => {
-		mockUserRepository.findByEmail.mockResolvedValue(null);
-		mockPasswordHasher.compare.mockResolvedValue(false);
+		mockUsuarioRepository.buscarPorEmail.mockResolvedValue(null);
+		mockPasswordHasher.comparar.mockResolvedValue(false);
 
 		await expect(
-			useCase.run({ email: "a@x.com", password: "pass" }),
-		).rejects.toThrow("Invalid credentials");
+			useCase.ejecutar({ email: "a@x.com", password: "pass" }),
+		).rejects.toThrow("Credenciales inválidas");
 		// bcrypt corre aunque el email no exista: misma latencia que un fallo de contraseña
-		expect(mockPasswordHasher.compare).toHaveBeenCalledTimes(1);
+		expect(mockPasswordHasher.comparar).toHaveBeenCalledTimes(1);
 	});
 
 	it("debería rechazar a un usuario desactivado", async () => {
-		mockUserRepository.findByEmail.mockResolvedValue(buildUser(false));
-		mockPasswordHasher.compare.mockResolvedValue(true);
-
-		expect(useCase.run({ email: "a@x.com", password: "pass" })).rejects.toThrow(
-			"User is inactive",
+		mockUsuarioRepository.buscarPorEmail.mockResolvedValue(
+			construirUsuario(false),
 		);
-		expect(mockRefreshTokenRepo.create).not.toHaveBeenCalled();
+		mockPasswordHasher.comparar.mockResolvedValue(true);
+
+		expect(
+			useCase.ejecutar({ email: "a@x.com", password: "pass" }),
+		).rejects.toThrow("El usuario está inactivo");
+		expect(mockRefreshTokenRepo.crear).not.toHaveBeenCalled();
 	});
 });

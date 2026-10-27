@@ -28,11 +28,11 @@ Cuando una página o componente empieza a crecer:
 - **Extraer Data Fetching:** Trasladar llamadas de API y TanStack Query a custom hooks dedicados en `modules/<nombre>/hooks/use<Feature>Query.ts`.
 - **Extraer Formularios:** Separar la lógica de TanStack Form y sus esquemas Zod en componentes autónomos en `modules/<nombre>/components/<Feature>Form.tsx`.
 - **Extraer Primitivas de UI:** Mover botones, cards, inputs y badges reutilizables a `core/components/ui/`.
-- **Extraer Subvistas y Secciones:** Dividir páginas en componentes visuales más pequeños (`<HeaderSection />`, `<MetricsGrid />`, `<UsersTable />`).
+- **Extraer Subvistas y Secciones:** Dividir páginas en componentes visuales más pequeños (`<HeaderSection />`, `<MetricsGrid />`, `<UsuariosTable />`).
 - **Extraer Schemas y Tipos:** Mantener los esquemas Zod en `schemas/<feature>Schemas.ts` y tipos en archivos de contrato.
 
 ### 2.2 Técnicas de Descomposición en Backend
-- **Un Controlador por Recurso:** Por defecto `UserController` con un método flecha por endpoint. Separarlo en varios cuando pase de ~6 handlers, tenga dependencias muy distintas o un ciclo HTTP propio (ej. `auth`).
+- **Un Controlador por Recurso:** Por defecto `UsuarioController` con un método flecha por endpoint. Separarlo en varios cuando pase de ~6 handlers, tenga dependencias muy distintas o un ciclo HTTP propio (ej. `auth`).
 - **Value Objects Dedicados:** Si un campo tiene lógica de validación o normalización (ej. Email, Teléfono, Rol, UUID), extraerlo a su propio Value Object en `domain/value-objects/`.
 - **Mappers Independientes:** Mover la transformación Entidad ↔ DTO a `application/mappers/<Entidad>Mapper.ts`.
 - **Esquemas Zod Aislados:** Definir validaciones de payload en `infrastructure/http/schemas/<entidad>Schemas.ts`.
@@ -68,7 +68,7 @@ Cuando una página o componente empieza a crecer:
 ### 3.2 Arquitectura de Backend
 
 - **Domain:** Entidades ricas, Value Objects, interfaces de repositorio/servicio, errores (`BaseError`). Cero frameworks.
-- **Application:** Casos de uso (`run`), DTOs, Mappers, suscriptores de eventos. Cero HTTP/Prisma.
+- **Application:** Casos de uso (`ejecutar`), DTOs, Mappers, suscriptores de eventos. Cero HTTP/Prisma.
 - **Infrastructure:** Controladores Hono (`executeSafely`), routers Hono, repositorios Prisma, servicios reales (Bcrypt, JWT).
 
 ---
@@ -78,16 +78,16 @@ Cuando una página o componente empieza a crecer:
 | Elemento | Convención | Ejemplo |
 | :--- | :--- | :--- |
 | **Componentes React** | PascalCase | `LoginForm.tsx`, `MainLayout.tsx` |
-| **Custom Hooks** | camelCase con prefijo `use` | `useUsersQuery.ts`, `useUserMutation.ts` |
+| **Custom Hooks** | camelCase con prefijo `use` | `useUsuariosQuery.ts`, `useUserMutation.ts` |
 | **Páginas** | PascalCase con sufijo `Page` | `LoginPage.tsx`, `DashboardPage.tsx` |
 | **Rutas (TanStack Router)** | kebab-case / archivo especial | `__root.tsx`, `_authenticated/dashboard.tsx` |
-| **Entidades / Value Objects** | PascalCase | `User.ts`, `Email.ts`, `EntityId.ts` |
-| **Casos de Uso** | PascalCase con sufijo `UseCase` | `CreateUserUseCase.ts`, `DeleteUserUseCase.ts` |
-| **Controladores** | PascalCase con sufijo `Controller`| `UserController.ts`, `LoginController.ts` |
-| **Enrutadores Backend** | PascalCase con sufijo `Router` | `UserRouter.ts`, `AuthRouter.ts` |
-| **Repositorios** | PascalCase con prefijo de tecnología | `PrismaUserRepository.ts` |
-| **DTOs** | PascalCase con sufijo `Dto` | `CreateUserDto.ts`, `UserDto.ts` |
-| **Esquemas Zod** | camelCase con sufijo `Schema` | `createUserSchema.ts`, `loginSchema.ts` |
+| **Entidades / Value Objects** | PascalCase | `Usuario.ts`, `Email.ts`, `EntityId.ts` |
+| **Casos de Uso** | PascalCase con sufijo `UseCase` | `CrearUsuarioUseCase.ts`, `EliminarUsuarioUseCase.ts` |
+| **Controladores** | PascalCase con sufijo `Controller`| `UsuarioController.ts`, `LoginController.ts` |
+| **Enrutadores Backend** | PascalCase con sufijo `Router` | `UsuarioRouter.ts`, `AuthRouter.ts` |
+| **Repositorios** | PascalCase con prefijo de tecnología | `PrismaUsuarioRepository.ts` |
+| **DTOs** | PascalCase con sufijo `Dto` | `CrearUsuarioDto.ts`, `UsuarioDto.ts` |
+| **Esquemas Zod** | camelCase con sufijo `Schema` | `crearUsuarioSchema.ts`, `loginSchema.ts` |
 | **Utilidades** | camelCase | `cn.ts`, `validate.ts` |
 
 ---
@@ -102,4 +102,4 @@ Cuando una página o componente empieza a crecer:
 ### 5.2 Tipado Estricto sin `any`
 - **Prohibido `any`:** Si el tipo es desconocido en tiempo de compilación, usar `unknown` junto con type narrowing o type guards.
 - **Interfaces e Inmutabilidad:** Usar `readonly` en propiedades de Value Objects, DTOs y parámetros de constructores inyectados.
-- **Tipado Explícito en Funciones Públicas:** Todo método público de un caso de uso, repositorio o controlador debe declarar explícitamente su tipo de retorno (`Promise<UserDto>`, `Promise<Response>`).
+- **Tipado Explícito en Funciones Públicas:** Todo método público de un caso de uso, repositorio o controlador debe declarar explícitamente su tipo de retorno (`Promise<UsuarioDto>`, `Promise<Response>`).

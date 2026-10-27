@@ -10,7 +10,7 @@ import { Input } from "@/core/components/ui/Input";
 import { authApi } from "../api/authApi";
 import { type LoginInput, loginSchema } from "../schemas/authSchemas";
 
-function extractErrorMessage(err: unknown): string | undefined {
+function extraerMensajeError(err: unknown): string | undefined {
 	if (!err) return undefined;
 	if (typeof err === "string") return err;
 	if (
@@ -41,7 +41,7 @@ export function LoginForm() {
 			try {
 				const response = await authApi.login(value);
 				login(response);
-				toast.success(`¡Bienvenido de nuevo, ${response.user.name}!`);
+				toast.success(`¡Bienvenido de nuevo, ${response.usuario.nombre}!`);
 				navigate({ to: "/dashboard" });
 			} catch (error: unknown) {
 				toast.error(getErrorMessage(error));
@@ -51,7 +51,7 @@ export function LoginForm() {
 		},
 	});
 
-	const fillDemoAdmin = () => {
+	const rellenarDemoAdmin = () => {
 		form.setFieldValue("email", "admin@dev.com");
 		form.setFieldValue("password", "SecurePass123!");
 	};
@@ -75,7 +75,7 @@ export function LoginForm() {
 						value={field.state.value}
 						onBlur={field.handleBlur}
 						onChange={(e) => field.handleChange(e.target.value)}
-						error={extractErrorMessage(field.state.meta.errors[0])}
+						error={extraerMensajeError(field.state.meta.errors[0])}
 					/>
 				)}
 			</form.Field>
@@ -90,7 +90,7 @@ export function LoginForm() {
 						value={field.state.value}
 						onBlur={field.handleBlur}
 						onChange={(e) => field.handleChange(e.target.value)}
-						error={extractErrorMessage(field.state.meta.errors[0])}
+						error={extraerMensajeError(field.state.meta.errors[0])}
 					/>
 				)}
 			</form.Field>
@@ -113,7 +113,7 @@ export function LoginForm() {
 					type="button"
 					variant="outline"
 					size="sm"
-					onClick={fillDemoAdmin}
+					onClick={rellenarDemoAdmin}
 					className="w-full text-xs text-indigo-300 border-indigo-900/50 hover:bg-indigo-950/40"
 				>
 					<Sparkles className="h-3.5 w-3.5 text-indigo-400 mr-1.5" />

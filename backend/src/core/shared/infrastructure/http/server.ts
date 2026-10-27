@@ -110,7 +110,7 @@ app.onError((err, c) => {
 	// En los 5xx no se expone el mensaje interno (ya queda en el log), sí el id para reportarlo.
 	return c.json(
 		status >= 500
-			? { error: "Internal Server Error", requestId: id }
+			? { error: "Error interno del servidor", requestId: id }
 			: { error: err.message },
 		status,
 	);

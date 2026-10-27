@@ -11,7 +11,7 @@ description: "Convenciones de tests del backend con bun:test: ubicación de los 
 pnpm --filter backend test            # unitarios (excluye *.e2e.spec.ts)
 pnpm --filter backend test:watch      # watch mode
 pnpm --filter backend test:coverage   # con coverage
-pnpm --filter backend test src/core/user   # módulo específico
+pnpm --filter backend test src/core/usuario   # módulo específico
 pnpm test:e2e                         # e2e contra Postgres real (desde la raíz)
 ```
 
@@ -24,14 +24,14 @@ pnpm test:e2e                         # e2e contra Postgres real (desde la raíz
 Todo test vive junto al archivo que prueba:
 
 ```
-src/modules/user/
+src/core/usuario/
 ├── domain/
-│   └── User.spec.ts
+│   └── Usuario.spec.ts
 ├── application/useCases/
-│   └── CreateUserUseCase.spec.ts
+│   └── CrearUsuarioUseCase.spec.ts
 └── infrastructure/http/
     ├── routes/
-    │   └── UserRouter.e2e.spec.ts
+    │   └── UsuarioRouter.e2e.spec.ts
     └── controllers/
         └── CreateUserController.spec.ts
 ```
@@ -44,48 +44,48 @@ Instanciar con `new` directamente, sin container. Mockear repositorios de infra.
 
 ```typescript
 import { describe, expect, it, mock, beforeEach } from "bun:test";
-import { CreateUserUseCase } from "./CreateUserUseCase";
+import { CrearUsuarioUseCase } from "./CrearUsuarioUseCase";
 import { UserAlreadyExistsError } from "../../domain/error/UserAlreadyExistsError";
 
-const mockUserRepository = {
-  findByEmail: mock(),
+const mockUsuarioRepository = {
+  buscarPorEmail: mock(),
   save: mock(),
 };
 
-describe("CreateUserUseCase", () => {
-  let useCase: CreateUserUseCase;
+describe("CrearUsuarioUseCase", () => {
+  let useCase: CrearUsuarioUseCase;
 
   beforeEach(() => {
-    mockUserRepository.findByEmail.mockReset();
-    mockUserRepository.save.mockReset();
-    useCase = new CreateUserUseCase(mockUserRepository as any);
+    mockUsuarioRepository.buscarPorEmail.mockReset();
+    mockUsuarioRepository.save.mockReset();
+    useCase = new CrearUsuarioUseCase(mockUsuarioRepository as any);
   });
 
   it("lanza UserAlreadyExistsError si el email ya existe", async () => {
-    mockUserRepository.findByEmail.mockResolvedValue({
+    mockUsuarioRepository.buscarPorEmail.mockResolvedValue({
       id: "1",
       email: "test@test.com",
     });
 
     await expect(
-      useCase.run({ email: "test@test.com", password: "123", roleId: "USER" }),
+      useCase.ejecutar({ email: "test@test.com", password: "123", rolId: "USUARIO" }),
     ).rejects.toThrow(UserAlreadyExistsError);
 
-    expect(mockUserRepository.save).not.toHaveBeenCalled();
+    expect(mockUsuarioRepository.save).not.toHaveBeenCalled();
   });
 
   it("crea el usuario y devuelve el DTO", async () => {
-    mockUserRepository.findByEmail.mockResolvedValue(null);
-    mockUserRepository.save.mockResolvedValue(undefined);
+    mockUsuarioRepository.buscarPorEmail.mockResolvedValue(null);
+    mockUsuarioRepository.save.mockResolvedValue(undefined);
 
-    const result = await useCase.run({
+    const result = await useCase.ejecutar({
       email: "new@test.com",
       password: "123",
-      roleId: "USER",
+      rolId: "USUARIO",
     });
 
     expect(result.email).toBe("new@test.com");
-    expect(mockUserRepository.save).toHaveBeenCalledTimes(1);
+    expect(mockUsuarioRepository.save).toHaveBeenCalledTimes(1);
   });
 });
 ```
@@ -94,7 +94,7 @@ describe("CreateUserUseCase", () => {
 
 ## Test E2E — Rutas HTTP
 
-`*.e2e.spec.ts` junto a la ruta que prueban (p. ej. `UserRouter.e2e.spec.ts`). Usan la `app` real
+`*.e2e.spec.ts` junto a la ruta que prueban (p. ej. `UsuarioRouter.e2e.spec.ts`). Usan la `app` real
 (contenedor DI + Prisma) con `app.request(...)`, sin mocks, contra la BD de `DATABASE_URL_TEST`.
 
 ### Ejecutar en local
@@ -106,38 +106,38 @@ describe("CreateUserUseCase", () => {
    ```
 2. `pnpm test:e2e` (o `pnpm --filter backend test:e2e`). `scripts/test-e2e.ts` hace
    `prisma migrate reset --force` + seed y luego `bun test .e2e.spec.ts`. Admite filtros extra:
-   `pnpm --filter backend test:e2e UserRouter`.
+   `pnpm --filter backend test:e2e UsuarioRouter`.
 
 ### Aislamiento
 
 - BD limpia por ejecución (reset + seed: roles y permisos del catálogo).
-- Cada archivo vacía los usuarios en `beforeAll` con `resetUsers()` (`TRUNCATE "user" ... CASCADE`)
+- Cada archivo vacía los usuarios en `beforeAll` con `vaciarUsuarios()` (`TRUNCATE "usuario" ... CASCADE`)
   y crea los suyos: no depender de los usuarios del seed ni de otro archivo.
 
 ### Helpers (`src/test/e2e.ts`)
 
 - `api(path, { method, body, token, cookie })` → `app.request` con JSON.
-- `createUser(email, role?)` crea en BD (contraseña `PASSWORD`); sin rol = sin permisos (403).
+- `crearUsuario(email, role?)` crea en BD (contraseña `PASSWORD`); sin rol = sin permisos (403).
 - `login(email)` → access token. `refreshCookie(res)` → `refresh_token=...` para reenviarla.
-- El rate limit de `/login` (5 cada 15 min) y `/register` (4/h) es en memoria y compartido por todos
+- El rate limit de `/login` (5 cada 15 min) y `/registro` (4/h) es en memoria y compartido por todos
   los e2e del proceso: minimizar logins (uno por usuario en `beforeAll`).
 
 ```typescript
 import { beforeAll, describe, expect, it } from "bun:test";
-import { api, createUser, login, resetUsers } from "@/test/e2e";
+import { api, crearUsuario, login, vaciarUsuarios } from "@/test/e2e";
 
-describe("Users (e2e)", () => {
+describe("Usuarios (e2e)", () => {
   let token: string;
 
   beforeAll(async () => {
-    await resetUsers();
-    await createUser("admin@e2e.dev", "ADMIN");
+    await vaciarUsuarios();
+    await crearUsuario("admin@e2e.dev", "ADMIN");
     token = await login("admin@e2e.dev");
   });
 
   it("sin permiso → 403", async () => {
-    await createUser("nobody@e2e.dev");
-    const res = await api("/api/users", { token: await login("nobody@e2e.dev") });
+    await crearUsuario("nobody@e2e.dev");
+    const res = await api("/api/usuarios", { token: await login("nobody@e2e.dev") });
     expect(res.status).toBe(403);
   });
 });

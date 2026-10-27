@@ -7,7 +7,7 @@ import { useAuthStore } from "./store";
 
 const session = {
 	accessToken: "access",
-	user: { id: 1, name: "Ana", email: "a@x.com", roles: ["USER"] },
+	usuario: { id: 1, nombre: "Ana", email: "a@x.com", roles: ["USUARIO"] },
 };
 
 describe("useAuthStore", () => {
@@ -27,7 +27,7 @@ describe("useAuthStore", () => {
 		useAuthStore.getState().logout();
 
 		expect(useAuthStore.getState()).toMatchObject({
-			user: null,
+			usuario: null,
 			accessToken: null,
 			isAuthenticated: false,
 		});

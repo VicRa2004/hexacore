@@ -1,46 +1,48 @@
 import type { LoginDto } from "../dtos/LoginDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
-import type { UserRepository } from "@/core/user";
-import type { PasswordHasher } from "@/core/user";
-import { SessionIssuer } from "../services/SessionIssuer";
-import type { UserDto } from "@/core/user";
-import { UserMapper } from "@/core/user";
+import type { UsuarioRepository } from "@/core/usuario";
+import type { PasswordHasher } from "@/core/usuario";
+import { EmisorSesion } from "../services/EmisorSesion";
+import type { UsuarioDto } from "@/core/usuario";
+import { UsuarioMapper } from "@/core/usuario";
 
 /**
  * Hash bcrypt de una contraseña aleatoria: si el email no existe se compara
  * igualmente contra él, para que la respuesta tarde lo mismo.
  */
-const DUMMY_PASSWORD_HASH =
+const HASH_PASSWORD_FICTICIO =
 	"$2b$10$UZQKZ7yo9nGiqhSbmYdj4eV9jrthslRlUx4lX.r5eMN.sW4Pb.boi";
 
 export class LoginUseCase {
 	constructor(
-		private readonly userRepository: UserRepository,
+		private readonly usuarioRepository: UsuarioRepository,
 		private readonly passwordHasher: PasswordHasher,
-		private readonly sessionIssuer: SessionIssuer,
+		private readonly emisorSesion: EmisorSesion,
 	) {}
 
-	async run(
-		dto: LoginDto,
-	): Promise<{ accessToken: string; refreshToken: string; user: UserDto }> {
-		const user = await this.userRepository.findByEmail(dto.email);
+	async ejecutar(dto: LoginDto): Promise<{
+		accessToken: string;
+		refreshToken: string;
+		usuario: UsuarioDto;
+	}> {
+		const usuario = await this.usuarioRepository.buscarPorEmail(dto.email);
 
-		const isPasswordValid = await this.passwordHasher.compare(
+		const isPasswordValido = await this.passwordHasher.comparar(
 			dto.password,
-			user?.getPasswordHash() ?? DUMMY_PASSWORD_HASH,
+			usuario?.getPasswordHash() ?? HASH_PASSWORD_FICTICIO,
 		);
 
-		if (!user || !isPasswordValid) {
-			throw new BaseError("Invalid credentials", 401);
+		if (!usuario || !isPasswordValido) {
+			throw new BaseError("Credenciales inválidas", 401);
 		}
 
-		if (!user.getIsActive()) {
-			throw new BaseError("User is inactive", 403);
+		if (!usuario.getIsActivo()) {
+			throw new BaseError("El usuario está inactivo", 403);
 		}
 
 		return {
-			...(await this.sessionIssuer.issue(user)),
-			user: UserMapper.toDto(user),
+			...(await this.emisorSesion.emitir(usuario)),
+			usuario: UsuarioMapper.toDto(usuario),
 		};
 	}
 }
