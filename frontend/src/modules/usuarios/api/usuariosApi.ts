@@ -25,4 +25,19 @@ export const usuariosApi = {
 		const response = await apiClient.get<Usuario>(`/usuarios/${id}`);
 		return response.data;
 	},
+
+	async subirAvatar(archivo: File): Promise<Usuario> {
+		const datos = new FormData();
+		datos.append("archivo", archivo);
+		// Sin esta cabecera axios convertiría el FormData al JSON por defecto del cliente.
+		const response = await apiClient.put<Usuario>("/avatares", datos, {
+			headers: { "Content-Type": "multipart/form-data" },
+		});
+		return response.data;
+	},
+
+	async eliminarAvatar(): Promise<Usuario> {
+		const response = await apiClient.delete<Usuario>("/avatares");
+		return response.data;
+	},
 };

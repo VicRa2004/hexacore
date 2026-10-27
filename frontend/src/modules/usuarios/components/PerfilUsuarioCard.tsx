@@ -7,10 +7,15 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/core/components/ui/Card";
-import { Shield, Mail, Hash, CheckCircle } from "lucide-react";
+import { Shield, Mail, Hash, CheckCircle, Camera, Trash2 } from "lucide-react";
+import { useRef } from "react";
+import { Button } from "@/core/components/ui/Button";
+import { useAvatarMutation } from "../hooks/useAvatarMutation";
 
 export function PerfilUsuarioCard() {
 	const usuario = useAuthStore((state) => state.usuario);
+	const avatar = useAvatarMutation();
+	const inputArchivo = useRef<HTMLInputElement>(null);
 
 	if (!usuario) {
 		return (
@@ -32,10 +37,18 @@ export function PerfilUsuarioCard() {
 		<Card className="max-w-2xl mx-auto">
 			<CardHeader>
 				<div className="flex items-center gap-4">
-					<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-xl font-bold text-indigo-400">
-						{usuario.nombre.charAt(0).toUpperCase()}
-					</div>
-					<div>
+					{usuario.avatarUrl ? (
+						<img
+							src={usuario.avatarUrl}
+							alt={`Avatar de ${usuario.nombre}`}
+							className="h-16 w-16 rounded-2xl border border-indigo-500/20 object-cover"
+						/>
+					) : (
+						<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-xl font-bold text-indigo-400">
+							{usuario.nombre.charAt(0).toUpperCase()}
+						</div>
+					)}
+					<div className="flex-1">
 						<CardTitle>{usuario.nombre}</CardTitle>
 						<CardDescription className="flex items-center gap-2 mt-1">
 							<Badge variant={varianteRol}>{usuario.roles.join(", ")}</Badge>
@@ -43,6 +56,40 @@ export function PerfilUsuarioCard() {
 								{usuario.isActivo ? "Cuenta Activa" : "Cuenta Inactiva"}
 							</Badge>
 						</CardDescription>
+					</div>
+					<div className="flex gap-2">
+						<input
+							ref={inputArchivo}
+							type="file"
+							accept="image/png,image/jpeg,image/webp"
+							className="hidden"
+							aria-label="Archivo del avatar"
+							onChange={(e) => {
+								const archivo = e.target.files?.[0];
+								if (archivo) avatar.mutate(archivo);
+								e.target.value = "";
+							}}
+						/>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => inputArchivo.current?.click()}
+							isLoading={avatar.isPending}
+						>
+							<Camera className="h-4 w-4" />
+							{usuario.avatarUrl ? "Cambiar" : "Subir avatar"}
+						</Button>
+						{usuario.avatarUrl && (
+							<Button
+								variant="ghost"
+								size="sm"
+								aria-label="Quitar avatar"
+								onClick={() => avatar.mutate(null)}
+								disabled={avatar.isPending}
+							>
+								<Trash2 className="h-4 w-4" />
+							</Button>
+						)}
 					</div>
 				</div>
 			</CardHeader>
