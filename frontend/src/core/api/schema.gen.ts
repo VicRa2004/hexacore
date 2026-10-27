@@ -314,6 +314,152 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/avatares/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Imagen del avatar de un usuario (pública, cacheable) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Imagen PNG, JPEG o WebP */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/*": string;
+                    };
+                };
+                /** @description El usuario no existe o no tiene avatar */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/avatares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Subir el avatar propio (multipart, campo «archivo», máx. 2 MB) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /** Format: binary */
+                        archivo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Usuario con el avatar nuevo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UsuarioDto"];
+                    };
+                };
+                /** @description Archivo ausente o no es PNG, JPEG ni WebP */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description El archivo supera los 2 MB */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Quitar el avatar propio */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Usuario sin avatar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UsuarioDto"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -1747,6 +1893,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auditoria": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar el registro de auditoría (más reciente primero) */
+        get: {
+            parameters: {
+                query?: {
+                    pagina?: string;
+                    limite?: string;
+                    evento?: string;
+                    usuarioId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Registros paginados */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            datos: components["schemas"]["RegistroAuditoria"][];
+                            /** @example 1 */
+                            pagina: number;
+                            /** @example 10 */
+                            totalElementos: number;
+                            /** @example 1 */
+                            totalPaginas: number;
+                        };
+                    };
+                };
+                /** @description Parámetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Permiso denegado (requiere auditoria:leer) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1771,6 +1993,8 @@ export interface components {
             roles: string[];
             /** @example true */
             emailVerificado: boolean;
+            /** @example /api/avatares/1?v=avatares%2F1-abc.png */
+            avatarUrl: string | null;
         };
         ErrorResponse: {
             /** @example Mensaje descriptivo del error */
@@ -1821,6 +2045,24 @@ export interface components {
                 concedido: boolean;
             }[];
         };
+        RegistroAuditoria: {
+            /** @example 1 */
+            id: number;
+            /** @example usuario.creado */
+            evento: string;
+            /**
+             * @example {
+             *       "id": 7,
+             *       "email": "ana@example.com"
+             *     }
+             */
+            datos?: unknown;
+            /** @example 1 */
+            usuarioId: number | null;
+            requestId: string | null;
+            /** Format: date-time */
+            ocurridoEn: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -1834,5 +2076,6 @@ export type AuthResponse = components['schemas']['AuthResponse'];
 export type PermisoDto = components['schemas']['PermisoDto'];
 export type RolDto = components['schemas']['RolDto'];
 export type AsignacionUsuario = components['schemas']['AsignacionUsuario'];
+export type RegistroAuditoria = components['schemas']['RegistroAuditoria'];
 export type $defs = Record<string, never>;
 export type operations = Record<string, never>;

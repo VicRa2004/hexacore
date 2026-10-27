@@ -1,3 +1,4 @@
+import type { Almacenamiento } from "@/core/shared/domain/Almacenamiento";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { Mailer } from "@/core/shared/domain/Mailer";
 import type { Scheduler } from "@/core/shared/domain/Scheduler";
@@ -12,4 +13,5 @@ export const TOKENS = {
 	Mailer: token<Mailer>("Mailer"),
 	Scheduler: token<Scheduler>("Scheduler"),
 	UnitOfWork: token<UnitOfWork>("UnitOfWork"),
+	Almacenamiento: token<Almacenamiento>("Almacenamiento"),
 } as const;

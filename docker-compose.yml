@@ -10,6 +10,12 @@ x-app: &app
     APP_URL: ${APP_URL:?Define APP_URL (dominio público, base de los enlaces de los correos)}
     RESEND_API_KEY: ${RESEND_API_KEY:-}
     MAIL_FROM: ${MAIL_FROM:-}
+    # Con S3_BUCKET los archivos van a S3/R2; si no, al volumen `uploads`.
+    S3_BUCKET: ${S3_BUCKET:-}
+    S3_ENDPOINT: ${S3_ENDPOINT:-}
+    S3_REGION: ${S3_REGION:-}
+    S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+    S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
     PORT: 3000
     # Solo se llega a `app` a través de Traefik: el rate limit usa su X-Forwarded-For.
     TRUST_PROXY: ${TRUST_PROXY:-true}
@@ -30,6 +36,8 @@ services:
         condition: service_completed_successfully
     expose:
       - "3000"
+    volumes:
+      - uploads:/app/backend/uploads
     # Liveness (/health, sin BD). /ready comprueba además Postgres.
     healthcheck:
       test: ["CMD", "bun", "-e", "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
@@ -37,3 +45,6 @@ services:
       timeout: 5s
       start_period: 10s
       retries: 3
+
+volumes:
+  uploads:

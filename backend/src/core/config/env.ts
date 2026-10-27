@@ -27,6 +27,13 @@ const EnvSchema = z
 		// Sin RESEND_API_KEY los correos se escriben en consola (ConsoleMailer).
 		RESEND_API_KEY: z.string().optional(),
 		MAIL_FROM: z.string().default("Hexacore <no-reply@localhost>"),
+		// Sin S3_BUCKET los archivos van a disco en STORAGE_DIR (LocalAlmacenamiento).
+		STORAGE_DIR: z.string().default("uploads"),
+		S3_BUCKET: z.string().optional(),
+		S3_ENDPOINT: z.url().optional(),
+		S3_REGION: z.string().optional(),
+		S3_ACCESS_KEY_ID: z.string().optional(),
+		S3_SECRET_ACCESS_KEY: z.string().optional(),
 	})
 	.refine(
 		(env) =>
@@ -46,6 +53,12 @@ const envPrev = {
 	APP_URL: process.env.APP_URL || undefined,
 	RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
 	MAIL_FROM: process.env.MAIL_FROM || undefined,
+	STORAGE_DIR: process.env.STORAGE_DIR || undefined,
+	S3_BUCKET: process.env.S3_BUCKET || undefined,
+	S3_ENDPOINT: process.env.S3_ENDPOINT || undefined,
+	S3_REGION: process.env.S3_REGION || undefined,
+	S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || undefined,
+	S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || undefined,
 };
 
 export const env = EnvSchema.parse(envPrev);
