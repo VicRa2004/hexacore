@@ -83,9 +83,15 @@ export function PerfilUsuarioCard() {
 							<CheckCircle className="h-3.5 w-3.5" />
 							Estado de Verificación
 						</div>
-						<p className="mt-1 text-sm font-semibold text-emerald-400">
-							Autenticado vía JWT
-						</p>
+						{usuario.emailVerificado === false ? (
+							<p className="mt-1 text-sm font-semibold text-amber-400">
+								Email sin verificar
+							</p>
+						) : (
+							<p className="mt-1 text-sm font-semibold text-emerald-400">
+								Email verificado
+							</p>
+						)}
 					</div>
 				</div>
 			</CardContent>

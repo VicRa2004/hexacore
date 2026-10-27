@@ -19,5 +19,34 @@ export const registroSchema = z.object({
 	password: passwordSchema,
 });
 
+export const recuperarPasswordSchema = z.object({
+	email: z.string().email("Ingresa un correo electrónico válido"),
+});
+
+export const restablecerPasswordSchema = z
+	.object({
+		password: passwordSchema,
+		confirmacion: z.string(),
+	})
+	.refine((d) => d.password === d.confirmacion, {
+		message: "Las contraseñas no coinciden",
+		path: ["confirmacion"],
+	});
+
+export const cambiarPasswordSchema = z
+	.object({
+		passwordActual: z.string().min(1, "La contraseña actual es requerida"),
+		passwordNueva: passwordSchema,
+		confirmacion: z.string(),
+	})
+	.refine((d) => d.passwordNueva === d.confirmacion, {
+		message: "Las contraseñas no coinciden",
+		path: ["confirmacion"],
+	});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegistroInput = z.infer<typeof registroSchema>;
+export type RestablecerPasswordInput = z.infer<
+	typeof restablecerPasswordSchema
+>;
+export type CambiarPasswordInput = z.infer<typeof cambiarPasswordSchema>;

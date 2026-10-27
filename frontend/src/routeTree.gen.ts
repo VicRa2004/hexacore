@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-password'
 import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as RestablecerPasswordRouteImport } from './routes/restablecer-password'
+import { Route as VerificarEmailRouteImport } from './routes/verificar-email'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
@@ -32,9 +35,24 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecuperarPasswordRoute = RecuperarPasswordRouteImport.update({
+  id: '/recuperar-password',
+  path: '/recuperar-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestablecerPasswordRoute = RestablecerPasswordRouteImport.update({
+  id: '/restablecer-password',
+  path: '/restablecer-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificarEmailRoute = VerificarEmailRouteImport.update({
+  id: '/verificar-email',
+  path: '/verificar-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -61,7 +79,10 @@ const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
+  '/restablecer-password': typeof RestablecerPasswordRoute
+  '/verificar-email': typeof VerificarEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/roles': typeof AuthenticatedRolesRoute
@@ -70,7 +91,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
+  '/restablecer-password': typeof RestablecerPasswordRoute
+  '/verificar-email': typeof VerificarEmailRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/roles': typeof AuthenticatedRolesRoute
@@ -81,7 +105,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
+  '/restablecer-password': typeof RestablecerPasswordRoute
+  '/verificar-email': typeof VerificarEmailRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
@@ -92,7 +119,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/recuperar-password'
     | '/registro'
+    | '/restablecer-password'
+    | '/verificar-email'
     | '/dashboard'
     | '/perfil'
     | '/roles'
@@ -101,7 +131,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/recuperar-password'
     | '/registro'
+    | '/restablecer-password'
+    | '/verificar-email'
     | '/dashboard'
     | '/perfil'
     | '/roles'
@@ -111,7 +144,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/recuperar-password'
     | '/registro'
+    | '/restablecer-password'
+    | '/verificar-email'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
     | '/_authenticated/roles'
@@ -122,7 +158,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  RecuperarPasswordRoute: typeof RecuperarPasswordRoute
   RegistroRoute: typeof RegistroRoute
+  RestablecerPasswordRoute: typeof RestablecerPasswordRoute
+  VerificarEmailRoute: typeof VerificarEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -148,11 +187,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recuperar-password': {
+      id: '/recuperar-password'
+      path: '/recuperar-password'
+      fullPath: '/recuperar-password'
+      preLoaderRoute: typeof RecuperarPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registro': {
       id: '/registro'
       path: '/registro'
       fullPath: '/registro'
       preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restablecer-password': {
+      id: '/restablecer-password'
+      path: '/restablecer-password'
+      fullPath: '/restablecer-password'
+      preLoaderRoute: typeof RestablecerPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verificar-email': {
+      id: '/verificar-email'
+      path: '/verificar-email'
+      fullPath: '/verificar-email'
+      preLoaderRoute: typeof VerificarEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -208,7 +268,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  RecuperarPasswordRoute: RecuperarPasswordRoute,
   RegistroRoute: RegistroRoute,
+  RestablecerPasswordRoute: RestablecerPasswordRoute,
+  VerificarEmailRoute: VerificarEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

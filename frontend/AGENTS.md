@@ -55,8 +55,9 @@ frontend/src/
 ├── modules/                        # Lógica de dominio modular
 │   ├── auth/                       # Módulo de Autenticación
 │   │   ├── api/                    # Llamadas a la API de auth (authApi.ts)
-│   │   ├── components/             # Formularios (LoginForm.tsx, RegistroForm.tsx)
-│   │   ├── pages/                  # Vistas del módulo (LoginPage.tsx, RegistroPage.tsx)
+│   │   ├── components/             # Formularios (Login, Registro, Recuperar/Restablecer/CambiarPassword, SeguridadCuentaCard)
+│   │   ├── hooks/                  # Mutaciones de cuenta (useCuentaMutation.ts)
+│   │   ├── pages/                  # Login, Registro, RecuperarPassword, RestablecerPassword, VerificarEmail
 │   │   └── schemas/                # Validaciones Zod (authSchemas.ts)
 │   │
 │   ├── roles/                      # Roles, permisos y su asignación a usuarios (módulo backend `autorizacion`)
@@ -75,6 +76,9 @@ frontend/src/
 │   ├── index.tsx                   # Redirección inteligente
 │   ├── login.tsx                   # Ruta pública de login
 │   ├── registro.tsx                # Ruta pública de registro
+│   ├── recuperar-password.tsx      # Pide el enlace de recuperación
+│   ├── restablecer-password.tsx    # ?token= del correo → nueva contraseña
+│   ├── verificar-email.tsx         # ?token= del correo → verifica el email
 │   ├── _authenticated.tsx          # Layout protegido: guardián de sesión
 │   └── _authenticated/             # Rutas hijas protegidas
 │       ├── dashboard.tsx           # Vista /dashboard

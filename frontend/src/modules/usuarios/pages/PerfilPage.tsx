@@ -1,4 +1,6 @@
 import { PerfilUsuarioCard } from "../components/PerfilUsuarioCard";
+import { CambiarPasswordForm } from "@/modules/auth/components/CambiarPasswordForm";
+import { SeguridadCuentaCard } from "@/modules/auth/components/SeguridadCuentaCard";
 import { UserCheck } from "lucide-react";
 
 export function PerfilPage() {
@@ -19,6 +21,8 @@ export function PerfilPage() {
 			</div>
 
 			<PerfilUsuarioCard />
+			<SeguridadCuentaCard />
+			<CambiarPasswordForm />
 		</div>
 	);
 }

@@ -9,6 +9,14 @@ export function LoginPage() {
 			subtitle="Ingresa tus credenciales para acceder a Hexacore"
 		>
 			<LoginForm />
+			<div className="mt-4 text-right text-xs">
+				<Link
+					to="/recuperar-password"
+					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+				>
+					¿Olvidaste tu contraseña?
+				</Link>
+			</div>
 			<div className="mt-6 text-center text-xs text-slate-400">
 				¿No tienes una cuenta?{" "}
 				<Link
