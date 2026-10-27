@@ -9,6 +9,7 @@ export const UsuarioMapper = {
 			email: usuario.getEmail(),
 			isActivo: usuario.getIsActivo(),
 			roles: usuario.getRoles(),
+			emailVerificado: usuario.getEmailVerificado(),
 		};
 	},
 };

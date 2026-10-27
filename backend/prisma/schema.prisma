@@ -20,10 +20,16 @@ model Usuario {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
+  // Seguridad de la cuenta (módulo auth)
+  emailVerificadoEn DateTime? @map("usr_email_verificado_en")
+  intentosFallidos  Int       @default(0) @map("usr_intentos_fallidos")
+  bloqueadoHasta    DateTime? @map("usr_bloqueado_hasta")
+
   // Relaciones N-a-N gestionadas por tablas intermedias explícitas
   roles            UsuarioRol[]
   permisosDirectos UsuarioPermiso[]
   refreshTokens    RefreshToken[]
+  tokensCuenta     TokenCuenta[]
 
   @@map("usuario")
 }
@@ -120,4 +126,25 @@ model RefreshToken {
 
   @@index([usuarioId])
   @@map("refresh_token")
+}
+
+// ─────────────────────────────────────────────
+//  4. Tokens de un solo uso (recuperar contraseña, verificar email)
+// ─────────────────────────────────────────────
+
+/// Se guarda el hash del token, nunca el token en claro.
+model TokenCuenta {
+  id        Int       @id @default(autoincrement()) @map("tkc_id")
+  tokenHash String    @unique @map("tkc_token_hash") @db.VarChar(128)
+  usuarioId Int       @map("tkc_fkusuario")
+  /// "recuperar_password" | "verificar_email"
+  tipo      String    @map("tkc_tipo") @db.VarChar(30)
+  expiraEn  DateTime  @map("tkc_expira_en")
+  usadoEn   DateTime? @map("tkc_usado_en")
+  createdAt DateTime  @default(now()) @map("tkc_created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, tipo])
+  @@map("token_cuenta")
 }

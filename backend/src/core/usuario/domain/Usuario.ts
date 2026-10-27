@@ -10,6 +10,7 @@ export class Usuario extends Entity {
 	private isActivo: boolean;
 	/** Nombres de los roles asignados (tabla N-a-N `usuario_rol`). */
 	private roles: string[];
+	private emailVerificado: boolean;
 
 	// El constructor es privado para forzar el uso del Factory Method
 	private constructor(
@@ -19,6 +20,7 @@ export class Usuario extends Entity {
 		passwordHash: string,
 		isActivo: boolean,
 		roles: string[],
+		emailVerificado: boolean,
 	) {
 		super(id);
 		this.nombre = nombre;
@@ -26,6 +28,7 @@ export class Usuario extends Entity {
 		this.passwordHash = passwordHash;
 		this.isActivo = isActivo;
 		this.roles = roles;
+		this.emailVerificado = emailVerificado;
 	}
 
 	// Crear un usuario NUEVO desde la interfaz de usuario
@@ -45,6 +48,7 @@ export class Usuario extends Entity {
 			passwordHash,
 			true,
 			roles,
+			false,
 		);
 
 		return usuario;
@@ -58,6 +62,7 @@ export class Usuario extends Entity {
 		isActivo: boolean,
 		id: number,
 		roles: string[],
+		emailVerificado = false,
 	): Usuario {
 		const entityId = new EntityId(id);
 		const emailVo = new Email(emailTexto);
@@ -69,6 +74,7 @@ export class Usuario extends Entity {
 			passwordHash,
 			isActivo,
 			roles,
+			emailVerificado,
 		);
 	}
 
@@ -86,6 +92,9 @@ export class Usuario extends Entity {
 	}
 	getRoles() {
 		return [...this.roles];
+	}
+	getEmailVerificado() {
+		return this.emailVerificado;
 	}
 
 	// Comportamiento de dominio

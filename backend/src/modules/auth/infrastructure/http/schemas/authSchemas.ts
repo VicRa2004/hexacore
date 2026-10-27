@@ -23,6 +23,24 @@ export const registroSchema = z.object({
 	password: passwordSchema,
 });
 
+export const recuperarPasswordSchema = z.object({
+	email: z.email("El email es obligatorio y debe ser válido"),
+});
+
+const tokenCuentaSchema = z.string().min(1, "El token es obligatorio").max(256);
+
+export const restablecerPasswordSchema = z.object({
+	token: tokenCuentaSchema,
+	password: passwordSchema,
+});
+
+export const verificarEmailSchema = z.object({ token: tokenCuentaSchema });
+
+export const cambiarPasswordSchema = z.object({
+	passwordActual: z.string().min(1, "La contraseña actual es obligatoria"),
+	passwordNueva: passwordSchema,
+});
+
 export const refreshTokenSchema = z.object({
 	refreshToken: z.string().min(1, "El refresh token es obligatorio"),
 });

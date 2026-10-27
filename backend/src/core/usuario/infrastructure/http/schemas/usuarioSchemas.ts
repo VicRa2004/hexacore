@@ -53,6 +53,7 @@ export const usuarioDtoSchema = z
 		email: z.email().openapi({ example: "usuario@example.com" }),
 		isActivo: z.boolean().openapi({ example: true }),
 		roles: z.array(z.string()).openapi({ example: ["USUARIO"] }),
+		emailVerificado: z.boolean().openapi({ example: true }),
 	})
 	.openapi("UsuarioDto");
 

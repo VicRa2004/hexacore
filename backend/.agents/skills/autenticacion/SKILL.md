@@ -1,6 +1,6 @@
 ---
 name: autenticacion
-description: "Flujo de autenticación del backend: access token JWT + refresh token en cookie httpOnly, endpoints /api/auth/*, rotación, expiraciones y cómo debe consumirlo el frontend. Úsala al tocar el módulo auth, sesiones, cookies o la renovación de tokens en el cliente."
+description: "Flujo de autenticación del backend: access token JWT + refresh token en cookie httpOnly, endpoints /api/auth/*, rotación, expiraciones, recuperación de contraseña, verificación de email, bloqueo por intentos y cómo debe consumirlo el frontend. Úsala al tocar el módulo auth, sesiones, cookies, correos de cuenta o la renovación de tokens en el cliente."
 ---
 
 # Autenticación con Refresh Tokens (Hexacore)
@@ -13,13 +13,36 @@ description: "Flujo de autenticación del backend: access token JWT + refresh to
 | POST | `/api/auth/registro` | `{ nombre, email, password }` | `{ accessToken, usuario }` + cookie |
 | POST | `/api/auth/refresh` | — (lee la cookie) | `{ accessToken }` + cookie nueva |
 | POST | `/api/auth/logout` | — (lee la cookie) | `{ mensaje }` y borra la cookie |
+| POST | `/api/auth/recuperar-password` | `{ email }` | `{ mensaje }` (igual exista o no el email) |
+| POST | `/api/auth/restablecer-password` | `{ token, password }` | `{ mensaje }`; cierra todas las sesiones y desbloquea |
+| POST | `/api/auth/verificar-email` | `{ token }` | `{ mensaje }` |
+| POST | `/api/auth/verificar-email/reenviar` | — (Bearer) | `{ mensaje }` |
+| PUT | `/api/auth/password` | `{ passwordActual, passwordNueva }` (Bearer) | `{ accessToken }` + cookie nueva; revoca el resto de sesiones |
+| POST | `/api/auth/logout-todas` | — (Bearer) | `{ mensaje }`; revoca todos los refresh tokens y borra la cookie |
 
 El refresh token **nunca** viaja en el body: el servidor lo fija en la cookie
 `refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/auth`, `Secure` en
 producción). El navegador la envía sola a las rutas de auth y JavaScript no
 puede leerla.
 
-Límites por IP: login 5 intentos / 15 min, registro 4 / hora (responden `429`).
+Límites por IP: login 5 intentos / 15 min, registro 4 / hora, correos (recuperar
+y reenviar verificación) 5 / hora, uso de tokens 10 / 15 min (responden `429`).
+
+Bloqueo por cuenta (además del límite por IP, contra ataques distribuidos): 5
+fallos seguidos bloquean la cuenta 15 min (`429`, sin comprobar la contraseña).
+Un login correcto o restablecer la contraseña reinician el contador.
+
+## Tokens de un solo uso y correos
+
+- Tabla `token_cuenta` (hash SHA-256, nunca el token en claro), tipos
+  `recuperar_password` (1 h) y `verificar_email` (24 h). Pedir uno nuevo
+  invalida los anteriores sin usar del mismo tipo.
+- `EmisorCorreosCuenta` genera el token y envía el enlace `${APP_URL}/<ruta>?token=…`
+  por el puerto `Mailer` (`TOKENS.Mailer`): `ResendMailer` si hay `RESEND_API_KEY`,
+  si no `ConsoleMailer` (en prod no imprime el cuerpo, para no filtrar enlaces).
+- El registro envía la verificación; un fallo del correo no deshace el registro.
+  Verificar el email es informativo (`usuario.emailVerificado`): no bloquea el login.
+- En los e2e, `spyOn(container.get(TOKENS.Mailer), "enviar")` captura los enlaces.
 
 ---
 

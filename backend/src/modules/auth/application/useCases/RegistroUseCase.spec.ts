@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, beforeEach } from "bun:test";
+import { describe, expect, it, mock, beforeEach, spyOn } from "bun:test";
 import { RegistroUseCase } from "./RegistroUseCase";
 import { EmisorSesion } from "../services/EmisorSesion";
 import { Usuario } from "@/core/usuario";
@@ -23,6 +23,8 @@ const mockRefreshTokenRepo = {
 	crear: mock(),
 };
 
+const mockCorreos = { enviar: mock(async () => {}) };
+
 describe("RegistroUseCase", () => {
 	let useCase: RegistroUseCase;
 
@@ -30,6 +32,8 @@ describe("RegistroUseCase", () => {
 		mockUsuarioRepository.buscarPorEmail.mockReset();
 		mockUsuarioRepository.crear.mockReset();
 		mockRefreshTokenRepo.crear.mockClear();
+		mockCorreos.enviar.mockReset();
+		mockCorreos.enviar.mockImplementation(async () => {});
 		useCase = new RegistroUseCase(
 			mockUsuarioRepository as never,
 			mockPasswordHasher as never,
@@ -37,6 +41,7 @@ describe("RegistroUseCase", () => {
 				mockTokenService as never,
 				mockRefreshTokenRepo as never,
 			),
+			mockCorreos as never,
 		);
 	});
 
@@ -67,6 +72,35 @@ describe("RegistroUseCase", () => {
 			usuario: { id: 7, email: "ana@x.com" },
 		});
 		expect(mockRefreshTokenRepo.crear).toHaveBeenCalled();
+		expect(mockCorreos.enviar).toHaveBeenCalledWith(
+			expect.objectContaining({}),
+			"verificar_email",
+		);
+	});
+
+	it("no debería fallar el registro si el correo de verificación falla", async () => {
+		mockUsuarioRepository.buscarPorEmail.mockResolvedValue(null);
+		mockUsuarioRepository.crear.mockImplementation(async (usuario: Usuario) =>
+			Usuario.reconstituir(
+				usuario.getNombre(),
+				usuario.getEmail(),
+				"hashed",
+				true,
+				8,
+				["USUARIO"],
+			),
+		);
+		mockCorreos.enviar.mockRejectedValue(new Error("SMTP caído"));
+		const consola = spyOn(console, "error").mockImplementation(() => {});
+
+		const resultado = await useCase.ejecutar({
+			nombre: "Bea",
+			email: "bea@x.com",
+			password: "secreta123",
+		});
+
+		expect(resultado.usuario.id).toBe(8);
+		consola.mockRestore();
 	});
 
 	it("debería rechazar un email ya registrado sin crear sesión", async () => {

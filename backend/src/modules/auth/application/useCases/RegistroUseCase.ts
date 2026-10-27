@@ -6,12 +6,14 @@ import { Usuario } from "@/core/usuario";
 import { EmisorSesion } from "../services/EmisorSesion";
 import type { UsuarioDto } from "@/core/usuario";
 import { UsuarioMapper } from "@/core/usuario";
+import type { EmisorCorreosCuenta } from "../services/EmisorCorreosCuenta";
 
 export class RegistroUseCase {
 	constructor(
 		private readonly usuarioRepository: UsuarioRepository,
 		private readonly passwordHasher: PasswordHasher,
 		private readonly emisorSesion: EmisorSesion,
+		private readonly correos: EmisorCorreosCuenta,
 	) {}
 
 	async ejecutar(dto: RegistroDto): Promise<{
@@ -30,6 +32,11 @@ export class RegistroUseCase {
 		const usuario = Usuario.crear(dto.nombre, dto.email, passwordHash);
 
 		const usuarioCreado = await this.usuarioRepository.crear(usuario);
+
+		// Un fallo del correo no deshace el registro: se puede reenviar desde el perfil.
+		await this.correos
+			.enviar(usuarioCreado, "verificar_email")
+			.catch((error: unknown) => console.error(error));
 
 		return {
 			...(await this.emisorSesion.emitir(usuarioCreado)),

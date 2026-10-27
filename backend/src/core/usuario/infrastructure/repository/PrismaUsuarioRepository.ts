@@ -14,6 +14,7 @@ interface PrismaUsuarioRecord {
 	nombre: string;
 	password: string;
 	isActivo: boolean;
+	emailVerificadoEn: Date | null;
 	roles: {
 		rol: { nombre: string };
 	}[];
@@ -32,6 +33,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 			raw.isActivo,
 			raw.id,
 			raw.roles.map(({ rol }) => rol.nombre),
+			raw.emailVerificadoEn !== null,
 		);
 	}
 
