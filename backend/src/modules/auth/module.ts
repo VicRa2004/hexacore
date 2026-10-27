@@ -94,12 +94,13 @@ export const authModule: AppModule = {
 		);
 		app.route("/api/auth", router.router);
 	},
-	onStart() {
-		// Limpieza periódica de refresh tokens expirados (cada hora).
-		const intervalo = setInterval(
-			() => refreshTokenRepo.eliminarExpirados().catch(console.error),
-			60 * 60 * 1000,
-		);
-		return () => clearInterval(intervalo);
+	onStart(container) {
+		container
+			.get(TOKENS.Scheduler)
+			.programar("auth.limpiar-tokens", 60 * 60 * 1000, async () => {
+				await refreshTokenRepo.eliminarExpirados();
+				await cuentaRepo.eliminarTokensCaducados();
+			});
+		return undefined;
 	},
 };

@@ -1,5 +1,7 @@
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { Mailer } from "@/core/shared/domain/Mailer";
+import type { Scheduler } from "@/core/shared/domain/Scheduler";
+import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
 import type { PermisoGuard } from "../http/permisoGuard";
 import { token } from "./DependencyContainer";
 
@@ -8,4 +10,6 @@ export const TOKENS = {
 	EventBus: token<EventBus>("EventBus"),
 	PermisoGuard: token<PermisoGuard>("PermisoGuard"),
 	Mailer: token<Mailer>("Mailer"),
+	Scheduler: token<Scheduler>("Scheduler"),
+	UnitOfWork: token<UnitOfWork>("UnitOfWork"),
 } as const;

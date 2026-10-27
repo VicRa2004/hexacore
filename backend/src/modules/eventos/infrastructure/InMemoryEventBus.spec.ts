@@ -33,3 +33,20 @@ describe("InMemoryEventBus", () => {
 		consoleError.mockRestore();
 	});
 });
+
+describe("InMemoryEventBus: comodín y meta", () => {
+	it("debería entregar a '*' todos los eventos con el contexto de la petición", async () => {
+		const { contexto } = await import("@/core/shared/infrastructure/contexto");
+		const bus = new InMemoryEventBus();
+		const todos = mock();
+		bus.subscribe("*", todos);
+
+		await contexto.ejecutar({ requestId: "req-1", usuarioId: 7 }, () =>
+			bus.publish({ eventName: "x", occurredOn: new Date(), data: {} }),
+		);
+
+		expect(todos).toHaveBeenCalledWith(
+			expect.objectContaining({ meta: { requestId: "req-1", usuarioId: 7 } }),
+		);
+	});
+});

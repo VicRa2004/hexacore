@@ -1,4 +1,5 @@
 import type { Context, Next } from "hono";
+import { contexto } from "@/core/shared/infrastructure/contexto";
 import type {
 	AccessTokenPayload,
 	TokenService,
@@ -54,7 +55,9 @@ export class AuthMiddleware {
 		try {
 			// En lugar de mutar req (ej. req.usuario), en Hono guardamos datos en el contexto
 			// usando c.set() para que otros middlewares/controladores puedan leerlo con c.get()
-			c.set("usuario", this.tokenService.verificarToken(token));
+			const usuario = this.tokenService.verificarToken(token);
+			c.set("usuario", usuario);
+			contexto.completar({ usuarioId: usuario.id });
 		} catch {
 			return c.json(
 				{ success: false, error: "Token inválido o expirado" },

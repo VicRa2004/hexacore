@@ -2,6 +2,7 @@ import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
 import { prisma } from "@/core/config/prisma";
 import { container } from "@/core/shared/infrastructure/di/container";
+import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
 import { modules } from "@/modules";
 
 const server = Bun.serve({
@@ -23,6 +24,7 @@ const stopTasks = modules.map((module) => module.onStart?.(container));
 const shutdown = async (signal: string) => {
 	console.log(`${signal} recibido, apagando...`);
 	await server.stop();
+	container.get(TOKENS.Scheduler).detener();
 	for (const stop of stopTasks) stop?.();
 	await prisma.$disconnect();
 	process.exit(0);

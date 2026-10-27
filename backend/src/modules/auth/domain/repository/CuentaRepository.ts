@@ -22,6 +22,9 @@ export interface CuentaRepository {
 		tipo: TipoTokenCuenta,
 	): Promise<number | null>;
 
+	/** Borra los tokens caducados o ya usados (limpieza periódica). */
+	eliminarTokensCaducados(): Promise<void>;
+
 	marcarEmailVerificado(usuarioId: number): Promise<void>;
 
 	/** @returns la fecha hasta la que la cuenta está bloqueada, o `null`. */

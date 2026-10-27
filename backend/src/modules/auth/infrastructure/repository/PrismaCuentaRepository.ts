@@ -37,6 +37,14 @@ export class PrismaCuentaRepository implements CuentaRepository {
 		return token?.usuarioId ?? null;
 	}
 
+	async eliminarTokensCaducados(): Promise<void> {
+		await prisma.tokenCuenta.deleteMany({
+			where: {
+				OR: [{ expiraEn: { lt: new Date() } }, { usadoEn: { not: null } }],
+			},
+		});
+	}
+
 	async marcarEmailVerificado(usuarioId: number): Promise<void> {
 		await prisma.usuario.updateMany({
 			where: { id: usuarioId, emailVerificadoEn: null },

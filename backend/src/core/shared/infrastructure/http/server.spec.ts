@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 const queryRaw = mock(() => Promise.resolve([{ "?column?": 1 }]));
 mock.module("@/core/config/prisma", () => ({
 	prisma: { $queryRaw: queryRaw },
+	enTransaccion: <T>(trabajo: () => Promise<T>) => trabajo(),
 }));
 
 const { app } = await import("./server");

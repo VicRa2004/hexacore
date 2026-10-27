@@ -13,7 +13,9 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
+import { contexto } from "@/core/shared/infrastructure/contexto";
 import { container } from "@/core/shared/infrastructure/di/container";
+import { log } from "@/core/shared/infrastructure/logger";
 import { modules } from "@/modules";
 
 const app = new OpenAPIHono();
@@ -23,22 +25,22 @@ const isProd = env.NODE_ENV === "prod";
 const jsonLogger: MiddlewareHandler = async (c, next) => {
 	const start = performance.now();
 	await next();
-	console.log(
-		JSON.stringify({
-			level: "info",
-			requestId: c.get("requestId"),
-			method: c.req.method,
-			path: c.req.path,
-			status: c.res.status,
-			ms: Math.round(performance.now() - start),
-		}),
-	);
+	log.info("peticion", {
+		method: c.req.method,
+		path: c.req.path,
+		status: c.res.status,
+		ms: Math.round(performance.now() - start),
+	});
 };
 
 // 1. Middlewares Nativos (Reemplazan a helmet, morgan y cors)
 app.use("*", secureHeaders());
 app.use("*", cors({ origin: env.CORS_ORIGIN }));
 app.use("*", requestId());
+// Contexto de la petición (requestId, usuarioId) para logs, eventos y auditoría.
+app.use("*", (c, next) =>
+	contexto.ejecutar({ requestId: c.get("requestId") }, next),
+);
 app.use("*", isProd ? jsonLogger : logger());
 // Nota: express.json() desaparece. Hono procesa el JSON automáticamente
 // cuando llamas a c.req.json() en tus controladores.
@@ -82,14 +84,7 @@ for (const module of modules) module.mount?.(app, container);
 app.onError((err, c) => {
 	const id = c.get("requestId");
 	if (isProd) {
-		console.error(
-			JSON.stringify({
-				level: "error",
-				requestId: id,
-				message: err.message,
-				stack: err.stack,
-			}),
-		);
+		log.error(err.message, { stack: err.stack });
 	} else {
 		console.error(`[${id}]`, err);
 	}

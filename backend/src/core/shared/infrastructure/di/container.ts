@@ -4,6 +4,8 @@ import { NoopEventBus } from "../events/NoopEventBus";
 import { PermitirAutenticadoGuard } from "../http/permisoGuard";
 import { ConsoleMailer } from "../mail/ConsoleMailer";
 import { ResendMailer } from "../mail/ResendMailer";
+import { PrismaUnitOfWork } from "../persistencia/PrismaUnitOfWork";
+import { IntervalScheduler } from "../tareas/IntervalScheduler";
 import { DependencyContainer } from "./DependencyContainer";
 import { TOKENS } from "./tokens";
 
@@ -17,6 +19,8 @@ container.set(TOKENS.Mailer, () =>
 		? new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM)
 		: new ConsoleMailer(env.NODE_ENV === "prod"),
 );
+container.set(TOKENS.Scheduler, () => new IntervalScheduler());
+container.set(TOKENS.UnitOfWork, () => new PrismaUnitOfWork());
 
 for (const module of modules) module.register?.(container);
 

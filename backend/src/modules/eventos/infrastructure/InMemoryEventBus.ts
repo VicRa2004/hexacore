@@ -3,6 +3,8 @@ import type {
 	EventHandler,
 } from "@/core/shared/domain/events/EventBus";
 import type { DomainEvent } from "@/core/shared/domain/events/DomainEvent";
+import { contexto } from "@/core/shared/infrastructure/contexto";
+import { log } from "@/core/shared/infrastructure/logger";
 
 /**
  * Bus de eventos en memoria. `publish` espera a todos los subscribers y aísla
@@ -12,17 +14,20 @@ export class InMemoryEventBus implements EventBus {
 	private handlers = new Map<string, EventHandler[]>();
 
 	async publish(event: DomainEvent): Promise<void> {
-		const handlers = this.handlers.get(event.eventName) ?? [];
+		event.meta ??= contexto.actual();
+		const handlers = [
+			...(this.handlers.get(event.eventName) ?? []),
+			...(this.handlers.get("*") ?? []),
+		];
 		const resultados = await Promise.allSettled(
 			handlers.map(async (handler) => handler(event)),
 		);
 
 		for (const resultado of resultados) {
 			if (resultado.status === "rejected") {
-				console.error(
-					`[EventBus] Falló un subscriber de "${event.eventName}":`,
-					resultado.reason,
-				);
+				log.error(`[EventBus] Falló un subscriber de "${event.eventName}"`, {
+					error: String(resultado.reason),
+				});
 			}
 		}
 	}
