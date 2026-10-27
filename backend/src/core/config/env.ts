@@ -19,6 +19,14 @@ const EnvSchema = z
 			.string()
 			.default("http://localhost:5173")
 			.transform((value) => value.split(",").map((origin) => origin.trim())),
+		// URL pública del frontend: base de los enlaces de los correos.
+		APP_URL: z
+			.url("APP_URL debe ser una URL valida")
+			.default("http://localhost:5173")
+			.transform((url) => url.replace(/\/$/, "")),
+		// Sin RESEND_API_KEY los correos se escriben en consola (ConsoleMailer).
+		RESEND_API_KEY: z.string().optional(),
+		MAIL_FROM: z.string().default("Hexacore <no-reply@localhost>"),
 	})
 	.refine(
 		(env) =>
@@ -35,6 +43,9 @@ const envPrev = {
 	DATABASE_URL: process.env.DATABASE_URL,
 	JWT_SECRET: process.env.JWT_SECRET,
 	CORS_ORIGIN: process.env.CORS_ORIGIN,
+	APP_URL: process.env.APP_URL || undefined,
+	RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
+	MAIL_FROM: process.env.MAIL_FROM || undefined,
 };
 
 export const env = EnvSchema.parse(envPrev);
