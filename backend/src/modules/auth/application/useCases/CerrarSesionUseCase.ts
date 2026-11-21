@@ -10,7 +10,7 @@ export class CerrarSesionUseCase {
 
 	async ejecutar(usuarioId: number, sesionId: number): Promise<void> {
 		// El id cambia con cada renovación: uno viejo da 404 y el cliente recarga la lista.
-		const cerrada = await this.refreshTokenRepo.revocarDeUsuario(
+		const cerrada = await this.refreshTokenRepo.eliminarDeUsuario(
 			sesionId,
 			usuarioId,
 		);

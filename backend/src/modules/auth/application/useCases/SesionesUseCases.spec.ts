@@ -49,12 +49,12 @@ describe("ListarSesionesUseCase", () => {
 
 describe("CerrarSesionUseCase", () => {
 	it("debería dar 404 si la sesión no es del usuario o ya estaba cerrada", async () => {
-		const repo = { revocarDeUsuario: mock(async () => false) };
+		const repo = { eliminarDeUsuario: mock(async () => false) };
 		const useCase = new CerrarSesionUseCase(repo as never);
 
 		await expect(useCase.ejecutar(5, 9)).rejects.toMatchObject({
 			code: 404,
 		});
-		expect(repo.revocarDeUsuario).toHaveBeenCalledWith(9, 5);
+		expect(repo.eliminarDeUsuario).toHaveBeenCalledWith(9, 5);
 	});
 });

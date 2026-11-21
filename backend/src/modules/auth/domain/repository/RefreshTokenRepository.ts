@@ -53,10 +53,13 @@ export interface RefreshTokenRepository {
 	listarActivosPorUsuario(usuarioId: number): Promise<SesionActiva[]>;
 
 	/**
-	 * Revoca un token vigente solo si es de ese usuario.
+	 * Cierra una sesión borrando su token vigente, solo si es de ese usuario.
+	 * Se borra en vez de revocarlo: un token revocado que se reutiliza se toma
+	 * por robado y cierra TODAS las sesiones (rotación), y aquí el dispositivo
+	 * cerrado lo reenviará de buena fe en su próxima renovación.
 	 * @returns `false` si no existe, es de otro usuario o ya estaba revocado.
 	 */
-	revocarDeUsuario(id: number, usuarioId: number): Promise<boolean>;
+	eliminarDeUsuario(id: number, usuarioId: number): Promise<boolean>;
 
 	/**
 	 * Elimina tokens expirados (revocados o no) de la base de datos (limpieza periódica).

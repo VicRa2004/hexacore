@@ -155,6 +155,8 @@ describe("Cuenta (e2e)", () => {
 			});
 		expect((await cerrar()).status).toBe(200);
 		expect((await cerrar()).status).toBe(404);
+		// El móvil cerrado reintenta renovar: 401, sin tomarse por robo de token
+		// (que cerraría también la sesión del portátil).
 		expect((await refresh(refreshCookie(movil))).status).toBe(401);
 		expect((await refresh(cookiePortatil)).status).toBe(200);
 	});

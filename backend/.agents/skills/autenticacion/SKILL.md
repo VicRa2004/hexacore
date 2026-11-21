@@ -19,6 +19,8 @@ description: "Flujo de autenticación del backend: access token JWT + refresh to
 | POST | `/api/auth/verificar-email/reenviar` | — (Bearer) | `{ mensaje }` |
 | PUT | `/api/auth/password` | `{ passwordActual, passwordNueva }` (Bearer) | `{ accessToken }` + cookie nueva; revoca el resto de sesiones |
 | POST | `/api/auth/logout-todas` | — (Bearer) | `{ mensaje }`; revoca todos los refresh tokens y borra la cookie |
+| GET | `/api/auth/sesiones` | — (Bearer + cookie) | `Sesion[]`: una por dispositivo (user agent, último uso), `actual` = la de la cookie |
+| DELETE | `/api/auth/sesiones/{id}` | — (Bearer) | `{ mensaje }`; borra el token de esa sesión (no lo revoca: su dispositivo lo reenviará y un revocado reutilizado cerraría todas). `404` si no es tuya o ya no existe |
 
 El refresh token **nunca** viaja en el body: el servidor lo fija en la cookie
 `refresh_token` (`HttpOnly`, `SameSite=Strict`, `Path=/api/auth`, `Secure` en

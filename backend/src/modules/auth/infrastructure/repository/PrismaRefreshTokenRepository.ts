@@ -83,10 +83,9 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 		}));
 	}
 
-	async revocarDeUsuario(id: number, usuarioId: number): Promise<boolean> {
-		const { count } = await prisma.refreshToken.updateMany({
+	async eliminarDeUsuario(id: number, usuarioId: number): Promise<boolean> {
+		const { count } = await prisma.refreshToken.deleteMany({
 			where: { id, usuarioId, revocado: false },
-			data: { revocado: true },
 		});
 		return count === 1;
 	}
