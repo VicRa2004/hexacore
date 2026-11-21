@@ -1,3 +1,13 @@
+/** Sesión abierta: el refresh token vigente de un dispositivo (la rotación deja uno por sesión). */
+export interface SesionActiva {
+	id: number;
+	tokenHash: string;
+	userAgent: string | null;
+	/** Inicio de sesión o última renovación. */
+	ultimoUso: Date;
+	expiraEn: Date;
+}
+
 /**
  * Contrato de repositorio para la gestión de Refresh Tokens.
  * Define las operaciones de persistencia sin acoplarse a la infraestructura.
@@ -38,6 +48,15 @@ export interface RefreshTokenRepository {
 	 * Revoca todos los refresh tokens de un usuario (logout global / compromiso de cuenta).
 	 */
 	revocarTodosPorUsuarioId(usuarioId: number): Promise<void>;
+
+	/** Refresh tokens vigentes del usuario (uno por sesión abierta), del más reciente al más antiguo. */
+	listarActivosPorUsuario(usuarioId: number): Promise<SesionActiva[]>;
+
+	/**
+	 * Revoca un token vigente solo si es de ese usuario.
+	 * @returns `false` si no existe, es de otro usuario o ya estaba revocado.
+	 */
+	revocarDeUsuario(id: number, usuarioId: number): Promise<boolean>;
 
 	/**
 	 * Elimina tokens expirados (revocados o no) de la base de datos (limpieza periódica).

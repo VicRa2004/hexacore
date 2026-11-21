@@ -5,7 +5,9 @@ import { USUARIO_TOKENS } from "@/core/usuario";
 import { EmisorCorreosCuenta } from "./application/services/EmisorCorreosCuenta";
 import { EmisorSesion } from "./application/services/EmisorSesion";
 import { CambiarPasswordUseCase } from "./application/useCases/CambiarPasswordUseCase";
+import { CerrarSesionUseCase } from "./application/useCases/CerrarSesionUseCase";
 import { CerrarSesionesUseCase } from "./application/useCases/CerrarSesionesUseCase";
+import { ListarSesionesUseCase } from "./application/useCases/ListarSesionesUseCase";
 import { LoginUseCase } from "./application/useCases/LoginUseCase";
 import { LogoutUseCase } from "./application/useCases/LogoutUseCase";
 import { RefreshTokenUseCase } from "./application/useCases/RefreshTokenUseCase";
@@ -19,6 +21,7 @@ import { LoginController } from "./infrastructure/http/controllers/LoginControll
 import { LogoutController } from "./infrastructure/http/controllers/LogoutController";
 import { RefreshTokenController } from "./infrastructure/http/controllers/RefreshTokenController";
 import { RegistroController } from "./infrastructure/http/controllers/RegistroController";
+import { SesionController } from "./infrastructure/http/controllers/SesionController";
 import { AuthMiddleware } from "./infrastructure/http/middlewares/authMiddleware";
 import { AuthRouter } from "./infrastructure/http/routes/AuthRouter";
 import { PrismaCuentaRepository } from "./infrastructure/repository/PrismaCuentaRepository";
@@ -89,6 +92,10 @@ export const authModule: AppModule = {
 					sesiones,
 				),
 				cerrarSesiones: new CerrarSesionesUseCase(refreshTokenRepo),
+			}),
+			new SesionController({
+				listar: new ListarSesionesUseCase(tokenService, refreshTokenRepo),
+				cerrar: new CerrarSesionUseCase(refreshTokenRepo),
 			}),
 			container.get(AUTH_TOKENS.AuthMiddleware),
 		);

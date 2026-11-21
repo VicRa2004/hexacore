@@ -3,7 +3,9 @@ import { z } from "@hono/zod-openapi";
 export const obtenerAuditoriaSchema = z.object({
 	pagina: z.string().regex(/^\d+$/).transform(Number).optional().default(1),
 	limite: z.string().regex(/^\d+$/).transform(Number).optional().default(20),
-	evento: z.string().trim().min(1).max(150).optional(),
+	evento: z.string().trim().min(1).max(150).optional().openapi({
+		description: "Prefijo del evento (`usuario.` o `usuario.creado`)",
+	}),
 	usuarioId: z.string().regex(/^\d+$/).transform(Number).optional(),
 });
 

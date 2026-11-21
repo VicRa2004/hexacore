@@ -131,6 +131,51 @@ describe("Cuenta (e2e)", () => {
 		expect((await refresh(refreshCookie(portatil))).status).toBe(401);
 	});
 
+	it("lista las sesiones por dispositivo y cierra una sin tocar las demás", async () => {
+		await crearUsuario("sara@e2e.dev");
+		const movil = await loginCon("sara@e2e.dev", PASSWORD);
+		const portatil = await loginCon("sara@e2e.dev", PASSWORD);
+		const { accessToken } = await portatil.json();
+		const cookiePortatil = refreshCookie(portatil);
+
+		const lista = await api("/api/auth/sesiones", {
+			token: accessToken,
+			cookie: cookiePortatil,
+		});
+		expect(lista.status).toBe(200);
+		const sesiones: { id: number; actual: boolean }[] = await lista.json();
+		expect(sesiones).toHaveLength(2);
+		const otra = sesiones.find((s) => !s.actual);
+		expect(sesiones.filter((s) => s.actual)).toHaveLength(1);
+
+		const cerrar = () =>
+			api(`/api/auth/sesiones/${otra?.id}`, {
+				method: "DELETE",
+				token: accessToken,
+			});
+		expect((await cerrar()).status).toBe(200);
+		expect((await cerrar()).status).toBe(404);
+		expect((await refresh(refreshCookie(movil))).status).toBe(401);
+		expect((await refresh(cookiePortatil)).status).toBe(200);
+	});
+
+	it("no deja cerrar la sesión de otro usuario", async () => {
+		await crearUsuario("teo@e2e.dev");
+		await crearUsuario("uma@e2e.dev");
+		await loginCon("uma@e2e.dev", PASSWORD);
+		const teo = await (await loginCon("teo@e2e.dev", PASSWORD)).json();
+		const uma = await (await loginCon("uma@e2e.dev", PASSWORD)).json();
+		const [deUma] = await (
+			await api("/api/auth/sesiones", { token: uma.accessToken })
+		).json();
+
+		const res = await api(`/api/auth/sesiones/${deUma.id}`, {
+			method: "DELETE",
+			token: teo.accessToken,
+		});
+		expect(res.status).toBe(404);
+	});
+
 	it("bloquea la cuenta tras 5 fallos aunque vengan de IPs distintas", async () => {
 		await crearUsuario("bruno@e2e.dev");
 

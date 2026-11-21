@@ -21,7 +21,11 @@ export class PrismaAuditoriaRepository implements AuditoriaRepository {
 		filtros: AuditoriaFiltros,
 	): Promise<Paginacion<RegistroAuditoria>> {
 		const { pagina, limite, evento, usuarioId } = filtros;
-		const where = { evento, usuarioId };
+		// Prefijo: `usuario.` filtra todos los eventos de usuario; el nombre exacto sigue valiendo.
+		const where = {
+			evento: evento ? { startsWith: evento } : undefined,
+			usuarioId,
+		};
 
 		const [datos, totalElementos] = await prisma.$transaction([
 			prisma.auditoria.findMany({

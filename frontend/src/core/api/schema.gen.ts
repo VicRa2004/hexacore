@@ -1086,6 +1086,113 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/sesiones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar las sesiones abiertas (una por dispositivo) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sesiones abiertas */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Sesion"][];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/sesiones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Cerrar una sesión concreta
+         * @description Revoca su refresh token. Su access token sigue valiendo hasta que caduca (máx. 15 min).
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sesión cerrada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Sesión cerrada correctamente */
+                            mensaje: string;
+                        };
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description La sesión no existe, no es tuya o ya estaba cerrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/permisos/usuarios/{usuarioId}": {
         parameters: {
             query?: never;
@@ -1906,6 +2013,7 @@ export interface paths {
                 query?: {
                     pagina?: string;
                     limite?: string;
+                    /** @description Prefijo del evento (`usuario.` o `usuario.creado`) */
                     evento?: string;
                     usuarioId?: string;
                 };
@@ -2009,6 +2117,15 @@ export interface components {
             accessToken: string;
             usuario: components["schemas"]["UsuarioDto"];
         };
+        Sesion: {
+            id: number;
+            userAgent: string | null;
+            /** Format: date-time */
+            ultimoUso: string;
+            /** Format: date-time */
+            expiraEn: string;
+            actual: boolean;
+        };
         PermisoDto: {
             /** @example 1 */
             id: number;
@@ -2073,6 +2190,7 @@ export interface components {
 export type UsuarioDto = components['schemas']['UsuarioDto'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type AuthResponse = components['schemas']['AuthResponse'];
+export type Sesion = components['schemas']['Sesion'];
 export type PermisoDto = components['schemas']['PermisoDto'];
 export type RolDto = components['schemas']['RolDto'];
 export type AsignacionUsuario = components['schemas']['AsignacionUsuario'];

@@ -13,6 +13,7 @@ export interface RegistroAuditoria {
 export interface AuditoriaFiltros {
 	pagina: number;
 	limite: number;
+	/** Prefijo del nombre del evento (`usuario.` o `usuario.creado`). */
 	evento?: string;
 	usuarioId?: number;
 }

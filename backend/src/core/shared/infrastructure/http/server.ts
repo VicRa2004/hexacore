@@ -45,7 +45,13 @@ app.use("*", cors({ origin: env.CORS_ORIGIN }));
 app.use("*", requestId());
 // Contexto de la petición (requestId, usuarioId) para logs, eventos y auditoría.
 app.use("*", (c, next) =>
-	contexto.ejecutar({ requestId: c.get("requestId") }, next),
+	contexto.ejecutar(
+		{
+			requestId: c.get("requestId"),
+			userAgent: c.req.header("user-agent")?.slice(0, 255),
+		},
+		next,
+	),
 );
 app.use("*", isProd ? jsonLogger : logger());
 // Nota: express.json() desaparece. Hono procesa el JSON automáticamente

@@ -5,6 +5,8 @@ export interface ContextoPeticion {
 	requestId?: string;
 	/** Lo añade `authMiddleware` al verificar el token. */
 	usuarioId?: number;
+	/** Navegador o cliente de la petición (identifica el dispositivo de cada sesión). */
+	userAgent?: string;
 }
 
 const almacen = new AsyncLocalStorage<ContextoPeticion>();

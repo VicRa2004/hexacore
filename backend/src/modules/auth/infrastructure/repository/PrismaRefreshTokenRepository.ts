@@ -1,5 +1,9 @@
 import { prisma } from "@/core/config/prisma";
-import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
+import { contexto } from "@/core/shared/infrastructure/contexto";
+import type {
+	RefreshTokenRepository,
+	SesionActiva,
+} from "../../domain/repository/RefreshTokenRepository";
 
 export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 	async crear(data: {
@@ -12,6 +16,8 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 				tokenHash: data.tokenHash,
 				usuarioId: data.usuarioId,
 				expiraEn: data.expiraEn,
+				// Dispositivo de la petición que abre o renueva la sesión.
+				userAgent: contexto.actual().userAgent,
 			},
 		});
 	}
@@ -61,6 +67,28 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 			where: { usuarioId, revocado: false },
 			data: { revocado: true },
 		});
+	}
+
+	async listarActivosPorUsuario(usuarioId: number): Promise<SesionActiva[]> {
+		const registros = await prisma.refreshToken.findMany({
+			where: { usuarioId, revocado: false, expiraEn: { gt: new Date() } },
+			orderBy: { createdAt: "desc" },
+		});
+		return registros.map((r) => ({
+			id: r.id,
+			tokenHash: r.tokenHash,
+			userAgent: r.userAgent,
+			ultimoUso: r.createdAt,
+			expiraEn: r.expiraEn,
+		}));
+	}
+
+	async revocarDeUsuario(id: number, usuarioId: number): Promise<boolean> {
+		const { count } = await prisma.refreshToken.updateMany({
+			where: { id, usuarioId, revocado: false },
+			data: { revocado: true },
+		});
+		return count === 1;
 	}
 
 	async eliminarExpirados(): Promise<void> {

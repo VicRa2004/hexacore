@@ -125,6 +125,7 @@ model RefreshToken {
   usuarioId Int      @map("rft_fkusuario")
   expiraEn  DateTime @map("rft_expira_en")
   revocado  Boolean  @default(false) @map("rft_revocado")
+  userAgent String?  @map("rft_user_agent") @db.VarChar(255) // dispositivo de la sesión
   createdAt DateTime @default(now()) @map("rft_created_at")
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)

@@ -5,6 +5,7 @@ import { RegistroController } from "../controllers/RegistroController";
 import { RefreshTokenController } from "../controllers/RefreshTokenController";
 import { LogoutController } from "../controllers/LogoutController";
 import type { CuentaController } from "../controllers/CuentaController";
+import type { SesionController } from "../controllers/SesionController";
 import type { AuthMiddleware } from "../middlewares/authMiddleware";
 import { rateLimit } from "@/core/shared/infrastructure/http/rateLimit";
 import {
@@ -20,6 +21,8 @@ import {
 	refreshResponseSchema,
 	registroSchema,
 	restablecerPasswordSchema,
+	sesionIdSchema,
+	sesionSchema,
 	verificarEmailSchema,
 } from "../schemas/authSchemas";
 
@@ -44,6 +47,7 @@ export class AuthRouter {
 		private readonly refreshTokenController: RefreshTokenController,
 		private readonly logoutController: LogoutController,
 		private readonly cuentaController: CuentaController,
+		private readonly sesionController: SesionController,
 		private readonly authMiddleware: AuthMiddleware,
 	) {
 		this.router = new OpenAPIHono();
@@ -273,5 +277,38 @@ export class AuthRouter {
 			},
 		});
 		this.router.post("/logout-todas", auth, cuenta.cerrarSesiones);
+
+		// Bajo /api/auth para recibir la cookie `refresh_token` y marcar la sesión actual.
+		docs.registerPath({
+			method: "get",
+			path: "/sesiones",
+			tags,
+			security: bearer,
+			summary: "Listar las sesiones abiertas (una por dispositivo)",
+			responses: {
+				200: jsonResponse(sesionSchema.array(), "Sesiones abiertas"),
+				401: errorResponse("No autenticado"),
+			},
+		});
+		this.router.get("/sesiones", auth, this.sesionController.listar);
+
+		docs.registerPath({
+			method: "delete",
+			path: "/sesiones/{id}",
+			tags,
+			security: bearer,
+			summary: "Cerrar una sesión concreta",
+			description:
+				"Revoca su refresh token. Su access token sigue valiendo hasta que caduca (máx. 15 min).",
+			request: { params: sesionIdSchema },
+			responses: {
+				200: jsonResponse(mensajeResponseSchema, "Sesión cerrada"),
+				401: errorResponse("No autenticado"),
+				404: errorResponse(
+					"La sesión no existe, no es tuya o ya estaba cerrada",
+				),
+			},
+		});
+		this.router.delete("/sesiones/:id", auth, this.sesionController.cerrar);
 	}
 }
