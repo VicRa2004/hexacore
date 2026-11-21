@@ -57,4 +57,14 @@ describe("server", () => {
 
 		expect(res.status).toBe(400);
 	});
+
+	it("POST /api/telemetria/v1/traces debería responder 400 si OTel no está configurado", async () => {
+		const res = await app.request("/api/telemetria/v1/traces", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: "{}",
+		});
+
+		expect(res.status).toBe(400);
+	});
 });

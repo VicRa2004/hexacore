@@ -21,7 +21,12 @@ import {
 	reportarError,
 	urlIngesta,
 } from "@/core/shared/infrastructure/monitoreo";
+import {
+	parsearCabecerasOtlp,
+	urlIngestaTrazas,
+} from "@/core/shared/infrastructure/telemetria";
 import { rateLimit } from "@/core/shared/infrastructure/http/rateLimit";
+import { telemetriaHttp } from "@/core/shared/infrastructure/http/telemetriaHttp";
 import { modules } from "@/modules";
 
 const app = new OpenAPIHono();
@@ -53,6 +58,7 @@ app.use("*", (c, next) =>
 		next,
 	),
 );
+app.use("*", telemetriaHttp());
 app.use("*", isProd ? jsonLogger : logger());
 // Nota: express.json() desaparece. Hono procesa el JSON automáticamente
 // cuando llamas a c.req.json() en tus controladores.
@@ -103,6 +109,35 @@ app.post(
 				method: "POST",
 				body: sobre,
 				headers: { "Content-Type": "application/x-sentry-envelope" },
+				signal: AbortSignal.timeout(5_000),
+			});
+			return c.body(null, res.ok ? 200 : 502);
+		} catch {
+			return c.body(null, 502);
+		}
+	},
+);
+
+// Túnel OTLP/HTTP para trazas del frontend: las credenciales y el endpoint del colector
+// se quedan en el servidor y nunca se compilan en el bundle público.
+const TIPOS_OTLP = new Set(["application/json", "application/x-protobuf"]);
+app.post(
+	"/api/telemetria/v1/traces",
+	rateLimit({ windowMs: 60_000, limit: 60 }),
+	bodyLimit({ maxSize: 256 * 1024 }),
+	async (c) => {
+		const destino = urlIngestaTrazas();
+		const tipo = c.req.header("content-type")?.split(";")[0]?.trim() ?? "";
+		if (!destino || !TIPOS_OTLP.has(tipo)) return c.body(null, 400);
+		const cuerpo = new Uint8Array(await c.req.arrayBuffer());
+		try {
+			const res = await fetch(destino, {
+				method: "POST",
+				body: cuerpo,
+				headers: {
+					...parsearCabecerasOtlp(env.OTEL_EXPORTER_OTLP_HEADERS),
+					"Content-Type": tipo,
+				},
 				signal: AbortSignal.timeout(5_000),
 			});
 			return c.body(null, res.ok ? 200 : 502);

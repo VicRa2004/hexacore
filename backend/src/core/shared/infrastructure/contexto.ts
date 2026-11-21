@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { trace } from "@opentelemetry/api";
 
 /** Datos de la petición en curso, accesibles sin pasarlos por parámetro. */
 export interface ContextoPeticion {
@@ -26,5 +27,8 @@ export const contexto = {
 	completar(datos: ContextoPeticion): void {
 		const actual = almacen.getStore();
 		if (actual) Object.assign(actual, datos);
+		if (datos.usuarioId !== undefined) {
+			trace.getActiveSpan()?.setAttribute("usuario.id", datos.usuarioId);
+		}
 	},
 };

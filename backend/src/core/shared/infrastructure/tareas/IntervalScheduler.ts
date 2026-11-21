@@ -1,5 +1,6 @@
 import type { Scheduler } from "@/core/shared/domain/Scheduler";
 import { log } from "../logger";
+import { conSpan } from "../telemetria";
 
 /**
  * Scheduler en proceso con `setInterval`. Una ejecución no se solapa con la
@@ -18,7 +19,9 @@ export class IntervalScheduler implements Scheduler {
 				if (enCurso) return;
 				enCurso = true;
 				try {
-					await tarea();
+					await conSpan(`scheduler.${nombre}`, () => tarea(), {
+						attributes: { "scheduler.tarea": nombre },
+					});
 				} catch (error) {
 					log.error(`Falló la tarea "${nombre}"`, { error: String(error) });
 				} finally {

@@ -9,6 +9,7 @@ import { ConsoleMailer } from "../mail/ConsoleMailer";
 import { ResendMailer } from "../mail/ResendMailer";
 import { PrismaUnitOfWork } from "../persistencia/PrismaUnitOfWork";
 import { IntervalScheduler } from "../tareas/IntervalScheduler";
+import { OtelTelemetria } from "../telemetria";
 import { DependencyContainer } from "./DependencyContainer";
 import { TOKENS } from "./tokens";
 
@@ -37,6 +38,7 @@ container.set(TOKENS.Almacenamiento, () =>
 			)
 		: new LocalAlmacenamiento(env.STORAGE_DIR),
 );
+container.set(TOKENS.Telemetria, () => new OtelTelemetria());
 
 for (const module of modules) module.register?.(container);
 

@@ -18,6 +18,8 @@ COPY backend backend
 COPY frontend frontend
 ARG VITE_SENTRY_DSN=""
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
+ARG VITE_OTEL_ENABLED=""
+ENV VITE_OTEL_ENABLED=$VITE_OTEL_ENABLED
 RUN pnpm --filter frontend build \
 	&& rm -rf node_modules backend/node_modules frontend/node_modules \
 	&& pnpm install --frozen-lockfile --offline --filter backend...

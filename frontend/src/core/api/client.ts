@@ -6,6 +6,7 @@ import axios, {
 import { useAuthStore } from "@/core/auth/store";
 import type { AuthTokens } from "@/core/auth/types";
 import { reportarErrorApi } from "@/core/monitoreo";
+import { inyectarCabecerasTraza } from "@/core/telemetria";
 import type { ErrorResponse } from "./schema.gen";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -37,12 +38,17 @@ function refreshAccessToken(): Promise<string> {
 	return refreshPromise;
 }
 
-// Request Interceptor: Inyectar token de autenticación
+// Request Interceptor: Inyectar token de autenticación y contexto de traza W3C
 apiClient.interceptors.request.use(
 	(config: InternalAxiosRequestConfig) => {
 		const token = useAuthStore.getState().accessToken;
 		if (token && config.headers) {
 			config.headers.Authorization = `Bearer ${token}`;
+		}
+		if (config.headers) {
+			inyectarCabecerasTraza((clave, valor) => {
+				config.headers.set(clave, valor);
+			});
 		}
 		return config;
 	},

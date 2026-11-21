@@ -1,10 +1,12 @@
+import { SpanKind } from "@opentelemetry/api";
+import type { DomainEvent } from "@/core/shared/domain/events/DomainEvent";
 import type {
 	EventBus,
 	EventHandler,
 } from "@/core/shared/domain/events/EventBus";
-import type { DomainEvent } from "@/core/shared/domain/events/DomainEvent";
 import { contexto } from "@/core/shared/infrastructure/contexto";
 import { log } from "@/core/shared/infrastructure/logger";
+import { conSpan } from "@/core/shared/infrastructure/telemetria";
 
 /**
  * Bus de eventos en memoria. `publish` espera a todos los subscribers y aísla
@@ -19,17 +21,32 @@ export class InMemoryEventBus implements EventBus {
 			...(this.handlers.get(event.eventName) ?? []),
 			...(this.handlers.get("*") ?? []),
 		];
-		const resultados = await Promise.allSettled(
-			handlers.map(async (handler) => handler(event)),
-		);
+		await conSpan(
+			`event.publish ${event.eventName}`,
+			async () => {
+				const resultados = await Promise.allSettled(
+					handlers.map(async (handler) => handler(event)),
+				);
 
-		for (const resultado of resultados) {
-			if (resultado.status === "rejected") {
-				log.error(`[EventBus] Falló un subscriber de "${event.eventName}"`, {
-					error: String(resultado.reason),
-				});
-			}
-		}
+				for (const resultado of resultados) {
+					if (resultado.status === "rejected") {
+						log.error(
+							`[EventBus] Falló un subscriber de "${event.eventName}"`,
+							{
+								error: String(resultado.reason),
+							},
+						);
+					}
+				}
+			},
+			{
+				kind: SpanKind.INTERNAL,
+				attributes: {
+					"messaging.system": "in-memory",
+					"messaging.destination.name": event.eventName,
+				},
+			},
+		);
 	}
 
 	subscribe<E extends DomainEvent>(

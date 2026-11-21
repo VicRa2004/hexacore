@@ -55,6 +55,7 @@ frontend/src/
 │   │                               #   Avatar, Tooltip, Menu, Tabs, Dialog, ConfirmDialog, Table (Tabla + Paginacion), EmptyState
 │   ├── router/                     # QueryClient, instancia del router y pantallas de error/404 (RouteFallbacks)
 │   ├── monitoreo.ts                # Errores a GlitchTip (@sentry/react) si hay VITE_SENTRY_DSN
+│   ├── telemetria.ts               # Trazas OpenTelemetry si VITE_OTEL_ENABLED="true" (túnel /api/telemetria/v1/traces)
 │   ├── tema.ts                     # Tema claro/oscuro/sistema (data-tema) y color de marca (--marca-h)
 │   └── utils/                      # Utilidades transversales (cn.ts)
 │

@@ -2,6 +2,10 @@ import {
 	cerrarMonitoreo,
 	iniciarMonitoreo,
 } from "@/core/shared/infrastructure/monitoreo";
+import {
+	cerrarTelemetria,
+	iniciarTelemetria,
+} from "@/core/shared/infrastructure/telemetria";
 import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
 import { prisma } from "@/core/config/prisma";
@@ -9,6 +13,7 @@ import { container } from "@/core/shared/infrastructure/di/container";
 import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
 import { modules } from "@/modules";
 
+iniciarTelemetria();
 iniciarMonitoreo();
 
 const server = Bun.serve({
@@ -33,7 +38,7 @@ const shutdown = async (signal: string) => {
 	container.get(TOKENS.Scheduler).detener();
 	for (const stop of stopTasks) stop?.();
 	await prisma.$disconnect();
-	await cerrarMonitoreo();
+	await Promise.allSettled([cerrarTelemetria(), cerrarMonitoreo()]);
 	process.exit(0);
 };
 process.once("SIGTERM", shutdown);

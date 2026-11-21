@@ -1,10 +1,11 @@
 import { env } from "@/core/config/env";
 import { contexto } from "./contexto";
+import { traceContextActual } from "./telemetria";
 
 type Nivel = "info" | "warn" | "error";
 
 /**
- * Log con el `requestId` y el `usuarioId` de la petición en curso.
+ * Log con el `requestId`, `usuarioId` y (`traceId`/`spanId` si OTel está activo) de la petición.
  * En prod, una línea JSON (la recogen los logs de Dokploy); en dev, legible.
  */
 function escribir(
@@ -13,11 +14,19 @@ function escribir(
 	extra?: Record<string, unknown>,
 ) {
 	const { requestId, usuarioId } = contexto.actual();
+	const { traceId, spanId } = traceContextActual();
 	const salida = nivel === "info" ? console.log : console[nivel];
 
 	if (env.NODE_ENV === "prod") {
 		salida(
-			JSON.stringify({ level: nivel, requestId, usuarioId, mensaje, ...extra }),
+			JSON.stringify({
+				level: nivel,
+				requestId,
+				usuarioId,
+				...(traceId ? { traceId, spanId } : {}),
+				mensaje,
+				...extra,
+			}),
 		);
 		return;
 	}

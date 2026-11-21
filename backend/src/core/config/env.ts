@@ -36,6 +36,12 @@ const EnvSchema = z
 		S3_SECRET_ACCESS_KEY: z.string().optional(),
 		// Errores a GlitchTip/Sentry. Sin SENTRY_DSN no se reporta nada.
 		SENTRY_DSN: z.url("SENTRY_DSN debe ser una URL valida").optional(),
+		// Trazas y métricas OpenTelemetry (OTLP/HTTP). Sin OTEL_EXPORTER_OTLP_ENDPOINT está desactivado.
+		OTEL_EXPORTER_OTLP_ENDPOINT: z
+			.url("OTEL_EXPORTER_OTLP_ENDPOINT debe ser una URL valida")
+			.optional(),
+		OTEL_SERVICE_NAME: z.string().default("hexacore"),
+		OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
 	})
 	.refine(
 		(env) =>
@@ -62,6 +68,11 @@ const envPrev = {
 	S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || undefined,
 	S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || undefined,
 	SENTRY_DSN: process.env.SENTRY_DSN || undefined,
+	OTEL_EXPORTER_OTLP_ENDPOINT:
+		process.env.OTEL_EXPORTER_OTLP_ENDPOINT || undefined,
+	OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME || undefined,
+	OTEL_EXPORTER_OTLP_HEADERS:
+		process.env.OTEL_EXPORTER_OTLP_HEADERS || undefined,
 };
 
 export const env = EnvSchema.parse(envPrev);

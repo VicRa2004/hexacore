@@ -1,3 +1,4 @@
+import { SpanKind } from "@opentelemetry/api";
 import { prisma } from "@/core/config/prisma";
 import type { DomainEvent } from "@/core/shared/domain/events/DomainEvent";
 import type {
@@ -6,6 +7,7 @@ import type {
 } from "@/core/shared/domain/events/EventBus";
 import { contexto } from "@/core/shared/infrastructure/contexto";
 import { log } from "@/core/shared/infrastructure/logger";
+import { conSpan } from "@/core/shared/infrastructure/telemetria";
 import type { Prisma } from "@/generated/prisma/client";
 
 /** Tras estos intentos fallidos el evento se queda en la tabla para revisarlo a mano. */
@@ -108,9 +110,22 @@ export class OutboxEventBus implements EventBus {
 
 		try {
 			// Los logs de los subscribers llevan el requestId de la petición original.
-			await contexto.ejecutar(meta, async () => {
-				for (const handler of handlers) await handler(event);
-			});
+			await contexto.ejecutar(meta, () =>
+				conSpan(
+					`event.process ${fila.nombre}`,
+					async () => {
+						for (const handler of handlers) await handler(event);
+					},
+					{
+						kind: SpanKind.CONSUMER,
+						attributes: {
+							"messaging.system": "outbox",
+							"messaging.destination.name": fila.nombre,
+							"outbox.intento": fila.intentos + 1,
+						},
+					},
+				),
+			);
 			await prisma.eventoOutbox.update({
 				where: { id: fila.id },
 				data: { procesadoEn: new Date(), reservadoHasta: null },

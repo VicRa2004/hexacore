@@ -4,6 +4,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/core/components/ErrorBoundary";
 import { iniciarMonitoreo } from "@/core/monitoreo";
+import { iniciarTelemetria } from "@/core/telemetria";
 import { queryClient } from "@/core/router";
 import {
 	DefaultErrorComponent,
@@ -13,6 +14,7 @@ import { routeTree } from "./routeTree.gen";
 import "@fontsource-variable/inter";
 import "./index.css";
 
+iniciarTelemetria();
 iniciarMonitoreo();
 
 const router = createRouter({

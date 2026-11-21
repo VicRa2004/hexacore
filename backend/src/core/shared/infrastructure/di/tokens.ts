@@ -2,6 +2,7 @@ import type { Almacenamiento } from "@/core/shared/domain/Almacenamiento";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { Mailer } from "@/core/shared/domain/Mailer";
 import type { Scheduler } from "@/core/shared/domain/Scheduler";
+import type { Telemetria } from "@/core/shared/domain/Telemetria";
 import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
 import type { PermisoGuard } from "../http/permisoGuard";
 import { token } from "./DependencyContainer";
@@ -14,4 +15,5 @@ export const TOKENS = {
 	Scheduler: token<Scheduler>("Scheduler"),
 	UnitOfWork: token<UnitOfWork>("UnitOfWork"),
 	Almacenamiento: token<Almacenamiento>("Almacenamiento"),
+	Telemetria: token<Telemetria>("Telemetria"),
 } as const;
