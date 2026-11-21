@@ -1,9 +1,12 @@
+import { iniciarMonitoreo } from "@/core/shared/infrastructure/monitoreo";
 import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
 import { prisma } from "@/core/config/prisma";
 import { container } from "@/core/shared/infrastructure/di/container";
 import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
 import { modules } from "@/modules";
+
+iniciarMonitoreo();
 
 const server = Bun.serve({
 	port: env.PORT,

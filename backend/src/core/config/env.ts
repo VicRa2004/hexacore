@@ -34,6 +34,8 @@ const EnvSchema = z
 		S3_REGION: z.string().optional(),
 		S3_ACCESS_KEY_ID: z.string().optional(),
 		S3_SECRET_ACCESS_KEY: z.string().optional(),
+		// Errores a GlitchTip/Sentry. Sin SENTRY_DSN no se reporta nada.
+		SENTRY_DSN: z.url("SENTRY_DSN debe ser una URL valida").optional(),
 	})
 	.refine(
 		(env) =>
@@ -59,6 +61,7 @@ const envPrev = {
 	S3_REGION: process.env.S3_REGION || undefined,
 	S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID || undefined,
 	S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || undefined,
+	SENTRY_DSN: process.env.SENTRY_DSN || undefined,
 };
 
 export const env = EnvSchema.parse(envPrev);

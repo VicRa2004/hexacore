@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "@/core/components/ErrorBoundary";
+import { iniciarMonitoreo } from "@/core/monitoreo";
 import { queryClient } from "@/core/router";
 import {
 	DefaultErrorComponent,
@@ -10,6 +11,8 @@ import {
 } from "@/core/router/RouteFallbacks";
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
+
+iniciarMonitoreo();
 
 const router = createRouter({
 	routeTree,

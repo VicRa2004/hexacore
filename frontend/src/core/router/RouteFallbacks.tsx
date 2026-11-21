@@ -1,5 +1,7 @@
 import { type ErrorComponentProps, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, Compass } from "lucide-react";
+import { useEffect } from "react";
+import { reportarError } from "@/core/monitoreo";
 import { Button } from "@/core/components/ui/Button";
 import {
 	Card,
@@ -36,6 +38,7 @@ function FallbackCard({
 /** Pantalla para errores no controlados de una ruta (en vez de dejarla en blanco). */
 export function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
 	const router = useRouter();
+	useEffect(() => reportarError(error), [error]);
 
 	return (
 		<FallbackCard

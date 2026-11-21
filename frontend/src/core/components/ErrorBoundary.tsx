@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { reportarError } from "@/core/monitoreo";
 
 /**
  * Última red: errores fuera de las rutas (providers, el propio router). Los de
@@ -17,6 +18,7 @@ export class ErrorBoundary extends Component<
 
 	componentDidCatch(error: Error, info: ErrorInfo) {
 		console.error(error, info.componentStack);
+		reportarError(error);
 	}
 
 	render() {

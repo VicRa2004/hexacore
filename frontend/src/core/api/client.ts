@@ -5,6 +5,7 @@ import axios, {
 } from "axios";
 import { useAuthStore } from "@/core/auth/store";
 import type { AuthTokens } from "@/core/auth/types";
+import { reportarErrorApi } from "@/core/monitoreo";
 import type { ErrorResponse } from "./schema.gen";
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -57,6 +58,7 @@ apiClient.interceptors.response.use(
 		if (!isAxiosError<ErrorResponse>(error) || !error.config) {
 			return Promise.reject(error);
 		}
+		reportarErrorApi(error);
 
 		const originalRequest = error.config as CustomAxiosRequestConfig;
 
