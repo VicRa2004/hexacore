@@ -1,6 +1,7 @@
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { EliminarUsuarioUseCase } from "./EliminarUsuarioUseCase";
 import { Usuario } from "../../domain/Usuario";
+import { UsuarioInvalidoError } from "../../domain/error/UsuarioInvalidoError";
 import { UsuarioNoEncontradoError } from "../../domain/error/UsuarioNoEncontradoError";
 
 const mockUsuarioRepository = {
@@ -43,6 +44,11 @@ describe("EliminarUsuarioUseCase", () => {
 		mockUsuarioRepository.buscarPorId.mockResolvedValue(null);
 
 		expect(useCase.ejecutar(999)).rejects.toThrow(UsuarioNoEncontradoError);
+		expect(mockUsuarioRepository.eliminar).not.toHaveBeenCalled();
+	});
+
+	it("no deja que un usuario se elimine a sí mismo", async () => {
+		expect(useCase.ejecutar(1, 1)).rejects.toThrow(UsuarioInvalidoError);
 		expect(mockUsuarioRepository.eliminar).not.toHaveBeenCalled();
 	});
 });

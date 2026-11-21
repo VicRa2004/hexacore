@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Save } from "lucide-react";
 import { getErrorMessage } from "@/core/api/client";
+import { usePermisos } from "@/core/auth/permisos";
 import type { Usuario } from "@/core/auth/types";
 import { Button } from "@/core/components/ui/Button";
 import { Checkbox } from "@/core/components/ui/Checkbox";
@@ -83,6 +84,7 @@ function Formulario({
 			),
 	);
 	const guardar = useActualizarAsignacionMutation(usuarioId);
+	const editable = usePermisos().puede("asignaciones:actualizar");
 	const porRoles = new Set(
 		roles
 			.filter((r) => rolIds.has(r.id))
@@ -111,7 +113,8 @@ function Formulario({
 		});
 
 	return (
-		<div className="space-y-5">
+		// Sin asignaciones:actualizar se ve todo pero no se puede cambiar.
+		<fieldset disabled={!editable} className="space-y-5">
 			<fieldset className="space-y-2">
 				<legend className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
 					Roles
@@ -140,12 +143,14 @@ function Formulario({
 				/>
 			</section>
 
-			<div className="flex justify-end">
-				<Button size="sm" onClick={enviar} isLoading={guardar.isPending}>
-					<Save className="h-4 w-4" />
-					Guardar
-				</Button>
-			</div>
-		</div>
+			{editable && (
+				<div className="flex justify-end">
+					<Button size="sm" onClick={enviar} isLoading={guardar.isPending}>
+						<Save className="h-4 w-4" />
+						Guardar
+					</Button>
+				</div>
+			)}
+		</fieldset>
 	);
 }

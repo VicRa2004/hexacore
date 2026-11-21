@@ -53,16 +53,26 @@ describe("Usuario Entity", () => {
 		expect(usuario.getRoles()).toEqual(["USUARIO"]);
 	});
 
-	it("debería desactivar un usuario cuando se llama a desactivar()", () => {
-		const usuario = Usuario.crear(
+	it("debería desactivar y reactivar un usuario con cambiarActivo()", () => {
+		const usuario = Usuario.reconstituir(
 			datosUsuario.nombre,
 			datosUsuario.email,
 			datosUsuario.passwordHash,
+			true,
+			1,
+			[],
 		);
 		expect(usuario.getIsActivo()).toBe(true);
 
-		usuario.desactivar();
+		usuario.cambiarActivo(false);
 		expect(usuario.getIsActivo()).toBe(false);
+		expect(usuario.pullDomainEvents()).toHaveLength(1);
+
+		usuario.cambiarActivo(false); // sin cambio: sin evento
+		expect(usuario.pullDomainEvents()).toHaveLength(0);
+
+		usuario.cambiarActivo(true);
+		expect(usuario.getIsActivo()).toBe(true);
 	});
 
 	it("debería añadir un evento de creación al llamar a agregarEventoCreado()", () => {

@@ -1,22 +1,35 @@
 import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { usePermisos } from "@/core/auth/permisos";
 import type { Usuario } from "@/core/auth/types";
 import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Button } from "@/core/components/ui/Button";
+import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { Input } from "@/core/components/ui/Input";
 import { AsignacionUsuarioPanel } from "@/modules/roles/components/AsignacionUsuarioPanel";
+import type { AccionUsuario } from "../components/AccionesUsuario";
 import { UsuarioDialog } from "../components/UsuarioForm";
 import { UsuariosTable } from "../components/UsuariosTable";
+import {
+	useCambiarActivoMutation,
+	useEliminarUsuarioMutation,
+} from "../hooks/useUsuariosMutation";
 import { useUsuariosQuery } from "../hooks/useUsuariosQuery";
 
-/** `null` = cerrado; `"nuevo"` = alta; un usuario = edición. */
-type Edicion = Usuario | "nuevo" | null;
+/** Qué diálogo está abierto y sobre quién (`"nuevo"` = alta). */
+type Abierto =
+	| { tipo: "editar"; usuario: Usuario | "nuevo" }
+	| { tipo: "permisos" | "desactivar" | "eliminar"; usuario: Usuario }
+	| null;
 
 export function UsuariosPage() {
+	const { puede } = usePermisos();
 	const [pagina, setPagina] = useState(1);
 	const [emailBusqueda, setEmailBusqueda] = useState("");
-	const [seleccionado, setSeleccionado] = useState<Usuario | null>(null);
-	const [edicion, setEdicion] = useState<Edicion>(null);
+	const [abierto, setAbierto] = useState<Abierto>(null);
+	const cambiarActivo = useCambiarActivoMutation();
+	const eliminar = useEliminarUsuarioMutation();
+	const cerrar = () => setAbierto(null);
 
 	const { data, isLoading, error } = useUsuariosQuery({
 		pagina,
@@ -24,16 +37,34 @@ export function UsuariosPage() {
 		email: emailBusqueda.trim() ? emailBusqueda.trim() : undefined,
 	});
 
+	const onAccion = (accion: AccionUsuario, usuario: Usuario) => {
+		if (accion === "activo" && !usuario.isActivo) {
+			// Reactivar no es destructivo: sin confirmación.
+			cambiarActivo.mutate({ id: usuario.id, isActivo: true });
+		} else if (accion === "activo") {
+			setAbierto({ tipo: "desactivar", usuario });
+		} else {
+			setAbierto({ tipo: accion, usuario });
+		}
+	};
+
+	const objetivo =
+		abierto && abierto.usuario !== "nuevo" ? abierto.usuario : null;
+
 	return (
 		<div className="space-y-6">
 			<Encabezado
 				titulo="Usuarios"
 				descripcion="Consulta y administra los usuarios registrados en el sistema."
 				acciones={
-					<Button onClick={() => setEdicion("nuevo")}>
-						<UserPlus />
-						Nuevo usuario
-					</Button>
+					puede("usuarios:crear") && (
+						<Button
+							onClick={() => setAbierto({ tipo: "editar", usuario: "nuevo" })}
+						>
+							<UserPlus />
+							Nuevo usuario
+						</Button>
+					)
 				}
 			/>
 
@@ -57,20 +88,49 @@ export function UsuariosPage() {
 				isLoading={isLoading}
 				error={error}
 				onCambioPagina={setPagina}
-				onGestionarPermisos={setSeleccionado}
-				onEditar={setEdicion}
+				onAccion={onAccion}
 			/>
 
 			<UsuarioDialog
-				abierto={edicion !== null}
-				usuario={edicion === "nuevo" ? null : edicion}
-				onCerrar={() => setEdicion(null)}
+				abierto={abierto?.tipo === "editar"}
+				usuario={abierto?.tipo === "editar" ? objetivo : null}
+				onCerrar={cerrar}
 			/>
 
 			<AsignacionUsuarioPanel
-				key={seleccionado?.id}
-				usuario={seleccionado}
-				onCerrar={() => setSeleccionado(null)}
+				key={objetivo?.id}
+				usuario={abierto?.tipo === "permisos" ? objetivo : null}
+				onCerrar={cerrar}
+			/>
+
+			<ConfirmDialog
+				abierto={abierto?.tipo === "desactivar"}
+				titulo={`¿Desactivar a ${objetivo?.nombre}?`}
+				mensaje="No podrá iniciar sesión ni usar la API y pierde sus permisos al momento. Puedes reactivarlo cuando quieras."
+				textoConfirmar="Desactivar"
+				peligroso
+				isLoading={cambiarActivo.isPending}
+				onCancelar={cerrar}
+				onConfirmar={() =>
+					objetivo &&
+					cambiarActivo.mutate(
+						{ id: objetivo.id, isActivo: false },
+						{ onSettled: cerrar },
+					)
+				}
+			/>
+
+			<ConfirmDialog
+				abierto={abierto?.tipo === "eliminar"}
+				titulo={`¿Eliminar a ${objetivo?.nombre}?`}
+				mensaje="Deja de aparecer en la aplicación y no podrá iniciar sesión. Su historial se conserva en la auditoría. Su email seguirá ocupado."
+				textoConfirmar="Eliminar"
+				peligroso
+				isLoading={eliminar.isPending}
+				onCancelar={cerrar}
+				onConfirmar={() =>
+					objetivo && eliminar.mutate(objetivo.id, { onSettled: cerrar })
+				}
 			/>
 		</div>
 	);

@@ -1,6 +1,7 @@
 import { type ErrorComponentProps, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Compass } from "lucide-react";
+import { ArrowLeft, Compass, ShieldX } from "lucide-react";
 import { useEffect } from "react";
+import { AccesoDenegadoError } from "@/core/auth/permisos";
 import { reportarError } from "@/core/monitoreo";
 import { Button } from "@/core/components/ui/Button";
 import {
@@ -35,10 +36,38 @@ function FallbackCard({
 	);
 }
 
+/** Ruta sin permiso: se queda dentro del layout, sin reportarlo como error. */
+function SinAcceso({ permiso }: { permiso: string }) {
+	const router = useRouter();
+	return (
+		<div className="flex flex-col items-center gap-5 py-20 text-center">
+			<div className="flex size-14 items-center justify-center rounded-2xl border border-peligro-borde bg-peligro-suave text-peligro-tinta">
+				<ShieldX className="size-7" />
+			</div>
+			<div className="space-y-2">
+				<h1 className="text-2xl font-semibold tracking-tight">Sin acceso</h1>
+				<p className="max-w-sm text-sm text-tinta-tenue">
+					Tu cuenta no tiene permiso para ver esta sección (
+					<code className="font-mono text-xs">{permiso}</code>). Pídeselo a un
+					administrador.
+				</p>
+			</div>
+			<Button onClick={() => router.navigate({ to: "/dashboard" })}>
+				Ir al inicio
+			</Button>
+		</div>
+	);
+}
+
 /** Pantalla para errores no controlados de una ruta (en vez de dejarla en blanco). */
 export function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
 	const router = useRouter();
-	useEffect(() => reportarError(error), [error]);
+	const denegado = error instanceof AccesoDenegadoError;
+	useEffect(() => {
+		if (!denegado) reportarError(error);
+	}, [error, denegado]);
+
+	if (denegado) return <SinAcceso permiso={error.permiso} />;
 
 	return (
 		<FallbackCard

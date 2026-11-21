@@ -48,3 +48,32 @@ export function useActualizarUsuarioMutation() {
 		onError,
 	});
 }
+
+export function useCambiarActivoMutation() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({ id, isActivo }: { id: number; isActivo: boolean }) =>
+			usuariosApi.actualizarUsuario(id, { isActivo }),
+		onSuccess: (usuario) => {
+			toast.success(
+				usuario.isActivo
+					? `${usuario.nombre} puede volver a iniciar sesión`
+					: `${usuario.nombre} desactivado: ya no puede iniciar sesión`,
+			);
+			return queryClient.invalidateQueries({ queryKey: usuariosKeys.all });
+		},
+		onError,
+	});
+}
+
+export function useEliminarUsuarioMutation() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: number) => usuariosApi.eliminarUsuario(id),
+		onSuccess: () => {
+			toast.success("Usuario eliminado");
+			return queryClient.invalidateQueries({ queryKey: usuariosKeys.all });
+		},
+		onError,
+	});
+}

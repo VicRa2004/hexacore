@@ -49,13 +49,16 @@ export class UsuarioController extends BaseController {
 		this.executeSafely(c, async () => {
 			const { id } = validate(usuarioIdSchema, c.req.param());
 			const dto = validate(actualizarUsuarioSchema, await c.req.json());
-			return this.ok(c, await this.useCases.actualizar.ejecutar(id, dto));
+			return this.ok(
+				c,
+				await this.useCases.actualizar.ejecutar(id, dto, c.get("usuario").id),
+			);
 		});
 
 	eliminar = (c: Context): Promise<Response> =>
 		this.executeSafely(c, async () => {
 			const { id } = validate(usuarioIdSchema, c.req.param());
-			await this.useCases.eliminar.ejecutar(id);
+			await this.useCases.eliminar.ejecutar(id, c.get("usuario").id);
 			return c.body(null, 204);
 		});
 }

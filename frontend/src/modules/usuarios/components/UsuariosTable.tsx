@@ -1,19 +1,18 @@
-import { KeyRound, Pencil, Shield, User as UserIcon } from "lucide-react";
+import { Shield, User as UserIcon } from "lucide-react";
 import { varianteRol } from "@/core/auth/rol";
 import type { Usuario } from "@/core/auth/types";
 import { Avatar } from "@/core/components/ui/Avatar";
 import { Badge } from "@/core/components/ui/Badge";
-import { Button } from "@/core/components/ui/Button";
 import { EmptyState } from "@/core/components/ui/EmptyState";
 import { type Columna, type Pagina, Tabla } from "@/core/components/ui/Table";
+import { type AccionUsuario, AccionesUsuario } from "./AccionesUsuario";
 
 interface UsuariosTableProps {
 	pagina?: Pagina<Usuario>;
 	isLoading: boolean;
 	error?: unknown;
 	onCambioPagina: (pagina: number) => void;
-	onGestionarPermisos: (usuario: Usuario) => void;
-	onEditar: (usuario: Usuario) => void;
+	onAccion: (accion: AccionUsuario, usuario: Usuario) => void;
 }
 
 export function UsuariosTable({
@@ -21,8 +20,7 @@ export function UsuariosTable({
 	isLoading,
 	error,
 	onCambioPagina,
-	onGestionarPermisos,
-	onEditar,
+	onAccion,
 }: UsuariosTableProps) {
 	const columnas: Columna<Usuario>[] = [
 		{
@@ -61,27 +59,7 @@ export function UsuariosTable({
 		{
 			cabecera: <span className="sr-only">Acciones</span>,
 			className: "text-right",
-			celda: (u) => (
-				<div className="flex justify-end gap-1.5">
-					<Button
-						variant="ghost"
-						size="sm"
-						aria-label={`Editar a ${u.nombre}`}
-						title="Editar"
-						onClick={() => onEditar(u)}
-					>
-						<Pencil className="h-3.5 w-3.5" />
-					</Button>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => onGestionarPermisos(u)}
-					>
-						<KeyRound className="h-3.5 w-3.5" />
-						Permisos
-					</Button>
-				</div>
-			),
+			celda: (u) => <AccionesUsuario usuario={u} onAccion={onAccion} />,
 		},
 	];
 

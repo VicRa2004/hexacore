@@ -167,7 +167,12 @@ Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind 
 - Campos: `CampoTexto`, `CampoSelect` (opciones como hijos), `CampoCheckbox`. `Formulario` llama a `handleSubmit` y se traga el rechazo (el toast lo da la mutación); `BotonEnviar` se bloquea mientras `onSubmit` está en curso. Un campo nuevo se añade en `campos.tsx` y se registra en `useAppForm.ts`.
 - Un CRUD nuevo no se escribe a mano: `pnpm gen:module <nombre>` genera también su frontend (ver skill `crear-modulo` del backend).
 
-### 6. Errores de render
+### 6. Permisos en la interfaz
+- `core/auth/permisos.ts`: `usePermisos().puede("usuarios:crear")` para mostrar u ocultar acciones y `beforeLoad: requierePermiso("roles:leer")` en las rutas (sin permiso, `DefaultErrorComponent` pinta «Sin acceso» dentro del layout). Los enlaces de `SECCIONES` llevan su `permiso`.
+- Los datos salen de `GET /api/permisos/mios`; si el backend no tiene `autorizacion` (404) todo se permite, igual que en el servidor. Tras cambiar roles o asignaciones se invalida `misPermisosQuery`.
+- Ocultar no protege: el backend sigue siendo quien decide. Sin permiso de edición, preferir vista de solo lectura (`<fieldset disabled>`) a esconder la pantalla.
+
+### 7. Errores de render
 - Errores dentro de una ruta: `DefaultErrorComponent` (con el layout intacto y «Reintentar»). Rutas inexistentes: `DefaultNotFoundComponent`. Ambos en `core/router/RouteFallbacks.tsx`.
 - Fuera de las rutas (providers, el propio router): `core/components/ErrorBoundary.tsx`, sin hooks del router ni primitivas.
 

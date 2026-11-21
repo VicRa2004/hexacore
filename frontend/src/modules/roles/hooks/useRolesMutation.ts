@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/core/api/client";
+import { misPermisosQuery } from "@/core/auth/permisos";
 import { usuariosKeys } from "@/modules/usuarios/hooks/useUsuariosQuery";
 import {
 	type AsignacionUsuario,
@@ -32,6 +33,8 @@ export function useActualizarRolMutation() {
 			toast.success(`Rol ${rol.nombre} guardado`);
 			// El nombre del rol aparece en la lista de usuarios.
 			queryClient.invalidateQueries({ queryKey: usuariosKeys.lists() });
+			// Si el rol es mío, cambian mis permisos (menú y botones).
+			queryClient.invalidateQueries({ queryKey: misPermisosQuery.queryKey });
 			return queryClient.invalidateQueries({ queryKey: rolesKeys.list() });
 		},
 		onError,
@@ -58,6 +61,7 @@ export function useActualizarAsignacionMutation(usuarioId: number) {
 		onSuccess: (asignacion) => {
 			toast.success("Roles y permisos guardados");
 			queryClient.setQueryData(rolesKeys.asignacion(usuarioId), asignacion);
+			queryClient.invalidateQueries({ queryKey: misPermisosQuery.queryKey });
 			return queryClient.invalidateQueries({ queryKey: usuariosKeys.lists() });
 		},
 		onError,

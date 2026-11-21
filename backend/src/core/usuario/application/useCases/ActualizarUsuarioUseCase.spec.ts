@@ -1,6 +1,7 @@
 import { describe, expect, it, mock, beforeEach } from "bun:test";
 import { ActualizarUsuarioUseCase } from "./ActualizarUsuarioUseCase";
 import { Usuario } from "../../domain/Usuario";
+import { UsuarioInvalidoError } from "../../domain/error/UsuarioInvalidoError";
 import { UsuarioNoEncontradoError } from "../../domain/error/UsuarioNoEncontradoError";
 
 const mockUsuarioRepository = {
@@ -79,6 +80,32 @@ describe("ActualizarUsuarioUseCase", () => {
 
 		expect(useCase.ejecutar(999, { nombre: "New Name" })).rejects.toThrow(
 			UsuarioNoEncontradoError,
+		);
+		expect(mockUsuarioRepository.actualizar).not.toHaveBeenCalled();
+	});
+
+	it("desactiva a otro usuario", async () => {
+		const usuario = Usuario.reconstituir(
+			"John",
+			"john@test.com",
+			"hash",
+			true,
+			2,
+			[],
+		);
+		mockUsuarioRepository.buscarPorId.mockResolvedValue(usuario);
+		mockUsuarioRepository.actualizar.mockImplementation(
+			async (u: Usuario) => u,
+		);
+
+		const resultado = await useCase.ejecutar(2, { isActivo: false }, 1);
+
+		expect(resultado.isActivo).toBe(false);
+	});
+
+	it("no deja que un usuario se desactive a sí mismo", async () => {
+		expect(useCase.ejecutar(1, { isActivo: false }, 1)).rejects.toThrow(
+			UsuarioInvalidoError,
 		);
 		expect(mockUsuarioRepository.actualizar).not.toHaveBeenCalled();
 	});

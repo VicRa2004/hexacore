@@ -70,4 +70,12 @@ export class PermisoController extends BaseController {
 				await this.useCases.obtenerPorUsuario.ejecutar(usuarioId),
 			);
 		});
+
+	obtenerMios = (c: Context): Promise<Response> =>
+		this.executeSafely(c, async () =>
+			this.ok(
+				c,
+				await this.useCases.obtenerPorUsuario.ejecutar(c.get("usuario").id),
+			),
+		);
 }

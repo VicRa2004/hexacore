@@ -9,6 +9,7 @@ import {
 	ShieldCheck,
 	Users,
 } from "lucide-react";
+import { type Permiso, usePermisos } from "@/core/auth/permisos";
 import { Tooltip } from "@/core/components/ui/Tooltip";
 import { cn } from "@/core/utils/cn";
 
@@ -16,6 +17,8 @@ interface Enlace {
 	to: LinkProps["to"];
 	etiqueta: string;
 	icono: LucideIcon;
+	/** Sin él, visible para cualquiera con sesión. */
+	permiso?: Permiso;
 }
 
 // Para quitar un módulo, quita también su enlace (ver AGENTS.md).
@@ -29,9 +32,24 @@ const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
 	{
 		titulo: "Administración",
 		enlaces: [
-			{ to: "/usuarios", etiqueta: "Usuarios", icono: Users },
-			{ to: "/roles", etiqueta: "Roles", icono: ShieldCheck },
-			{ to: "/auditoria", etiqueta: "Auditoría", icono: History },
+			{
+				to: "/usuarios",
+				etiqueta: "Usuarios",
+				icono: Users,
+				permiso: "usuarios:leer",
+			},
+			{
+				to: "/roles",
+				etiqueta: "Roles",
+				icono: ShieldCheck,
+				permiso: "roles:leer",
+			},
+			{
+				to: "/auditoria",
+				etiqueta: "Auditoría",
+				icono: History,
+				permiso: "auditoria:leer",
+			},
 		],
 	},
 ];
@@ -72,6 +90,12 @@ function EnlaceNav({
 }
 
 export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
+	const { puede } = usePermisos();
+	const secciones = SECCIONES.map((s) => ({
+		...s,
+		enlaces: s.enlaces.filter((e) => !e.permiso || puede(e.permiso)),
+	})).filter((s) => s.enlaces.length > 0);
+
 	return (
 		<div className="flex h-full flex-col gap-6 p-3">
 			<Link
@@ -96,7 +120,7 @@ export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
 				aria-label="Principal"
 				className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto"
 			>
-				{SECCIONES.map((seccion) => (
+				{secciones.map((seccion) => (
 					<div key={seccion.titulo} className="space-y-1">
 						{plegado ? (
 							<hr className="mx-2 mb-2 border-borde" />

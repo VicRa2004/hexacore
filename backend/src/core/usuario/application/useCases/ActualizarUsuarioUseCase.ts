@@ -5,6 +5,7 @@ import type { PasswordHasher } from "../../domain/service/PasswordHasher";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
 import { UsuarioMapper } from "../mappers/UsuarioMapper";
+import { UsuarioInvalidoError } from "../../domain/error/UsuarioInvalidoError";
 import { UsuarioNoEncontradoError } from "../../domain/error/UsuarioNoEncontradoError";
 
 export class ActualizarUsuarioUseCase {
@@ -15,7 +16,16 @@ export class ActualizarUsuarioUseCase {
 		private readonly uow: UnitOfWork,
 	) {}
 
-	async ejecutar(id: number, dto: ActualizarUsuarioDto): Promise<UsuarioDto> {
+	/** `solicitanteId`: quien hace la petición; no puede desactivarse a sí mismo. */
+	async ejecutar(
+		id: number,
+		dto: ActualizarUsuarioDto,
+		solicitanteId?: number,
+	): Promise<UsuarioDto> {
+		if (dto.isActivo === false && solicitanteId === id) {
+			throw new UsuarioInvalidoError("No puedes desactivar tu propia cuenta");
+		}
+
 		const usuario = await this.usuarioRepository.buscarPorId(id);
 		if (!usuario) {
 			throw new UsuarioNoEncontradoError();
@@ -28,6 +38,7 @@ export class ActualizarUsuarioUseCase {
 				? await this.passwordHasher.hash(dto.password)
 				: undefined,
 		});
+		if (dto.isActivo !== undefined) usuario.cambiarActivo(dto.isActivo);
 
 		const usuarioActualizado = await this.uow.ejecutar(async () => {
 			const guardado = await this.usuarioRepository.actualizar(usuario);

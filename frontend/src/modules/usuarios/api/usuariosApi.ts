@@ -44,6 +44,10 @@ export const usuariosApi = {
 		return response.data;
 	},
 
+	async eliminarUsuario(id: number): Promise<void> {
+		await apiClient.delete(`/usuarios/${id}`);
+	},
+
 	async subirAvatar(archivo: File): Promise<Usuario> {
 		const datos = new FormData();
 		datos.append("archivo", archivo);

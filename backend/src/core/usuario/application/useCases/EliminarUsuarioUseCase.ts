@@ -1,5 +1,6 @@
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
+import { UsuarioInvalidoError } from "../../domain/error/UsuarioInvalidoError";
 import { UsuarioNoEncontradoError } from "../../domain/error/UsuarioNoEncontradoError";
 import type { UsuarioRepository } from "../../domain/repository/UsuarioRepository";
 
@@ -11,7 +12,11 @@ export class EliminarUsuarioUseCase {
 		private readonly uow: UnitOfWork,
 	) {}
 
-	async ejecutar(id: number) {
+	/** `solicitanteId`: quien hace la petición; no puede eliminarse a sí mismo. */
+	async ejecutar(id: number, solicitanteId?: number) {
+		if (solicitanteId === id) {
+			throw new UsuarioInvalidoError("No puedes eliminar tu propia cuenta");
+		}
 		const usuario = await this.usuarioRepository.buscarPorId(id);
 		if (!usuario) {
 			throw new UsuarioNoEncontradoError();

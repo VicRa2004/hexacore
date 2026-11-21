@@ -137,8 +137,13 @@ export class Usuario extends Entity {
 		);
 	}
 
-	public desactivar(): void {
-		this.isActivo = false;
+	/** Inactivo: no puede iniciar sesión ni renovar el token, y pierde sus permisos. */
+	public cambiarActivo(isActivo: boolean): void {
+		if (this.isActivo === isActivo) return;
+		this.isActivo = isActivo;
+		this.addDomainEvent(
+			new UsuarioActualizadoEvent({ id: this.getId(), campos: ["isActivo"] }),
+		);
 	}
 
 	/** Borrado lógico: el repositorio lo persiste y deja de devolverlo. */

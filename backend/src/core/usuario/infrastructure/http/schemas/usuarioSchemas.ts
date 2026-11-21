@@ -28,6 +28,7 @@ export const actualizarUsuarioSchema = z.object({
 		.min(2, "El nombre debe tener al menos 2 caracteres")
 		.optional(),
 	password: passwordSchema.optional(),
+	isActivo: z.boolean().optional(),
 });
 
 export const usuarioIdSchema = z.object({

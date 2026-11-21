@@ -1,5 +1,6 @@
 import { RotateCcw, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { usePermisos } from "@/core/auth/permisos";
 import { Button } from "@/core/components/ui/Button";
 import { Card } from "@/core/components/ui/Card";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
@@ -27,6 +28,9 @@ export function RolEditor({ rol, permisos, onEliminado }: RolEditorProps) {
 	const [descripcion, setDescripcion] = useState(rol.descripcion ?? "");
 	const [seleccionados, setSeleccionados] = useState(inicial);
 	const [confirmando, setConfirmando] = useState(false);
+	const { puede } = usePermisos();
+	const editable = puede("roles:actualizar");
+	const borrable = puede("roles:eliminar");
 	const actualizar = useActualizarRolMutation();
 	const eliminar = useEliminarRolMutation();
 
@@ -63,65 +67,89 @@ export function RolEditor({ rol, permisos, onEliminado }: RolEditorProps) {
 
 	return (
 		<Card className="space-y-5 p-0">
-			<div className="grid gap-3 px-4 pt-4 sm:grid-cols-[1fr_2fr] sm:px-6 sm:pt-6">
-				<Input
-					id={`rol-${rol.id}-nombre`}
-					label="Nombre"
-					placeholder="SOPORTE"
-					value={nombre}
-					onChange={(e) => setNombre(e.target.value)}
-					error={nombre.trim() ? undefined : "El nombre es requerido"}
-				/>
-				<Input
-					id={`rol-${rol.id}-descripcion`}
-					label="Descripción"
-					placeholder="Qué puede hacer quien tenga este rol"
-					value={descripcion}
-					onChange={(e) => setDescripcion(e.target.value)}
-				/>
-			</div>
-
-			<div className="space-y-2 px-4 sm:px-6">
-				<div className="flex items-baseline justify-between gap-3">
-					<h3 className="text-sm font-semibold">Permisos</h3>
-					<p className="text-xs text-tinta-tenue tabular-nums">
-						{seleccionados.size} de {permisos.length} concedidos
-					</p>
+			{/* Sin roles:actualizar, el mismo editor sirve de vista de solo lectura. */}
+			<fieldset
+				disabled={!editable}
+				className={
+					editable || borrable ? "space-y-5" : "space-y-5 pb-4 sm:pb-6"
+				}
+			>
+				<div className="grid gap-3 px-4 pt-4 sm:grid-cols-[1fr_2fr] sm:px-6 sm:pt-6">
+					<Input
+						id={`rol-${rol.id}-nombre`}
+						label="Nombre"
+						placeholder="SOPORTE"
+						value={nombre}
+						onChange={(e) => setNombre(e.target.value)}
+						error={nombre.trim() ? undefined : "El nombre es requerido"}
+					/>
+					<Input
+						id={`rol-${rol.id}-descripcion`}
+						label="Descripción"
+						placeholder="Qué puede hacer quien tenga este rol"
+						value={descripcion}
+						onChange={(e) => setDescripcion(e.target.value)}
+					/>
 				</div>
-				<PermisosMatriz
-					permisos={permisos}
-					seleccionados={seleccionados}
-					onCambiar={cambiar}
-				/>
-			</div>
 
-			<div className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-borde bg-elevada/40 px-4 py-3 sm:px-6">
-				<Button
-					variant="ghost"
-					size="sm"
-					onClick={() => setConfirmando(true)}
-					className="text-peligro-tinta hover:bg-peligro-suave hover:text-peligro-tinta"
-				>
-					<Trash2 />
-					Eliminar rol
-				</Button>
-				<span className="ml-auto text-xs text-aviso-tinta" aria-live="polite">
-					{sucio && "Cambios sin guardar"}
-				</span>
-				<Button variant="ghost" size="sm" onClick={descartar} disabled={!sucio}>
-					<RotateCcw />
-					Descartar
-				</Button>
-				<Button
-					size="sm"
-					onClick={guardar}
-					isLoading={actualizar.isPending}
-					disabled={!sucio || !nombre.trim()}
-				>
-					<Save />
-					Guardar
-				</Button>
-			</div>
+				<div className="space-y-2 px-4 sm:px-6">
+					<div className="flex items-baseline justify-between gap-3">
+						<h3 className="text-sm font-semibold">Permisos</h3>
+						<p className="text-xs text-tinta-tenue tabular-nums">
+							{seleccionados.size} de {permisos.length} concedidos
+						</p>
+					</div>
+					<PermisosMatriz
+						permisos={permisos}
+						seleccionados={seleccionados}
+						onCambiar={cambiar}
+					/>
+				</div>
+			</fieldset>
+
+			{(editable || borrable) && (
+				<div className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-borde bg-elevada/40 px-4 py-3 sm:px-6">
+					{borrable && (
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setConfirmando(true)}
+							className="text-peligro-tinta hover:bg-peligro-suave hover:text-peligro-tinta"
+						>
+							<Trash2 />
+							Eliminar rol
+						</Button>
+					)}
+					{editable && (
+						<>
+							<span
+								className="ml-auto text-xs text-aviso-tinta"
+								aria-live="polite"
+							>
+								{sucio && "Cambios sin guardar"}
+							</span>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={descartar}
+								disabled={!sucio}
+							>
+								<RotateCcw />
+								Descartar
+							</Button>
+							<Button
+								size="sm"
+								onClick={guardar}
+								isLoading={actualizar.isPending}
+								disabled={!sucio || !nombre.trim()}
+							>
+								<Save />
+								Guardar
+							</Button>
+						</>
+					)}
+				</div>
+			)}
 
 			<ConfirmDialog
 				abierto={confirmando}

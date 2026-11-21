@@ -1,6 +1,7 @@
 import { AlertCircle, Plus, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { getErrorMessage } from "@/core/api/client";
+import { usePermisos } from "@/core/auth/permisos";
 import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Button } from "@/core/components/ui/Button";
 import { Dialog } from "@/core/components/ui/Dialog";
@@ -12,6 +13,7 @@ import { RolesLista } from "../components/RolesLista";
 import { usePermisosQuery, useRolesQuery } from "../hooks/useRolesQuery";
 
 export function RolesPage() {
+	const { puede } = usePermisos();
 	const roles = useRolesQuery();
 	const permisos = usePermisosQuery();
 	const error = roles.error ?? permisos.error;
@@ -27,10 +29,12 @@ export function RolesPage() {
 				titulo="Roles y permisos"
 				descripcion="Elige un rol para ver y editar sus permisos. Los roles se asignan a cada usuario desde Usuarios."
 				acciones={
-					<Button onClick={() => setCreando(true)}>
-						<Plus />
-						Nuevo rol
-					</Button>
+					puede("roles:crear") && (
+						<Button onClick={() => setCreando(true)}>
+							<Plus />
+							Nuevo rol
+						</Button>
+					)
 				}
 			/>
 
@@ -50,10 +54,12 @@ export function RolesPage() {
 					titulo="Aún no hay roles"
 					descripcion="Crea el primero y marca qué permisos concede."
 					accion={
-						<Button size="sm" onClick={() => setCreando(true)}>
-							<Plus />
-							Nuevo rol
-						</Button>
+						puede("roles:crear") && (
+							<Button size="sm" onClick={() => setCreando(true)}>
+								<Plus />
+								Nuevo rol
+							</Button>
+						)
 					}
 				/>
 			) : (
