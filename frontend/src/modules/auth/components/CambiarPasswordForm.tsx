@@ -42,9 +42,9 @@ export function CambiarPasswordForm() {
 	});
 
 	return (
-		<Card className="max-w-2xl mx-auto">
+		<Card>
 			<CardHeader>
-				<CardTitle className="text-lg">Cambiar contraseña</CardTitle>
+				<CardTitle>Cambiar contraseña</CardTitle>
 				<CardDescription>
 					Se cerrarán tus sesiones en otros dispositivos.
 				</CardDescription>
@@ -64,7 +64,7 @@ export function CambiarPasswordForm() {
 					))}
 					<div className="flex justify-end">
 						<form.BotonEnviar>
-							<KeyRound className="h-4 w-4" />
+							<KeyRound />
 							Cambiar contraseña
 						</form.BotonEnviar>
 					</div>

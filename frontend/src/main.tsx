@@ -10,6 +10,7 @@ import {
 	DefaultNotFoundComponent,
 } from "@/core/router/RouteFallbacks";
 import { routeTree } from "./routeTree.gen";
+import "@fontsource-variable/inter";
 import "./index.css";
 
 iniciarMonitoreo();

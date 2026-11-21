@@ -4,7 +4,7 @@ import { getErrorMessage } from "@/core/api/client";
 import { cn } from "@/core/utils/cn";
 import { Button } from "./Button";
 import { EmptyState } from "./EmptyState";
-import { Spinner } from "./Spinner";
+import { Skeleton } from "./Skeleton";
 
 /** Forma de las respuestas paginadas del backend. */
 export interface Pagina<T> {
@@ -45,8 +45,19 @@ export function Tabla<T>({
 }: TablaProps<T>) {
 	if (isLoading) {
 		return (
-			<div className="flex justify-center py-16" aria-busy="true">
-				<Spinner size="lg" className="text-indigo-500" />
+			<div
+				aria-busy="true"
+				className="space-y-px overflow-hidden rounded-xl border border-borde bg-superficie"
+			>
+				<span className="sr-only">Cargando…</span>
+				<Skeleton className="h-11 rounded-none" />
+				{[0, 1, 2, 3, 4].map((i) => (
+					<div key={i} className="flex items-center gap-4 px-6 py-4">
+						<Skeleton className="h-4 w-1/4" />
+						<Skeleton className="h-4 w-1/3" />
+						<Skeleton className="ml-auto h-4 w-16" />
+					</div>
+				))}
 			</div>
 		);
 	}
@@ -55,7 +66,7 @@ export function Tabla<T>({
 		return (
 			<div
 				role="alert"
-				className="flex items-center gap-3 rounded-xl border border-rose-900/40 bg-rose-950/20 p-4 text-sm text-rose-400"
+				className="flex items-center gap-3 rounded-xl border border-peligro-borde bg-peligro-suave p-4 text-sm text-peligro-tinta"
 			>
 				<AlertCircle className="h-5 w-5 shrink-0" />
 				{getErrorMessage(error)}
@@ -70,27 +81,27 @@ export function Tabla<T>({
 
 	return (
 		<div className="space-y-4">
-			<div className="overflow-x-auto rounded-xl border border-borde bg-superficie/40">
+			<div className="relative overflow-x-auto rounded-xl border border-borde bg-superficie shadow-sm">
 				<table className="w-full text-left text-sm" aria-label={etiqueta}>
-					<thead className="border-b border-borde bg-superficie/90 text-xs uppercase tracking-wider text-tinta-tenue">
+					<thead className="border-b border-borde bg-elevada/50 text-xs font-medium text-tinta-tenue">
 						<tr>
 							{columnas.map((columna, i) => (
 								<th
 									// biome-ignore lint/suspicious/noArrayIndexKey: las columnas son fijas
 									key={i}
 									scope="col"
-									className={cn("px-6 py-3.5 font-semibold", columna.className)}
+									className={cn("px-6 py-3 font-medium", columna.className)}
 								>
 									{columna.cabecera}
 								</th>
 							))}
 						</tr>
 					</thead>
-					<tbody className="divide-y divide-borde/60">
+					<tbody className="divide-y divide-borde">
 						{filas.map((fila) => (
 							<tr
 								key={clave(fila)}
-								className="transition-colors hover:bg-elevada/30"
+								className="transition-colors hover:bg-elevada/40"
 							>
 								{columnas.map((columna, i) => (
 									<td

@@ -49,20 +49,24 @@ frontend/src/
 │   ├── components/
 │   │   ├── ErrorBoundary.tsx       # Última red para errores fuera de las rutas
 │   │   ├── form/                   # useAppForm + campos conectados a TanStack Form
-│   │   ├── layout/                 # MainLayout, AuthLayout y SelectorTema
-│   │   └── ui/                     # Primitivas: Button, Input, Select, Checkbox, Card, Badge, Spinner,
-│   │                               #   Dialog, ConfirmDialog, Table (Tabla + Paginacion), EmptyState
+│   │   ├── layout/                 # MainLayout (Sidebar + barra con Migas y MenuUsuario), AuthLayout,
+│   │   │                           #   Encabezado (cabecera de página) y SelectorTema
+│   │   └── ui/                     # Primitivas: Button, Input, Select, Checkbox, Card, Badge, Spinner, Skeleton,
+│   │                               #   Avatar, Tooltip, Menu, Tabs, Dialog, ConfirmDialog, Table (Tabla + Paginacion), EmptyState
 │   ├── router/                     # QueryClient, instancia del router y pantallas de error/404 (RouteFallbacks)
-│   ├── tema.ts                     # Tema claro/oscuro/sistema (data-tema en <html>)
+│   ├── monitoreo.ts                # Errores a GlitchTip (@sentry/react) si hay VITE_SENTRY_DSN
+│   ├── tema.ts                     # Tema claro/oscuro/sistema (data-tema) y color de marca (--marca-h)
 │   └── utils/                      # Utilidades transversales (cn.ts)
 │
 ├── modules/                        # Lógica de dominio modular
 │   ├── auth/                       # Módulo de Autenticación
 │   │   ├── api/                    # Llamadas a la API de auth (authApi.ts)
-│   │   ├── components/             # Formularios (Login, Registro, Recuperar/Restablecer/CambiarPassword, SeguridadCuentaCard)
+│   │   ├── components/             # Formularios (Login, Registro, Recuperar/Restablecer/CambiarPassword), SesionesCard, AvisoVerificacionEmail
 │   │   ├── hooks/                  # Mutaciones de cuenta (useCuentaMutation.ts)
 │   │   ├── pages/                  # Login, Registro, RecuperarPassword, RestablecerPassword, VerificarEmail
 │   │   └── schemas/                # Validaciones Zod (authSchemas.ts)
+│   │
+│   ├── auditoria/                  # Registro de auditoría (/auditoria) y ActividadReciente del dashboard
 │   │
 │   ├── roles/                      # Roles, permisos y su asignación a usuarios (módulo backend `autorizacion`)
 │   │   ├── api/ hooks/ schemas/ utils/
@@ -88,7 +92,8 @@ frontend/src/
 │       ├── dashboard.tsx           # Vista /dashboard
 │       ├── usuarios.tsx               # Vista /usuarios
 │       ├── roles.tsx               # Vista /roles
-│       └── perfil.tsx              # Vista /perfil
+│       ├── auditoria.tsx           # Vista /auditoria
+│       └── perfil.tsx              # Vista /perfil (pestañas Cuenta / Seguridad con sesiones)
 │
 ├── routeTree.gen.ts                # Árbol de rutas generado automáticamente por TanStack Router
 ├── index.css                       # Directivas y tema base de Tailwind CSS v4
@@ -101,7 +106,7 @@ Parte frontend de la checklist de `backend/AGENTS.md` ("Cómo quitar un módulo"
 
 1. Borrar `src/modules/<nombre>/`.
 2. Borrar sus rutas en `src/routes/` (`routeTree.gen.ts` se regenera solo en `dev`/`build`).
-3. Quitar sus enlaces de navegación en `src/core/components/layout/MainLayout.tsx`.
+3. Quitar sus enlaces de navegación en `SECCIONES` de `src/core/components/layout/Sidebar.tsx`.
 4. `pnpm gen:api` desde la raíz (el backend ya no expone sus endpoints) y `pnpm verify`.
 
 ---
@@ -138,10 +143,14 @@ Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind 
 - Usar Tailwind CSS v4 y la utilidad `cn(...)` para combinar clases condicionales.
 - No crear estilos CSS tradicionales en hojas externas salvo reglas globales indispensables en `index.css`.
 - Los componentes de `core/components/ui/` deben ser accesibles, recibir `className` opcional y propagar props nativas de HTML de forma segura.
-- **Colores neutros = tokens semánticos** (definidos en `index.css`, cambian con el tema): `bg-fondo` (página), `bg-superficie` (tarjetas, inputs), `bg-elevada` (hover, chips), `border-borde` / `border-borde-fuerte`, `text-tinta` (títulos, texto principal), `text-tinta-suave` (etiquetas), `text-tinta-tenue` (ayuda, metadatos). **Prohibido `slate-*`, `text-white` o `bg-black` para neutros**: no se verían en tema claro. `text-white` solo sobre fondos de acento sólidos (`bg-indigo-600`).
-- **Acentos** (`indigo`, `rose`, `amber`, `emerald`) se escriben pensando en el tema oscuro (texto `-300/-400`, fondos `-950/x`); en claro `index.css` invierte esos tonos para mantener el contraste. Si usas otro tono o color, compruébalo en los dos temas.
+- **Solo tokens, nunca la paleta de Tailwind** (`slate-*`, `indigo-*`, `text-white`, `bg-black`…). Todos viven en `index.css` y cambian con el tema:
+  - **Neutros:** `bg-fondo` (página), `bg-superficie` (tarjetas, inputs), `bg-elevada` (hover, chips), `border-borde` / `border-borde-fuerte`, `text-tinta` (títulos, texto), `text-tinta-suave` (etiquetas), `text-tinta-tenue` (ayuda, metadatos).
+  - **Estados** `acento`, `peligro`, `aviso`, `exito`, cada uno con cinco variantes: `bg-acento` (relleno sólido, con `text-sobre-acento` encima), `hover:bg-acento-hover`, `bg-acento-suave` (fondo tenue), `border-acento-borde` y `text-acento-tinta` (texto sobre fondo neutro o suave). Ej.: `bg-peligro-suave border-peligro-borde text-peligro-tinta`.
+  - **Forma y movimiento:** `rounded-*`, `shadow-sm|shadow|shadow-flotante`, `font-sans` y las transiciones leen `--radio`, `--sombra-*`, `--fuente-sans`, `--duracion` y `--curva`. `animar-entrada` para menús y diálogos. `prefers-reduced-motion` se respeta globalmente.
+- **Personalizar la marca:** `--marca-h` (tono 0-360) y `--marca-c` (saturación) en `index.css` generan todo el acento y el leve tinte de los neutros; el tema solo cambia las luminosidades `--l-*`. El usuario elige el tono en su menú (`ACENTOS`, `cambiarAcento` y `useAcento` de `core/tema.ts`; el script de `index.html` repite la lista para aplicarlo antes de pintar: si añades un tono, añádelo en los dos sitios).
 - **Tema:** `data-tema="claro|oscuro"` en `<html>`. El script de `index.html` lo pone antes de pintar y `core/tema.ts` (`useTema`, `cambiarTema`) lo cambia y lo guarda; «sistema» sigue a `prefers-color-scheme`. La variante `dark:` de Tailwind responde a ese atributo.
-- **Primitivas en vez de HTML suelto:** `Dialog` (`<dialog>` nativo: foco, Esc y fondo inerte) y `ConfirmDialog` en lugar de `window.confirm`; `Tabla` recibe una lista o directamente la página del backend (`{ datos, pagina, totalPaginas, totalElementos }`) y muestra carga, error, vacío (`EmptyState`) y `Paginacion`; `Select` y `Checkbox` nativos con etiqueta y error.
+- **Páginas:** empiezan con `Encabezado` (título, descripción y acciones). El título de las migas sale de `staticData: { titulo }` de la ruta; un enlace nuevo del menú lateral se añade en `SECCIONES` de `Sidebar.tsx`.
+- **Primitivas en vez de HTML suelto:** `Dialog` (`<dialog>` nativo: foco, Esc y fondo inerte) y `ConfirmDialog` en lugar de `window.confirm`; `Tabla` recibe una lista o directamente la página del backend (`{ datos, pagina, totalPaginas, totalElementos }`) y muestra carga, error, vacío (`EmptyState`) y `Paginacion`; `Select` y `Checkbox` nativos con etiqueta y error; `Menu` (Popover API nativa: Esc y clic fuera sin JS) con `MenuOpcion`; `Tabs` con navegación por flechas; `Avatar` (foto o iniciales); `Skeleton` para cargas; `Tooltip` solo CSS (el nombre accesible lo lleva el hijo).
 
 ### 5. Formularios
 - `useAppForm` (`core/components/form/useAppForm.ts`) en lugar de `useForm`: trae los campos ya cableados (valor, `onBlur`, error de Zod tras tocar el campo, `aria-invalid`/`aria-describedby`, id único).

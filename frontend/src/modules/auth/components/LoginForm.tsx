@@ -69,9 +69,9 @@ export function LoginForm() {
 						variant="outline"
 						size="sm"
 						onClick={rellenarDemoAdmin}
-						className="w-full text-xs text-indigo-300 border-indigo-900/50 hover:bg-indigo-950/40"
+						className="w-full text-xs text-acento-tinta border-acento-borde hover:bg-acento-suave"
 					>
-						<Sparkles className="h-3.5 w-3.5 text-indigo-400 mr-1.5" />
+						<Sparkles className="h-3.5 w-3.5 text-acento-tinta mr-1.5" />
 						Rellenar como Administrador (admin@dev.com)
 					</Button>
 				</div>

@@ -1,4 +1,5 @@
-import { AlertCircle, ShieldCheck } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Encabezado } from "@/core/components/layout/Encabezado";
 import { getErrorMessage } from "@/core/api/client";
 import { Card } from "@/core/components/ui/Card";
 import { Spinner } from "@/core/components/ui/Spinner";
@@ -13,33 +14,23 @@ export function RolesPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<div className="flex items-center gap-2.5">
-					<div className="p-2 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400">
-						<ShieldCheck className="h-5 w-5" />
-					</div>
-					<h1 className="text-2xl font-bold tracking-tight text-tinta">
-						Roles y permisos
-					</h1>
-				</div>
-				<p className="mt-1 text-sm text-tinta-tenue">
-					Define qué permisos concede cada rol. Los roles se asignan a cada
-					usuario desde Usuarios.
-				</p>
-			</div>
+			<Encabezado
+				titulo="Roles y permisos"
+				descripcion="Define qué permisos concede cada rol. Los roles se asignan a cada usuario desde Usuarios."
+			/>
 
 			<Card>
 				<CrearRolForm />
 			</Card>
 
 			{error ? (
-				<div className="flex items-center gap-3 rounded-xl border border-rose-900/40 bg-rose-950/20 p-4 text-sm text-rose-400">
+				<div className="flex items-center gap-3 rounded-xl border border-peligro-borde bg-peligro-suave p-4 text-sm text-peligro-tinta">
 					<AlertCircle className="h-5 w-5 shrink-0" />
 					{getErrorMessage(error)}
 				</div>
 			) : roles.isLoading || permisos.isLoading ? (
 				<div className="flex justify-center py-16">
-					<Spinner size="lg" className="text-indigo-500" />
+					<Spinner size="lg" className="text-acento-tinta" />
 				</div>
 			) : (
 				<div className="space-y-4">

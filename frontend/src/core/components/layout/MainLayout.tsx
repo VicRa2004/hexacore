@@ -1,137 +1,82 @@
-import type { ReactNode } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
-import {
-	Hexagon,
-	LayoutDashboard,
-	Users,
-	ShieldCheck,
-	UserCheck,
-	LogOut,
-} from "lucide-react";
-import { useAuthStore } from "@/core/auth/store";
-import { SelectorTema } from "./SelectorTema";
-import { Badge } from "@/core/components/ui/Badge";
-import { Button } from "@/core/components/ui/Button";
-import { toast } from "sonner";
-import { authApi } from "@/modules/auth/api/authApi";
+import { Menu as IconoMenu } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { cn } from "@/core/utils/cn";
+import { MenuUsuario } from "./MenuUsuario";
+import { Migas } from "./Migas";
+import { Sidebar } from "./Sidebar";
 
-interface MainLayoutProps {
-	children: ReactNode;
+const CLAVE_PLEGADO = "sidebar-plegado";
+
+function leerPlegado() {
+	try {
+		return localStorage.getItem(CLAVE_PLEGADO) === "1";
+	} catch {
+		return false;
+	}
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
-	const navigate = useNavigate();
-	const { usuario, logout } = useAuthStore();
+export function MainLayout({ children }: { children: ReactNode }) {
+	const [plegado, setPlegado] = useState(leerPlegado);
+	const [cajonAbierto, setCajonAbierto] = useState(false);
+	const cajon = useRef<HTMLDialogElement>(null);
 
-	const handleLogout = async () => {
+	useEffect(() => {
 		try {
-			await authApi.logout();
+			localStorage.setItem(CLAVE_PLEGADO, plegado ? "1" : "0");
 		} catch {
-			// Ignoramos error en logout para asegurar limpieza local
-		} finally {
-			logout();
-			toast.info("Sesión cerrada correctamente");
-			navigate({ to: "/login" });
+			// sin persistencia
 		}
-	};
+	}, [plegado]);
 
-	const varianteRol = usuario?.roles.includes("ADMIN")
-		? "purple"
-		: usuario?.roles.includes("MOD")
-			? "warning"
-			: "default";
+	// Cajón de móvil sobre <dialog> modal: foco atrapado y Esc nativos.
+	useEffect(() => {
+		const dialogo = cajon.current;
+		if (cajonAbierto && dialogo && !dialogo.open) dialogo.showModal();
+		if (!cajonAbierto && dialogo?.open) dialogo.close();
+	}, [cajonAbierto]);
 
 	return (
-		<div className="min-h-screen flex flex-col bg-fondo text-tinta">
-			{/* Navbar Superior */}
-			<header className="sticky top-0 z-40 border-b border-borde bg-fondo/80 backdrop-blur-md">
-				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-					<div className="flex h-16 items-center justify-between gap-4">
-						<div className="flex items-center gap-8">
-							<Link to="/dashboard" className="flex items-center gap-2.5 group">
-								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 group-hover:bg-indigo-600/20 transition-colors">
-									<Hexagon className="h-5 w-5 stroke-[2.2]" />
-								</div>
-								<span className="text-lg font-bold tracking-tight text-tinta group-hover:text-indigo-400 transition-colors">
-									Hexacore
-								</span>
-							</Link>
+		<div className="flex min-h-screen bg-fondo text-tinta">
+			<aside
+				className={cn(
+					"sticky top-0 hidden h-screen shrink-0 border-r border-borde bg-superficie transition-[width] md:block",
+					plegado ? "w-[3.75rem]" : "w-60",
+				)}
+			>
+				<Sidebar plegado={plegado} onPlegar={() => setPlegado(!plegado)} />
+			</aside>
 
-							<nav className="hidden md:flex items-center gap-1">
-								<Link
-									to="/dashboard"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
-								>
-									<LayoutDashboard className="h-4 w-4" />
-									Dashboard
-								</Link>
-								<Link
-									to="/usuarios"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
-								>
-									<Users className="h-4 w-4" />
-									Usuarios
-								</Link>
-								<Link
-									to="/roles"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
-								>
-									<ShieldCheck className="h-4 w-4" />
-									Roles
-								</Link>
-								<Link
-									to="/perfil"
-									className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg text-tinta-suave hover:text-tinta hover:bg-elevada/60 transition-colors [&.active]:bg-indigo-600/10 [&.active]:text-indigo-400 [&.active]:border [&.active]:border-indigo-500/20"
-								>
-									<UserCheck className="h-4 w-4" />
-									Mi Perfil
-								</Link>
-							</nav>
-						</div>
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: el equivalente de teclado es Esc, nativo de <dialog> */}
+			<dialog
+				ref={cajon}
+				aria-label="Menú de navegación"
+				onClose={() => setCajonAbierto(false)}
+				onClick={(e) => e.target === cajon.current && setCajonAbierto(false)}
+				className="m-0 h-full max-h-none w-64 border-r border-borde bg-superficie text-tinta shadow-flotante open:animar-entrada backdrop:bg-tinta/40 md:hidden"
+			>
+				<Sidebar plegado={false} onNavegar={() => setCajonAbierto(false)} />
+			</dialog>
 
-						<div className="flex items-center gap-3">
-							<SelectorTema />
-							{usuario && (
-								<div className="hidden sm:flex items-center gap-2.5 pr-2">
-									<div className="text-right">
-										<p className="text-xs font-semibold text-tinta">
-											{usuario.nombre}
-										</p>
-										<p className="text-[11px] text-tinta-tenue">
-											{usuario.email}
-										</p>
-									</div>
-									<Badge variant={varianteRol}>
-										{usuario.roles.join(", ")}
-									</Badge>
-								</div>
-							)}
-
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={handleLogout}
-								className="text-tinta-tenue hover:text-rose-400 hover:bg-rose-950/20"
-								title="Cerrar sesión"
-							>
-								<LogOut className="h-4 w-4 mr-1.5" />
-								<span className="hidden sm:inline">Salir</span>
-							</Button>
-						</div>
+			<div className="flex min-w-0 flex-1 flex-col">
+				<header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-borde bg-fondo/85 px-4 backdrop-blur-md sm:px-6">
+					<button
+						type="button"
+						onClick={() => setCajonAbierto(true)}
+						aria-label="Abrir menú"
+						className="-ml-1.5 inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-tinta-suave hover:bg-elevada md:hidden"
+					>
+						<IconoMenu className="size-5" />
+					</button>
+					<Migas />
+					<div className="ml-auto">
+						<MenuUsuario />
 					</div>
-				</div>
-			</header>
+				</header>
 
-			{/* Contenido Principal */}
-			<main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-				{children}
-			</main>
-
-			{/* Footer */}
-			<footer className="border-t border-borde/60 py-6 text-center text-xs text-tinta-tenue">
-				Hexacore Monorepo &copy; {new Date().getFullYear()} &mdash; Arquitectura
-				Hexagonal y Modular
-			</footer>
+				<main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+					{children}
+				</main>
+			</div>
 		</div>
 	);
 }

@@ -11,7 +11,7 @@ export function RestablecerPasswordPage({ token }: { token: string }) {
 			{token ? (
 				<RestablecerPasswordForm token={token} />
 			) : (
-				<p className="text-center text-sm text-rose-400">
+				<p className="text-center text-sm text-peligro-tinta">
 					El enlace no es válido.{" "}
 					<Link to="/recuperar-password" className="underline">
 						Pide uno nuevo

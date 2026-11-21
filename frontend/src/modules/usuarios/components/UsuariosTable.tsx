@@ -1,5 +1,7 @@
 import { KeyRound, Shield, User as UserIcon } from "lucide-react";
+import { varianteRol } from "@/core/auth/rol";
 import type { Usuario } from "@/core/auth/types";
+import { Avatar } from "@/core/components/ui/Avatar";
 import { Badge } from "@/core/components/ui/Badge";
 import { Button } from "@/core/components/ui/Button";
 import { EmptyState } from "@/core/components/ui/EmptyState";
@@ -12,13 +14,6 @@ interface UsuariosTableProps {
 	onCambioPagina: (pagina: number) => void;
 	onGestionarPermisos: (usuario: Usuario) => void;
 }
-
-const varianteRol = (roles: string[]) =>
-	roles.includes("ADMIN")
-		? "purple"
-		: roles.includes("MOD")
-			? "warning"
-			: "default";
 
 export function UsuariosTable({
 	pagina,
@@ -38,17 +33,7 @@ export function UsuariosTable({
 			className: "font-medium text-tinta",
 			celda: (u) => (
 				<div className="flex items-center gap-2.5">
-					{u.avatarUrl ? (
-						<img
-							src={u.avatarUrl}
-							alt=""
-							className="h-8 w-8 rounded-full object-cover"
-						/>
-					) : (
-						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-elevada text-xs font-semibold text-indigo-400">
-							{u.nombre.charAt(0).toUpperCase()}
-						</div>
-					)}
+					<Avatar nombre={u.nombre} src={u.avatarUrl} size="sm" />
 					<span>{u.nombre}</span>
 				</div>
 			),
@@ -57,8 +42,8 @@ export function UsuariosTable({
 		{
 			cabecera: "Rol",
 			celda: (u) => (
-				<Badge variant={varianteRol(u.roles)} className="gap-1">
-					<Shield className="h-3 w-3" />
+				<Badge variant={varianteRol(u.roles)}>
+					<Shield className="size-3" />
 					{u.roles.join(", ")}
 				</Badge>
 			),

@@ -13,7 +13,7 @@ export function RegistroPage() {
 				¿Ya tienes una cuenta?{" "}
 				<Link
 					to="/login"
-					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+					className="font-medium text-acento-tinta hover:underline"
 				>
 					Inicia sesión
 				</Link>

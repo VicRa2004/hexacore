@@ -47,7 +47,7 @@ function Contenido({ usuario }: { usuario: Usuario }) {
 	const error = roles.error ?? permisos.error ?? asignacion.error;
 
 	return error ? (
-		<p className="text-sm text-rose-400">{getErrorMessage(error)}</p>
+		<p className="text-sm text-peligro-tinta">{getErrorMessage(error)}</p>
 	) : roles.data && permisos.data && asignacion.data ? (
 		<Formulario
 			usuarioId={usuario.id}
@@ -57,7 +57,7 @@ function Contenido({ usuario }: { usuario: Usuario }) {
 		/>
 	) : (
 		<div className="flex justify-center py-8">
-			<Spinner className="text-indigo-500" />
+			<Spinner className="text-acento-tinta" />
 		</div>
 	);
 }

@@ -22,12 +22,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 					ref={ref}
 					type="checkbox"
 					aria-invalid={!!error}
-					className="h-4 w-4 cursor-pointer accent-indigo-500 focus-visible:outline-2 focus-visible:outline-indigo-500"
+					className="h-4 w-4 cursor-pointer accent-acento focus-visible:outline-2 focus-visible:outline-acento"
 					{...props}
 				/>
 				{label}
 			</label>
-			{error && <p className="text-xs font-medium text-rose-400">{error}</p>}
+			{error && (
+				<p className="text-xs font-medium text-peligro-tinta">{error}</p>
+			)}
 		</div>
 	),
 );

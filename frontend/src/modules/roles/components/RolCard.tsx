@@ -74,7 +74,7 @@ export function RolCard({ rol, permisos }: RolCardProps) {
 					size="sm"
 					onClick={() => setConfirmando(true)}
 					isLoading={eliminar.isPending}
-					className="text-rose-400 hover:bg-rose-950/20 hover:text-rose-300"
+					className="text-peligro-tinta hover:bg-peligro-suave hover:text-peligro-tinta"
 				>
 					<Trash2 className="h-4 w-4" />
 					Eliminar

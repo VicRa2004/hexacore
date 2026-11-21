@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/core/api/client";
@@ -6,6 +6,8 @@ import { useAuthStore } from "@/core/auth/store";
 import { authApi } from "../api/authApi";
 
 const onError = (error: unknown) => toast.error(getErrorMessage(error));
+
+const SESIONES_KEY = ["auth", "sesiones"] as const;
 
 export function useRecuperarPasswordMutation() {
 	return useMutation({ mutationFn: authApi.recuperarPassword, onError });
@@ -45,10 +47,12 @@ export function useReenviarVerificacionMutation() {
 
 export function useCambiarPasswordMutation() {
 	const setTokens = useAuthStore((state) => state.setTokens);
+	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: authApi.cambiarPassword,
 		onSuccess: (tokens) => {
 			setTokens(tokens);
+			queryClient.invalidateQueries({ queryKey: SESIONES_KEY });
 			toast.success("Contraseña cambiada. Se cerraron tus otras sesiones.");
 		},
 		onError,
@@ -66,5 +70,24 @@ export function useCerrarSesionesMutation() {
 			navigate({ to: "/login" });
 		},
 		onError,
+	});
+}
+
+export function useSesionesQuery() {
+	return useQuery({
+		queryKey: SESIONES_KEY,
+		queryFn: authApi.listarSesiones,
+		staleTime: 0,
+	});
+}
+
+export function useCerrarSesionMutation() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: authApi.cerrarSesion,
+		onSuccess: ({ mensaje }) => toast.success(mensaje),
+		onError,
+		// También tras un 404: el id cambia cuando ese dispositivo renueva su sesión.
+		onSettled: () => queryClient.invalidateQueries({ queryKey: SESIONES_KEY }),
 	});
 }

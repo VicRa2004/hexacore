@@ -18,11 +18,11 @@ export function VerificarEmailPage({ token }: { token: string }) {
 					className="flex flex-col items-center gap-3 text-center"
 					role="status"
 				>
-					<CheckCircle className="h-10 w-10 text-emerald-400" />
+					<CheckCircle className="h-10 w-10 text-exito-tinta" />
 					<p className="text-sm text-tinta-suave">{verificar.data.mensaje}</p>
 					<Link
 						to="/dashboard"
-						className="text-sm font-medium text-indigo-400 hover:underline"
+						className="text-sm font-medium text-acento-tinta hover:underline"
 					>
 						Ir a la aplicación
 					</Link>

@@ -69,11 +69,11 @@ export function DefaultNotFoundComponent() {
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-fondo p-6 text-center">
-			<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-600/10 text-indigo-400">
+			<div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-acento-borde bg-acento-suave text-acento-tinta">
 				<Compass className="h-7 w-7" />
 			</div>
 			<div className="space-y-2">
-				<p className="font-mono text-sm font-semibold text-indigo-400">404</p>
+				<p className="font-mono text-sm font-semibold text-acento-tinta">404</p>
 				<h1 className="text-3xl font-extrabold tracking-tight text-tinta">
 					Página no encontrada
 				</h1>

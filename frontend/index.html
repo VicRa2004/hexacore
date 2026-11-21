@@ -16,10 +16,18 @@
 					tema === "oscuro" ||
 					(tema !== "claro" && matchMedia("(prefers-color-scheme: dark)").matches);
 				document.documentElement.dataset.tema = oscuro ? "oscuro" : "claro";
+				// Tono de marca elegido (mismos valores que ACENTOS de src/core/tema.ts).
+				const tonos = { indigo: 277, violeta: 300, azul: 250, cian: 215, esmeralda: 160, rosa: 350 };
+				let acento = null;
+				try {
+					acento = localStorage.getItem("acento");
+				} catch {}
+				if (acento in tonos)
+					document.documentElement.style.setProperty("--marca-h", tonos[acento]);
 			})();
 		</script>
 	</head>
-	<body class="h-full antialiased selection:bg-indigo-500 selection:text-white">
+	<body class="h-full antialiased">
 		<div id="root" class="h-full flex flex-col"></div>
 		<script type="module" src="/src/main.tsx"></script>
 	</body>

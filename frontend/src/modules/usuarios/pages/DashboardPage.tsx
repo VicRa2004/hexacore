@@ -1,230 +1,182 @@
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
+import {
+	ArrowUpRight,
+	BookOpen,
+	History,
+	KeyRound,
+	type LucideIcon,
+	ShieldCheck,
+	Users,
+} from "lucide-react";
+import { varianteRol } from "@/core/auth/rol";
 import { useAuthStore } from "@/core/auth/store";
-import { useUsuariosQuery } from "../hooks/useUsuariosQuery";
+import { Encabezado } from "@/core/components/layout/Encabezado";
+import { Avatar } from "@/core/components/ui/Avatar";
 import { Badge } from "@/core/components/ui/Badge";
 import { Button } from "@/core/components/ui/Button";
+import { Card, CardTitle } from "@/core/components/ui/Card";
+import { Skeleton } from "@/core/components/ui/Skeleton";
+import { ActividadReciente } from "@/modules/auditoria/components/ActividadReciente";
+import { useAuditoriaQuery } from "@/modules/auditoria/hooks/useAuditoriaQuery";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/core/components/ui/Card";
-import {
-	Users,
-	ShieldCheck,
-	Server,
-	ArrowRight,
-	ExternalLink,
-	Layers,
-	Cpu,
-	Zap,
-} from "lucide-react";
+	usePermisosQuery,
+	useRolesQuery,
+} from "@/modules/roles/hooks/useRolesQuery";
+import { useUsuariosQuery } from "../hooks/useUsuariosQuery";
+
+interface Metrica {
+	etiqueta: string;
+	icono: LucideIcon;
+	to: LinkProps["to"];
+	valor?: number;
+	isLoading: boolean;
+	/** Sin permiso (403) u otro error: se muestra «—» en vez de romper el panel. */
+	isError: boolean;
+}
+
+function TarjetaMetrica({
+	etiqueta,
+	icono: Icono,
+	to,
+	valor,
+	isLoading,
+	isError,
+}: Metrica) {
+	return (
+		<Link
+			to={to}
+			className="group rounded-xl border border-borde bg-superficie p-5 shadow-sm transition-[border-color,box-shadow] hover:border-acento-borde hover:shadow focus-visible:outline-2 focus-visible:outline-acento"
+		>
+			<div className="flex items-center justify-between text-sm text-tinta-tenue">
+				<span className="flex items-center gap-2">
+					<span className="flex size-7 items-center justify-center rounded-md bg-acento-suave text-acento-tinta">
+						<Icono className="size-4" />
+					</span>
+					{etiqueta}
+				</span>
+				<ArrowUpRight className="size-4 opacity-0 transition-opacity group-hover:opacity-100" />
+			</div>
+			<div className="mt-4 text-3xl font-semibold tracking-tight tabular-nums">
+				{isLoading ? (
+					<Skeleton className="h-9 w-16" />
+				) : isError || valor === undefined ? (
+					<span className="text-tinta-tenue" title="Sin acceso">
+						—
+					</span>
+				) : (
+					valor.toLocaleString("es")
+				)}
+			</div>
+		</Link>
+	);
+}
+
+function saludo() {
+	const hora = new Date().getHours();
+	if (hora < 12) return "Buenos días";
+	if (hora < 20) return "Buenas tardes";
+	return "Buenas noches";
+}
 
 export function DashboardPage() {
 	const usuario = useAuthStore((state) => state.usuario);
-	const { data: datosUsuarios, isLoading: isCargandoUsuarios } =
-		useUsuariosQuery({
-			pagina: 1,
-			limite: 1,
-		});
+	const usuarios = useUsuariosQuery({ pagina: 1, limite: 1 });
+	const roles = useRolesQuery();
+	const permisos = usePermisosQuery();
+	const auditoria = useAuditoriaQuery({ pagina: 1, limite: 6 });
 
-	const varianteRol = usuario?.roles.includes("ADMIN")
-		? "purple"
-		: usuario?.roles.includes("MOD")
-			? "warning"
-			: "default";
+	const metricas: Metrica[] = [
+		{
+			etiqueta: "Usuarios",
+			icono: Users,
+			to: "/usuarios",
+			valor: usuarios.data?.totalElementos,
+			isLoading: usuarios.isLoading,
+			isError: usuarios.isError,
+		},
+		{
+			etiqueta: "Roles",
+			icono: ShieldCheck,
+			to: "/roles",
+			valor: roles.data?.length,
+			isLoading: roles.isLoading,
+			isError: roles.isError,
+		},
+		{
+			etiqueta: "Permisos",
+			icono: KeyRound,
+			to: "/roles",
+			valor: permisos.data?.length,
+			isLoading: permisos.isLoading,
+			isError: permisos.isError,
+		},
+		{
+			etiqueta: "Eventos auditados",
+			icono: History,
+			to: "/auditoria",
+			valor: auditoria.data?.totalElementos,
+			isLoading: auditoria.isLoading,
+			isError: auditoria.isError,
+		},
+	];
 
 	return (
 		<div className="space-y-8">
-			{/* Banner de Bienvenida */}
-			<div className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-950/50 via-superficie to-fondo p-6 sm:p-8 shadow-2xl">
-				<div className="relative z-10 max-w-2xl space-y-3">
-					<div className="inline-flex items-center gap-2">
-						<Badge variant={varianteRol} className="px-3 py-1 text-xs">
-							Rol: {usuario?.roles.join(", ")}
-						</Badge>
-						<Badge variant="success" className="px-3 py-1 text-xs">
-							Sistema Operativo
-						</Badge>
-					</div>
-					<h1 className="text-3xl font-extrabold tracking-tight text-tinta sm:text-4xl">
-						¡Hola, {usuario?.nombre}!
-					</h1>
-					<p className="text-sm sm:text-base text-tinta-suave leading-relaxed">
-						Bienvenido a la consola de Hexacore. El frontend está estructurado
-						de forma modular con React 19, TanStack Suite (Query, Router, Form)
-						y Tailwind CSS v4, consumiendo el backend con Bun y Hono.
-					</p>
-					<div className="flex flex-wrap items-center gap-3 pt-2">
-						<Link to="/usuarios">
-							<Button size="md" className="gap-2">
-								<Users className="h-4 w-4" />
-								Ver Usuarios
-								<ArrowRight className="h-4 w-4" />
-							</Button>
-						</Link>
-						<a
-							href="/docs"
-							target="_blank"
-							rel="noreferrer"
-							className="inline-flex items-center"
-						>
-							<Button variant="outline" size="md" className="gap-2">
-								<Server className="h-4 w-4" />
-								API Docs (Scalar)
-								<ExternalLink className="h-3.5 w-3.5 text-tinta-tenue" />
-							</Button>
-						</a>
-					</div>
+			<Encabezado
+				titulo={`${saludo()}, ${usuario?.nombre.split(" ")[0] ?? ""}`}
+				descripcion="Resumen de tu espacio de trabajo."
+				acciones={
+					<Button
+						variant="outline"
+						onClick={() => window.open("/docs", "_blank", "noopener")}
+					>
+						<BookOpen />
+						API
+					</Button>
+				}
+			/>
+
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				{metricas.map((m) => (
+					<TarjetaMetrica key={m.etiqueta} {...m} />
+				))}
+			</div>
+
+			<div className="grid gap-6 lg:grid-cols-3">
+				<div className="lg:col-span-2">
+					<ActividadReciente />
 				</div>
-			</div>
-
-			{/* Tarjetas de Métricas */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between pb-2">
-						<CardTitle className="text-sm font-medium text-tinta-tenue">
-							Usuarios Registrados
-						</CardTitle>
-						<div className="p-2 rounded-lg bg-indigo-600/10 text-indigo-400">
-							<Users className="h-4 w-4" />
+				{usuario && (
+					<Card className="space-y-5">
+						<CardTitle>Tu cuenta</CardTitle>
+						<div className="flex items-center gap-3">
+							<Avatar nombre={usuario.nombre} src={usuario.avatarUrl} />
+							<div className="min-w-0">
+								<p className="truncate text-sm font-medium">{usuario.nombre}</p>
+								<p className="truncate text-xs text-tinta-tenue">
+									{usuario.email}
+								</p>
+							</div>
 						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-tinta">
-							{isCargandoUsuarios
-								? "..."
-								: (datosUsuarios?.totalElementos ?? 0)}
+						<div className="flex flex-wrap gap-1.5">
+							<Badge variant={varianteRol(usuario.roles)}>
+								{usuario.roles.join(", ")}
+							</Badge>
+							{usuario.emailVerificado === false ? (
+								<Badge variant="warning">Email sin verificar</Badge>
+							) : (
+								<Badge variant="success">Email verificado</Badge>
+							)}
 						</div>
-						<p className="text-xs text-tinta-tenue mt-1">
-							Datos cacheados reactivamente vía TanStack Query
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between pb-2">
-						<CardTitle className="text-sm font-medium text-tinta-tenue">
-							Seguridad de Sesión
-						</CardTitle>
-						<div className="p-2 rounded-lg bg-emerald-600/10 text-emerald-400">
-							<ShieldCheck className="h-4 w-4" />
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-emerald-400">
-							JWT + Refresh
-						</div>
-						<p className="text-xs text-tinta-tenue mt-1">
-							Rotación automática con interceptores de Axios
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between pb-2">
-						<CardTitle className="text-sm font-medium text-tinta-tenue">
-							Rendimiento & Stack
-						</CardTitle>
-						<div className="p-2 rounded-lg bg-amber-600/10 text-amber-400">
-							<Zap className="h-4 w-4" />
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold text-amber-400">Vite + Bun</div>
-						<p className="text-xs text-tinta-tenue mt-1">
-							Ultra rápido en desarrollo y unificado en producción
-						</p>
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* Resumen de Arquitectura */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-				<Card>
-					<CardHeader>
-						<div className="flex items-center gap-2">
-							<Layers className="h-5 w-5 text-indigo-400" />
-							<CardTitle className="text-base">
-								Arquitectura del Frontend
-							</CardTitle>
-						</div>
-						<CardDescription>
-							Estructura escalable dividida en capas limpias
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-2 text-xs text-tinta-suave">
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="font-mono text-indigo-300">src/core/</span>
-							<span className="text-tinta-tenue">
-								API, Auth Store, Layouts, UI Primitives
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="font-mono text-indigo-300">
-								src/modules/auth/
-							</span>
-							<span className="text-tinta-tenue">
-								Login, Registro, Schemas Zod, TanStack Form
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="font-mono text-indigo-300">
-								src/modules/usuarios/
-							</span>
-							<span className="text-tinta-tenue">
-								Hooks TanStack Query, Tablas, Perfil
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5">
-							<span className="font-mono text-indigo-300">src/routes/</span>
-							<span className="text-tinta-tenue">
-								Enrutamiento seguro y tipado por archivos
-							</span>
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<div className="flex items-center gap-2">
-							<Cpu className="h-5 w-5 text-indigo-400" />
-							<CardTitle className="text-base">
-								Integración con el Backend
-							</CardTitle>
-						</div>
-						<CardDescription>
-							Convivencia en monorepo de alto rendimiento
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-2 text-xs text-tinta-suave">
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="text-tinta">Desarrollo:</span>
-							<span className="text-tinta-tenue">
-								Vite (5173) + Proxy hacia Hono/Bun (3000)
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="text-tinta">Producción:</span>
-							<span className="text-tinta-tenue">
-								Hono Bun sirve dist/ + Fallback SPA
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5 border-b border-borde/80">
-							<span className="text-tinta">CORS / Dominios:</span>
-							<span className="text-emerald-400">
-								0 problemas de CORS en producción
-							</span>
-						</div>
-						<div className="flex items-center justify-between py-1.5">
-							<span className="text-tinta">Linter & Tipado:</span>
-							<span className="text-indigo-400">
-								Biome + TypeScript 7 Estricto
-							</span>
-						</div>
-					</CardContent>
-				</Card>
+						<Link
+							to="/perfil"
+							className="inline-flex items-center gap-1 text-sm font-medium text-acento-tinta hover:underline"
+						>
+							Gestionar perfil y sesiones
+							<ArrowUpRight className="size-3.5" />
+						</Link>
+					</Card>
+				)}
 			</div>
 		</div>
 	);

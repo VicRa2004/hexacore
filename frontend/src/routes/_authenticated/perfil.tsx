@@ -3,4 +3,5 @@ import { PerfilPage } from "@/modules/usuarios/pages/PerfilPage";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
 	component: PerfilPage,
+	staticData: { titulo: "Mi perfil" },
 });

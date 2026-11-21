@@ -443,7 +443,7 @@ ${columnas.join("\n")}
 						<Pencil className="h-4 w-4" />
 					</Button>
 					<Button variant="ghost" size="sm" onClick={() => onEliminar(fila)} aria-label="Eliminar">
-						<Trash2 className="h-4 w-4 text-rose-400" />
+						<Trash2 className="h-4 w-4 text-peligro-tinta" />
 					</Button>
 				</div>
 			),
@@ -466,6 +466,7 @@ ${columnas.join("\n")}
 
 	[`pages/${Ns}Page.tsx`]: `import { Plus${filtro ? ", Search" : ""} } from "lucide-react";
 import { useState } from "react";
+import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Button } from "@/core/components/ui/Button";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { Dialog } from "@/core/components/ui/Dialog";
@@ -488,9 +489,10 @@ export function ${Ns}Page() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<h1 className="text-2xl font-bold tracking-tight text-tinta">${humano(ns)}</h1>
-				<div className="flex gap-2">${
+			<Encabezado
+				titulo="${humano(ns)}"
+				acciones={
+					<>${
 					filtro
 						? `
 					<div className="relative w-full sm:w-64">
@@ -512,8 +514,9 @@ export function ${Ns}Page() {
 						<Plus className="h-4 w-4" />
 						Nuevo
 					</Button>
-				</div>
-			</div>
+					</>
+				}
+			/>
 
 			<${Ns}Table
 				pagina={data}
@@ -571,6 +574,7 @@ import { ${Ns}Page } from "@/modules/${ns}/pages/${Ns}Page";
 
 export const Route = createFileRoute("/_authenticated/${kebabs}")({
 	component: ${Ns}Page,
+	staticData: { titulo: "${humano(ns)}" },
 });
 `,
 );
@@ -591,5 +595,5 @@ if (exitCode !== 0) fallar("Falló el formateo con Biome");
 
 console.log(`
 Frontend de ${n} creado en src/modules/${ns} y src/routes/_authenticated/${kebabs}.tsx.
-${omitidos.length ? `Campos sin control genérico (añadir a mano en ${N}Form): ${omitidos.join(", ")}\n` : ""}Siguiente paso: añadir el enlace a /${kebabs} en src/core/components/layout/MainLayout.tsx.
+${omitidos.length ? `Campos sin control genérico (añadir a mano en ${N}Form): ${omitidos.join(", ")}\n` : ""}Siguiente paso: añadir el enlace a /${kebabs} en SECCIONES de src/core/components/layout/Sidebar.tsx.
 `);

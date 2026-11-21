@@ -1,6 +1,7 @@
 import { apiClient } from "@/core/api/client";
 import type { AuthResponse } from "@/core/auth/types";
 import type { AuthTokens } from "@/core/auth/types";
+import type { Sesion } from "@/core/api/schema.gen";
 import type { LoginInput, RegistroInput } from "../schemas/authSchemas";
 
 interface Mensaje {
@@ -70,6 +71,16 @@ export const authApi = {
 
 	async cerrarSesiones(): Promise<Mensaje> {
 		const response = await apiClient.post<Mensaje>("/auth/logout-todas");
+		return response.data;
+	},
+
+	async listarSesiones(): Promise<Sesion[]> {
+		const response = await apiClient.get<Sesion[]>("/auth/sesiones");
+		return response.data;
+	},
+
+	async cerrarSesion(id: number): Promise<Mensaje> {
+		const response = await apiClient.delete<Mensaje>(`/auth/sesiones/${id}`);
 		return response.data;
 	},
 };

@@ -23,25 +23,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 		ref,
 	) => {
 		const baseStyles =
-			"inline-flex items-center justify-center font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-superficie disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none";
+			"inline-flex shrink-0 items-center justify-center font-medium rounded-md transition-[color,background-color,border-color,box-shadow,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento focus-visible:ring-offset-2 focus-visible:ring-offset-fondo disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none [&_svg]:size-4 [&_svg]:shrink-0";
 
 		const variants = {
-			primary:
-				"bg-indigo-600 text-white hover:bg-indigo-500 active:bg-indigo-700 shadow-sm",
-			secondary:
-				"bg-elevada text-tinta hover:bg-borde-fuerte active:bg-superficie border border-borde-fuerte",
+			primary: "bg-acento text-sobre-acento hover:bg-acento-hover shadow-sm",
+			secondary: "bg-elevada text-tinta hover:bg-borde border border-borde",
 			outline:
-				"border border-borde-fuerte bg-transparent text-tinta hover:bg-elevada hover:text-tinta",
-			danger:
-				"bg-rose-600 text-white hover:bg-rose-500 active:bg-rose-700 shadow-sm",
+				"border border-borde bg-superficie text-tinta shadow-sm hover:bg-elevada hover:border-borde-fuerte",
+			danger: "bg-peligro text-sobre-acento hover:bg-peligro-hover shadow-sm",
 			ghost:
 				"bg-transparent text-tinta-suave hover:bg-elevada hover:text-tinta",
 		};
 
 		const sizes = {
-			sm: "text-xs px-2.5 py-1.5 gap-1.5",
-			md: "text-sm px-4 py-2 gap-2",
-			lg: "text-base px-5 py-2.5 gap-2.5",
+			sm: "h-8 text-xs px-2.5 gap-1.5",
+			md: "h-9 text-sm px-3.5 gap-2",
+			lg: "h-11 text-base px-5 gap-2.5",
 		};
 
 		return (
@@ -52,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 				className={cn(baseStyles, variants[variant], sizes[size], className)}
 				{...props}
 			>
-				{isLoading && <Spinner size="sm" className="mr-1 text-current" />}
+				{isLoading && <Spinner size="sm" className="text-current" />}
 				{children}
 			</button>
 		);

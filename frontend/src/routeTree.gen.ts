@@ -16,6 +16,7 @@ import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-passwo
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as RestablecerPasswordRouteImport } from './routes/restablecer-password'
 import { Route as VerificarEmailRouteImport } from './routes/verificar-email'
+import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
@@ -55,6 +56,11 @@ const VerificarEmailRoute = VerificarEmailRouteImport.update({
   path: '/verificar-email',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/roles': typeof AuthenticatedRolesRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/roles': typeof AuthenticatedRolesRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/restablecer-password'
     | '/verificar-email'
+    | '/auditoria'
     | '/dashboard'
     | '/perfil'
     | '/roles'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/restablecer-password'
     | '/verificar-email'
+    | '/auditoria'
     | '/dashboard'
     | '/perfil'
     | '/roles'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/restablecer-password'
     | '/verificar-email'
+    | '/_authenticated/auditoria'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
     | '/_authenticated/roles'
@@ -215,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificarEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/auditoria': {
+      id: '/_authenticated/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuthenticatedAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -247,6 +266,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
@@ -254,6 +274,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRolesRoute: AuthenticatedRolesRoute,

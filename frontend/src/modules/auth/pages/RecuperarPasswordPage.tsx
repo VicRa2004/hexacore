@@ -12,7 +12,7 @@ export function RecuperarPasswordPage() {
 			<div className="mt-6 text-center text-xs text-tinta-tenue">
 				<Link
 					to="/login"
-					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+					className="font-medium text-acento-tinta hover:underline"
 				>
 					Volver a iniciar sesión
 				</Link>

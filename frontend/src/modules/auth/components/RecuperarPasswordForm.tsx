@@ -18,7 +18,7 @@ export function RecuperarPasswordForm() {
 				className="flex flex-col items-center gap-3 text-center"
 				role="status"
 			>
-				<MailCheck className="h-10 w-10 text-emerald-400" />
+				<MailCheck className="h-10 w-10 text-exito-tinta" />
 				<p className="text-sm text-tinta-suave">{recuperar.data.mensaje}</p>
 			</div>
 		);

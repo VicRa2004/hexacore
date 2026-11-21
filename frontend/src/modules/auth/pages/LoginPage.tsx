@@ -12,7 +12,7 @@ export function LoginPage() {
 			<div className="mt-4 text-right text-xs">
 				<Link
 					to="/recuperar-password"
-					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+					className="font-medium text-acento-tinta hover:underline"
 				>
 					¿Olvidaste tu contraseña?
 				</Link>
@@ -21,7 +21,7 @@ export function LoginPage() {
 				¿No tienes una cuenta?{" "}
 				<Link
 					to="/registro"
-					className="font-medium text-indigo-400 hover:text-indigo-300 hover:underline"
+					className="font-medium text-acento-tinta hover:underline"
 				>
 					Regístrate aquí
 				</Link>

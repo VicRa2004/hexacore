@@ -1,147 +1,101 @@
-import { useAuthStore } from "@/core/auth/store";
-import { Badge } from "@/core/components/ui/Badge";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/core/components/ui/Card";
-import { Shield, Mail, Hash, CheckCircle, Camera, Trash2 } from "lucide-react";
+import { Camera, Trash2 } from "lucide-react";
 import { useRef } from "react";
+import { varianteRol } from "@/core/auth/rol";
+import { useAuthStore } from "@/core/auth/store";
+import { Avatar } from "@/core/components/ui/Avatar";
+import { Badge } from "@/core/components/ui/Badge";
 import { Button } from "@/core/components/ui/Button";
+import { Card } from "@/core/components/ui/Card";
 import { useAvatarMutation } from "../hooks/useAvatarMutation";
+
+function Dato({
+	etiqueta,
+	children,
+}: {
+	etiqueta: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<div className="space-y-1">
+			<dt className="text-xs font-medium text-tinta-tenue">{etiqueta}</dt>
+			<dd className="text-sm text-tinta">{children}</dd>
+		</div>
+	);
+}
 
 export function PerfilUsuarioCard() {
 	const usuario = useAuthStore((state) => state.usuario);
 	const avatar = useAvatarMutation();
 	const inputArchivo = useRef<HTMLInputElement>(null);
 
-	if (!usuario) {
-		return (
-			<Card>
-				<p className="text-sm text-tinta-tenue">
-					No hay información de sesión activa.
-				</p>
-			</Card>
-		);
-	}
-
-	const varianteRol = usuario.roles.includes("ADMIN")
-		? "purple"
-		: usuario.roles.includes("MOD")
-			? "warning"
-			: "default";
+	if (!usuario) return null;
 
 	return (
-		<Card className="max-w-2xl mx-auto">
-			<CardHeader>
-				<div className="flex items-center gap-4">
-					{usuario.avatarUrl ? (
-						<img
-							src={usuario.avatarUrl}
-							alt={`Avatar de ${usuario.nombre}`}
-							className="h-16 w-16 rounded-2xl border border-indigo-500/20 object-cover"
-						/>
-					) : (
-						<div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-xl font-bold text-indigo-400">
-							{usuario.nombre.charAt(0).toUpperCase()}
-						</div>
-					)}
-					<div className="flex-1">
-						<CardTitle>{usuario.nombre}</CardTitle>
-						<CardDescription className="flex items-center gap-2 mt-1">
-							<Badge variant={varianteRol}>{usuario.roles.join(", ")}</Badge>
-							<Badge variant={usuario.isActivo ? "success" : "danger"}>
-								{usuario.isActivo ? "Cuenta Activa" : "Cuenta Inactiva"}
-							</Badge>
-						</CardDescription>
+		<Card className="space-y-6">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+				<Avatar nombre={usuario.nombre} src={usuario.avatarUrl} size="lg" />
+				<div className="min-w-0 flex-1 space-y-1.5">
+					<h2 className="truncate text-lg font-semibold">{usuario.nombre}</h2>
+					<div className="flex flex-wrap gap-1.5">
+						<Badge variant={varianteRol(usuario.roles)}>
+							{usuario.roles.join(", ")}
+						</Badge>
+						<Badge variant={usuario.isActivo ? "success" : "danger"}>
+							{usuario.isActivo ? "Cuenta activa" : "Cuenta inactiva"}
+						</Badge>
 					</div>
-					<div className="flex gap-2">
-						<input
-							ref={inputArchivo}
-							type="file"
-							accept="image/png,image/jpeg,image/webp"
-							className="hidden"
-							aria-label="Archivo del avatar"
-							onChange={(e) => {
-								const archivo = e.target.files?.[0];
-								if (archivo) avatar.mutate(archivo);
-								e.target.value = "";
-							}}
-						/>
+				</div>
+				<div className="flex gap-2">
+					<input
+						ref={inputArchivo}
+						type="file"
+						accept="image/png,image/jpeg,image/webp"
+						className="hidden"
+						aria-label="Archivo del avatar"
+						onChange={(e) => {
+							const archivo = e.target.files?.[0];
+							if (archivo) avatar.mutate(archivo);
+							e.target.value = "";
+						}}
+					/>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => inputArchivo.current?.click()}
+						isLoading={avatar.isPending}
+					>
+						<Camera />
+						{usuario.avatarUrl ? "Cambiar foto" : "Subir foto"}
+					</Button>
+					{usuario.avatarUrl && (
 						<Button
-							variant="outline"
+							variant="ghost"
 							size="sm"
-							onClick={() => inputArchivo.current?.click()}
-							isLoading={avatar.isPending}
+							aria-label="Quitar foto"
+							onClick={() => avatar.mutate(null)}
+							disabled={avatar.isPending}
 						>
-							<Camera className="h-4 w-4" />
-							{usuario.avatarUrl ? "Cambiar" : "Subir avatar"}
+							<Trash2 />
 						</Button>
-						{usuario.avatarUrl && (
-							<Button
-								variant="ghost"
-								size="sm"
-								aria-label="Quitar avatar"
-								onClick={() => avatar.mutate(null)}
-								disabled={avatar.isPending}
-							>
-								<Trash2 className="h-4 w-4" />
-							</Button>
-						)}
-					</div>
+					)}
 				</div>
-			</CardHeader>
-			<CardContent className="space-y-4 pt-4 border-t border-borde/80">
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
-							<Hash className="h-3.5 w-3.5" />
-							ID de Usuario
-						</div>
-						<p className="mt-1 text-sm font-semibold text-tinta font-mono">
-							#{usuario.id}
-						</p>
-					</div>
+			</div>
 
-					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
-							<Mail className="h-3.5 w-3.5" />
-							Correo Electrónico
-						</div>
-						<p className="mt-1 text-sm font-semibold text-tinta truncate">
-							{usuario.email}
-						</p>
-					</div>
-
-					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
-							<Shield className="h-3.5 w-3.5" />
-							Nivel de Autorización
-						</div>
-						<p className="mt-1 text-sm font-semibold text-tinta">
-							{usuario.roles.join(", ")} (Control Basado en Permisos)
-						</p>
-					</div>
-
-					<div className="rounded-lg border border-borde bg-superficie/50 p-3.5">
-						<div className="flex items-center gap-2 text-xs font-medium text-tinta-tenue">
-							<CheckCircle className="h-3.5 w-3.5" />
-							Estado de Verificación
-						</div>
+			<dl className="grid gap-5 border-t border-borde pt-6 sm:grid-cols-2">
+				<Dato etiqueta="Email">
+					<span className="flex flex-wrap items-center gap-2">
+						{usuario.email}
 						{usuario.emailVerificado === false ? (
-							<p className="mt-1 text-sm font-semibold text-amber-400">
-								Email sin verificar
-							</p>
+							<Badge variant="warning">Sin verificar</Badge>
 						) : (
-							<p className="mt-1 text-sm font-semibold text-emerald-400">
-								Email verificado
-							</p>
+							<Badge variant="success">Verificado</Badge>
 						)}
-					</div>
-				</div>
-			</CardContent>
+					</span>
+				</Dato>
+				<Dato etiqueta="ID de usuario">
+					<span className="font-mono">#{usuario.id}</span>
+				</Dato>
+			</dl>
 		</Card>
 	);
 }

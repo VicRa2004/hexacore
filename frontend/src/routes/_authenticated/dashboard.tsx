@@ -3,4 +3,5 @@ import { DashboardPage } from "@/modules/usuarios/pages/DashboardPage";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
 	component: DashboardPage,
+	staticData: { titulo: "Dashboard" },
 });

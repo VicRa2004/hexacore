@@ -41,7 +41,7 @@ export function Dialog({
 			// Clic en el fondo (fuera de la caja) = cerrar.
 			onClick={(e) => e.target === ref.current && onCerrar()}
 			className={cn(
-				"m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border border-borde bg-superficie p-0 text-tinta shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm",
+				"m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border border-borde bg-superficie p-0 text-tinta shadow-flotante open:animar-entrada backdrop:bg-tinta/40 backdrop:backdrop-blur-[2px]",
 				className,
 			)}
 		>

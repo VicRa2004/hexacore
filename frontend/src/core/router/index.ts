@@ -27,3 +27,10 @@ export const queryClient = new QueryClient({
 export interface RouterContext {
 	queryClient: QueryClient;
 }
+
+declare module "@tanstack/react-router" {
+	interface StaticDataRouteOption {
+		/** Título de la página en las migas de pan de la barra superior. */
+		titulo?: string;
+	}
+}
