@@ -55,7 +55,7 @@ export function RegistroForm() {
 						<campo.CampoTexto
 							label="Contraseña"
 							type="password"
-							placeholder="Mínimo 12 caracteres (1 Mayús, 1 Núm, 1 Esp)"
+							placeholder="Mínimo 12 caracteres"
 							autoComplete="new-password"
 							helperText="Al menos 12 caracteres con mayúscula, número y símbolo."
 						/>

@@ -1,4 +1,5 @@
 import { Menu as IconoMenu } from "lucide-react";
+import { useLocation } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/core/utils/cn";
 import { MenuUsuario } from "./MenuUsuario";
@@ -19,6 +20,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
 	const [plegado, setPlegado] = useState(leerPlegado);
 	const [cajonAbierto, setCajonAbierto] = useState(false);
 	const cajon = useRef<HTMLDialogElement>(null);
+	const contenido = useRef<HTMLDivElement>(null);
+	const ruta = useLocation({ select: (l) => l.pathname });
+
+	// El scroll vive en el contenido (no en la ventana): al cambiar de página, arriba.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: se dispara con `ruta`
+	useEffect(() => {
+		contenido.current?.scrollTo({ top: 0 });
+	}, [ruta]);
 
 	useEffect(() => {
 		try {
@@ -36,10 +45,11 @@ export function MainLayout({ children }: { children: ReactNode }) {
 	}, [cajonAbierto]);
 
 	return (
-		<div className="flex min-h-screen bg-fondo text-tinta">
+		// Shell de altura fija: el sidebar y la barra no se mueven; solo hace scroll el contenido.
+		<div className="flex h-dvh overflow-hidden bg-fondo text-tinta">
 			<aside
 				className={cn(
-					"sticky top-0 hidden h-screen shrink-0 border-r border-borde bg-superficie transition-[width] md:block",
+					"hidden h-full shrink-0 border-r border-borde bg-superficie transition-[width] md:block",
 					plegado ? "w-[3.75rem]" : "w-60",
 				)}
 			>
@@ -58,7 +68,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 			</dialog>
 
 			<div className="flex min-w-0 flex-1 flex-col">
-				<header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-borde bg-fondo/85 px-4 backdrop-blur-md sm:px-6">
+				<header className="z-30 flex h-14 shrink-0 items-center gap-3 border-b border-borde bg-fondo px-4 sm:px-6">
 					<button
 						type="button"
 						onClick={() => setCajonAbierto(true)}
@@ -73,9 +83,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
 					</div>
 				</header>
 
-				<main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-					{children}
-				</main>
+				<div
+					ref={contenido}
+					className="flex-1 overflow-y-auto [scrollbar-gutter:stable]"
+				>
+					<main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+						{children}
+					</main>
+				</div>
 			</div>
 		</div>
 	);

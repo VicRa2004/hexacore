@@ -8,6 +8,11 @@ export interface ObtenerUsuariosParams {
 	email?: string;
 }
 
+export type CrearUsuarioInput =
+	paths["/api/usuarios"]["post"]["requestBody"]["content"]["application/json"];
+export type ActualizarUsuarioInput =
+	paths["/api/usuarios/{id}"]["put"]["requestBody"]["content"]["application/json"];
+
 type UsuariosPagina =
 	paths["/api/usuarios"]["get"]["responses"][200]["content"]["application/json"];
 
@@ -23,6 +28,19 @@ export const usuariosApi = {
 
 	async obtenerUsuarioPorId(id: number): Promise<Usuario> {
 		const response = await apiClient.get<Usuario>(`/usuarios/${id}`);
+		return response.data;
+	},
+
+	async crearUsuario(datos: CrearUsuarioInput): Promise<Usuario> {
+		const response = await apiClient.post<Usuario>("/usuarios", datos);
+		return response.data;
+	},
+
+	async actualizarUsuario(
+		id: number,
+		datos: ActualizarUsuarioInput,
+	): Promise<Usuario> {
+		const response = await apiClient.put<Usuario>(`/usuarios/${id}`, datos);
 		return response.data;
 	},
 

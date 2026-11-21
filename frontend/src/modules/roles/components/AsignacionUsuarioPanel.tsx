@@ -5,7 +5,6 @@ import type { Usuario } from "@/core/auth/types";
 import { Button } from "@/core/components/ui/Button";
 import { Checkbox } from "@/core/components/ui/Checkbox";
 import { Dialog } from "@/core/components/ui/Dialog";
-import { Select } from "@/core/components/ui/Select";
 import { Spinner } from "@/core/components/ui/Spinner";
 import type { AsignacionUsuario, PermisoDto, RolDto } from "../api/rolesApi";
 import { useActualizarAsignacionMutation } from "../hooks/useRolesMutation";
@@ -14,7 +13,7 @@ import {
 	usePermisosQuery,
 	useRolesQuery,
 } from "../hooks/useRolesQuery";
-import { agruparPorRecurso } from "../utils/agruparPorRecurso";
+import { type Decision, ExcepcionesPermisos } from "./ExcepcionesPermisos";
 
 interface AsignacionUsuarioPanelProps {
 	/** `null` = cerrado. */
@@ -33,7 +32,7 @@ export function AsignacionUsuarioPanel({
 			onCerrar={onCerrar}
 			titulo={usuario ? `Permisos de ${usuario.nombre}` : ""}
 			descripcion={usuario?.email}
-			className="max-w-3xl"
+			className="max-w-4xl"
 		>
 			{usuario && <Contenido usuario={usuario} />}
 		</Dialog>
@@ -62,8 +61,6 @@ function Contenido({ usuario }: { usuario: Usuario }) {
 	);
 }
 
-type Decision = "heredado" | "conceder" | "denegar";
-
 function Formulario({
 	usuarioId,
 	roles,
@@ -86,6 +83,11 @@ function Formulario({
 			),
 	);
 	const guardar = useActualizarAsignacionMutation(usuarioId);
+	const porRoles = new Set(
+		roles
+			.filter((r) => rolIds.has(r.id))
+			.flatMap((r) => r.permisos.map((p) => p.id)),
+	);
 
 	const toggleRol = (id: number) =>
 		setRolIds((actual) => {
@@ -126,49 +128,17 @@ function Formulario({
 				</div>
 			</fieldset>
 
-			<fieldset className="space-y-2">
-				<legend className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
+			<section className="space-y-2">
+				<h3 className="text-xs font-semibold uppercase tracking-wider text-tinta-suave">
 					Excepciones de permisos
-				</legend>
-				<p className="text-xs text-tinta-tenue">
-					«Según roles» no cambia nada; «Conceder» y «Denegar» ganan a lo que
-					digan sus roles.
-				</p>
-				<div className="grid gap-3 sm:grid-cols-2">
-					{agruparPorRecurso(permisos).map(([recurso, delRecurso]) => (
-						<div
-							key={recurso}
-							className="rounded-lg border border-borde bg-fondo/40 p-3 space-y-2"
-						>
-							<p className="text-xs font-semibold uppercase tracking-wider text-tinta-tenue">
-								{recurso}
-							</p>
-							{delRecurso.map((permiso) => (
-								<div
-									key={permiso.id}
-									className="flex items-center justify-between gap-3 text-sm text-tinta"
-								>
-									<label htmlFor={`decision-${permiso.id}`}>
-										{permiso.accion}
-									</label>
-									<Select
-										id={`decision-${permiso.id}`}
-										className="w-36 py-1 text-xs"
-										value={decisiones.get(permiso.id) ?? "heredado"}
-										onChange={(e) =>
-											decidir(permiso.id, e.target.value as Decision)
-										}
-									>
-										<option value="heredado">Según roles</option>
-										<option value="conceder">Conceder</option>
-										<option value="denegar">Denegar</option>
-									</Select>
-								</div>
-							))}
-						</div>
-					))}
-				</div>
-			</fieldset>
+				</h3>
+				<ExcepcionesPermisos
+					permisos={permisos}
+					porRoles={porRoles}
+					decisiones={decisiones}
+					onDecidir={decidir}
+				/>
+			</section>
 
 			<div className="flex justify-end">
 				<Button size="sm" onClick={enviar} isLoading={guardar.isPending}>

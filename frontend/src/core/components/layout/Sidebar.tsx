@@ -7,7 +7,6 @@ import {
 	PanelLeftClose,
 	PanelLeftOpen,
 	ShieldCheck,
-	UserRound,
 	Users,
 } from "lucide-react";
 import { Tooltip } from "@/core/components/ui/Tooltip";
@@ -93,7 +92,10 @@ export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
 				)}
 			</Link>
 
-			<nav aria-label="Principal" className="flex flex-1 flex-col gap-5">
+			<nav
+				aria-label="Principal"
+				className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto"
+			>
 				{SECCIONES.map((seccion) => (
 					<div key={seccion.titulo} className="space-y-1">
 						{plegado ? (
@@ -116,11 +118,6 @@ export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
 			</nav>
 
 			<div className="space-y-1">
-				<EnlaceNav
-					enlace={{ to: "/perfil", etiqueta: "Mi perfil", icono: UserRound }}
-					plegado={plegado}
-					onNavegar={onNavegar}
-				/>
 				{onPlegar && (
 					<Tooltip texto="Desplegar menú" activo={plegado}>
 						<button

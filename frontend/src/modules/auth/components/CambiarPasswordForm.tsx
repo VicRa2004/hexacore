@@ -17,9 +17,20 @@ const campos = [
 		name: "passwordActual",
 		label: "Contraseña actual",
 		auto: "current-password",
+		placeholder: "Tu contraseña actual",
 	},
-	{ name: "passwordNueva", label: "Nueva contraseña", auto: "new-password" },
-	{ name: "confirmacion", label: "Repite la nueva", auto: "new-password" },
+	{
+		name: "passwordNueva",
+		label: "Nueva contraseña",
+		auto: "new-password",
+		placeholder: "Mínimo 12 caracteres",
+	},
+	{
+		name: "confirmacion",
+		label: "Repite la nueva",
+		auto: "new-password",
+		placeholder: "Vuelve a escribirla",
+	},
 ] as const;
 
 export function CambiarPasswordForm() {
@@ -51,13 +62,14 @@ export function CambiarPasswordForm() {
 			</CardHeader>
 			<form.AppForm>
 				<form.Formulario className="space-y-4">
-					{campos.map(({ name, label, auto }) => (
+					{campos.map(({ name, label, auto, placeholder }) => (
 						<form.AppField key={name} name={name}>
 							{(campo) => (
 								<campo.CampoTexto
 									label={label}
 									type="password"
 									autoComplete={auto}
+									placeholder={placeholder}
 								/>
 							)}
 						</form.AppField>

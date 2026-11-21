@@ -27,11 +27,6 @@ export function LoginForm() {
 		},
 	});
 
-	const rellenarDemoAdmin = () => {
-		form.setFieldValue("email", "admin@dev.com");
-		form.setFieldValue("password", "SecurePass123!");
-	};
-
 	return (
 		<form.AppForm>
 			<form.Formulario className="space-y-4">
@@ -61,20 +56,27 @@ export function LoginForm() {
 					Iniciar Sesión
 				</form.BotonEnviar>
 
-				<div className="pt-4 border-t border-borde">
-					<p className="text-xs text-tinta-tenue mb-2 font-medium">
-						Credenciales de prueba del sistema:
-					</p>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={rellenarDemoAdmin}
-						className="w-full text-xs text-acento-tinta border-acento-borde hover:bg-acento-suave"
-					>
-						<Sparkles className="h-3.5 w-3.5 text-acento-tinta mr-1.5" />
-						Rellenar como Administrador (admin@dev.com)
-					</Button>
-				</div>
+				{/* Solo en `pnpm dev`: Vite elimina este bloque del build de producción. */}
+				{import.meta.env.DEV && (
+					<div className="pt-4 border-t border-borde">
+						<p className="text-xs text-tinta-tenue mb-2 font-medium">
+							Credenciales de prueba del sistema:
+						</p>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								// Usuario de `pnpm db:seed:demo`.
+								form.setFieldValue("email", "admin@dev.com");
+								form.setFieldValue("password", "SecurePass123!");
+							}}
+							className="w-full text-xs text-acento-tinta border-acento-borde hover:bg-acento-suave"
+						>
+							<Sparkles className="h-3.5 w-3.5 text-acento-tinta mr-1.5" />
+							Rellenar como Administrador (admin@dev.com)
+						</Button>
+					</div>
+				)}
 			</form.Formulario>
 		</form.AppForm>
 	);

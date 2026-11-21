@@ -70,12 +70,12 @@ frontend/src/
 │   │
 │   ├── roles/                      # Roles, permisos y su asignación a usuarios (módulo backend `autorizacion`)
 │   │   ├── api/ hooks/ schemas/ utils/
-│   │   ├── components/             # RolCard, CrearRolForm, PermisosChecklist, AsignacionUsuarioPanel
+│   │   ├── components/             # RolesLista + RolEditor (PermisosMatriz), CrearRolForm, AsignacionUsuarioPanel (ExcepcionesPermisos)
 │   │   └── pages/                  # RolesPage.tsx
 │   │
 │   └── usuarios/                      # Módulo de Usuarios
 │       ├── api/                    # Llamadas a la API de usuarios (usuariosApi.ts)
-│       ├── components/             # Tablas y tarjetas (UsuariosTable.tsx, PerfilUsuarioCard.tsx)
+│       ├── components/             # UsuariosTable, UsuarioForm (alta/edición en modal), PerfilUsuarioCard
 │       ├── hooks/                  # Custom hooks de TanStack Query (useUsuariosQuery.ts)
 │       └── pages/                  # Vistas del módulo (DashboardPage.tsx, UsuariosPage.tsx, PerfilPage.tsx)
 │
@@ -113,7 +113,7 @@ Parte frontend de la checklist de `backend/AGENTS.md` ("Cómo quitar un módulo"
 
 ## Skills
 
-Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind v4, diseño y guías web). Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
+Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind v4, diseño, guías web y `patron-formulario`). Las transversales (`code-design-and-structure`, `optimal-test-design`, `typescript-advanced-types`) están en la raíz.
 
 ---
 
@@ -163,6 +163,7 @@ Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind 
     </form.Formulario>
   </form.AppForm>
   ```
+- **Modal, página o pasos:** según cuántos datos pide el formulario, ver la skill `patron-formulario`. Todo campo de texto lleva `placeholder`; `type="password"` ya trae el botón de mostrar/ocultar.
 - Campos: `CampoTexto`, `CampoSelect` (opciones como hijos), `CampoCheckbox`. `Formulario` llama a `handleSubmit` y se traga el rechazo (el toast lo da la mutación); `BotonEnviar` se bloquea mientras `onSubmit` está en curso. Un campo nuevo se añade en `campos.tsx` y se registra en `useAppForm.ts`.
 - Un CRUD nuevo no se escribe a mano: `pnpm gen:module <nombre>` genera también su frontend (ver skill `crear-modulo` del backend).
 

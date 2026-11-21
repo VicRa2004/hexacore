@@ -1,4 +1,4 @@
-import { KeyRound, Shield, User as UserIcon } from "lucide-react";
+import { KeyRound, Pencil, Shield, User as UserIcon } from "lucide-react";
 import { varianteRol } from "@/core/auth/rol";
 import type { Usuario } from "@/core/auth/types";
 import { Avatar } from "@/core/components/ui/Avatar";
@@ -13,6 +13,7 @@ interface UsuariosTableProps {
 	error?: unknown;
 	onCambioPagina: (pagina: number) => void;
 	onGestionarPermisos: (usuario: Usuario) => void;
+	onEditar: (usuario: Usuario) => void;
 }
 
 export function UsuariosTable({
@@ -21,6 +22,7 @@ export function UsuariosTable({
 	error,
 	onCambioPagina,
 	onGestionarPermisos,
+	onEditar,
 }: UsuariosTableProps) {
 	const columnas: Columna<Usuario>[] = [
 		{
@@ -60,14 +62,25 @@ export function UsuariosTable({
 			cabecera: <span className="sr-only">Acciones</span>,
 			className: "text-right",
 			celda: (u) => (
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() => onGestionarPermisos(u)}
-				>
-					<KeyRound className="h-3.5 w-3.5" />
-					Permisos
-				</Button>
+				<div className="flex justify-end gap-1.5">
+					<Button
+						variant="ghost"
+						size="sm"
+						aria-label={`Editar a ${u.nombre}`}
+						title="Editar"
+						onClick={() => onEditar(u)}
+					>
+						<Pencil className="h-3.5 w-3.5" />
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => onGestionarPermisos(u)}
+					>
+						<KeyRound className="h-3.5 w-3.5" />
+						Permisos
+					</Button>
+				</div>
 			),
 		},
 	];
