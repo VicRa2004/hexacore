@@ -1,4 +1,7 @@
-import { iniciarMonitoreo } from "@/core/shared/infrastructure/monitoreo";
+import {
+	cerrarMonitoreo,
+	iniciarMonitoreo,
+} from "@/core/shared/infrastructure/monitoreo";
 import { app } from "@/core/shared/infrastructure/http/server";
 import { env } from "./core/config/env";
 import { prisma } from "@/core/config/prisma";
@@ -30,6 +33,7 @@ const shutdown = async (signal: string) => {
 	container.get(TOKENS.Scheduler).detener();
 	for (const stop of stopTasks) stop?.();
 	await prisma.$disconnect();
+	await cerrarMonitoreo();
 	process.exit(0);
 };
 process.once("SIGTERM", shutdown);

@@ -35,12 +35,34 @@ describe("urlIngesta", () => {
 		expect(urlIngesta(sobre(dsn), dsn)).toBe(
 			"https://glitchtip.dev/api/7/envelope/?sentry_key=clave",
 		);
+		expect(urlIngesta(new TextEncoder().encode(sobre(dsn)), dsn)).toBe(
+			"https://glitchtip.dev/api/7/envelope/?sentry_key=clave",
+		);
+		const dsnSubruta = "https://clave@glitchtip.dev/sentry/7";
+		expect(urlIngesta(sobre(dsnSubruta), dsnSubruta)).toBe(
+			"https://glitchtip.dev/sentry/api/7/envelope/?sentry_key=clave",
+		);
 	});
 
-	it("debería rechazar otro host, otro proyecto, un sobre inválido o sin DSN configurado", () => {
+	it("debería rechazar otro host, protocolo, clave, proyecto, sobre inválido o DSN incompleto", () => {
 		expect(urlIngesta(sobre("https://clave@evil.dev/7"), dsn)).toBeUndefined();
 		expect(
+			urlIngesta(sobre("http://clave@glitchtip.dev/7"), dsn),
+		).toBeUndefined();
+		expect(
+			urlIngesta(sobre("https://otra@glitchtip.dev/7"), dsn),
+		).toBeUndefined();
+		expect(
 			urlIngesta(sobre("https://clave@glitchtip.dev/8"), dsn),
+		).toBeUndefined();
+		expect(
+			urlIngesta(sobre("https://glitchtip.dev/7"), "https://glitchtip.dev/7"),
+		).toBeUndefined();
+		expect(
+			urlIngesta(
+				sobre("https://clave@glitchtip.dev/sin-id"),
+				"https://clave@glitchtip.dev/sin-id",
+			),
 		).toBeUndefined();
 		expect(urlIngesta("no es json", dsn)).toBeUndefined();
 		expect(urlIngesta(sobre(dsn), undefined)).toBeUndefined();

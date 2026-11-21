@@ -48,4 +48,13 @@ describe("server", () => {
 		});
 		expect(body.requestId).toBeString();
 	});
+
+	it("POST /api/monitoreo debería responder 400 ante un sobre inválido", async () => {
+		const res = await app.request("/api/monitoreo", {
+			method: "POST",
+			body: "sobre-invalido",
+		});
+
+		expect(res.status).toBe(400);
+	});
 });

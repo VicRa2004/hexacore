@@ -89,17 +89,22 @@ app.get("/ready", async (c) => {
 	}
 });
 
-// Túnel de la web hacia GlitchTip: desde el propio dominio no lo cortan los bloqueadores.
+// Túnel de la web hacia GlitchTip/Sentry: desde el propio dominio no lo cortan los bloqueadores.
 app.post(
 	"/api/monitoreo",
 	rateLimit({ windowMs: 60_000, limit: 30 }),
 	bodyLimit({ maxSize: 256 * 1024 }),
 	async (c) => {
-		const sobre = await c.req.text();
+		const sobre = new Uint8Array(await c.req.arrayBuffer());
 		const destino = urlIngesta(sobre);
 		if (!destino) return c.body(null, 400);
 		try {
-			const res = await fetch(destino, { method: "POST", body: sobre });
+			const res = await fetch(destino, {
+				method: "POST",
+				body: sobre,
+				headers: { "Content-Type": "application/x-sentry-envelope" },
+				signal: AbortSignal.timeout(5_000),
+			});
 			return c.body(null, res.ok ? 200 : 502);
 		} catch {
 			return c.body(null, 502);
