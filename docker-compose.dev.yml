@@ -9,7 +9,8 @@ services:
       POSTGRES_PASSWORD: cambia_esta_password
       POSTGRES_DB: hexacore_db
     ports:
-      - "5433:5432"
+      # DB_PORT si el 5433 está ocupado (p. ej. DB_PORT=5434 pnpm db:up; ajusta DATABASE_URL).
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - postgres-dev:/var/lib/postgresql
       # Solo se ejecuta al crear el volumen por primera vez.
