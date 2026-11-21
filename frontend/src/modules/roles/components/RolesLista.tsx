@@ -17,7 +17,11 @@ export function RolesLista({
 	onSeleccionar,
 }: RolesListaProps) {
 	return (
-		<nav aria-label="Roles" className="space-y-1.5">
+		// Móvil/tablet: fila deslizable; escritorio: columna.
+		<nav
+			aria-label="Roles"
+			className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:px-0 lg:pb-0"
+		>
 			{roles.map((rol) => {
 				const activo = rol.id === seleccionadoId;
 				const cobertura = totalPermisos
@@ -30,7 +34,7 @@ export function RolesLista({
 						aria-current={activo ? "true" : undefined}
 						onClick={() => onSeleccionar(rol.id)}
 						className={cn(
-							"w-full cursor-pointer rounded-lg border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-acento",
+							"w-60 shrink-0 snap-start cursor-pointer rounded-lg border p-3 lg:w-full text-left transition-colors focus-visible:outline-2 focus-visible:outline-acento",
 							activo
 								? "border-acento-borde bg-acento-suave"
 								: "border-borde bg-superficie hover:border-borde-fuerte hover:bg-elevada/50",

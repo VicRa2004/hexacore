@@ -46,7 +46,7 @@ export function Dialog({
 			)}
 		>
 			{abierto && (
-				<div className="space-y-4 p-6">
+				<div className="space-y-4 p-4 sm:p-6">
 					<div className="flex items-start justify-between gap-4">
 						<div className="space-y-1">
 							<h2 id={`${id}-titulo`} className="text-lg font-bold">

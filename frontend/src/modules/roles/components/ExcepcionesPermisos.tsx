@@ -54,101 +54,66 @@ export function ExcepcionesPermisos({
 				</Badge>
 			</div>
 
-			<div className="overflow-hidden rounded-lg border border-borde">
-				<table className="w-full text-sm">
-					<caption className="sr-only">Excepciones de permisos</caption>
-					<thead className="bg-elevada/60 text-xs text-tinta-suave">
-						<tr>
-							<th scope="col" className="px-3 py-2 text-left font-medium">
-								Permiso
-							</th>
-							<th
-								scope="col"
-								className="hidden px-3 py-2 text-center font-medium sm:table-cell"
-							>
-								Por roles
-							</th>
-							<th scope="col" className="px-3 py-2 text-left font-medium">
-								Excepción
-							</th>
-							<th scope="col" className="px-3 py-2 text-center font-medium">
-								Resultado
-							</th>
-						</tr>
-					</thead>
-					{agruparPorRecurso(permisos).map(([recurso, delRecurso]) => (
-						<tbody
-							key={recurso}
-							className="divide-y divide-borde border-t border-borde"
-						>
-							<tr className="bg-fondo/60">
-								<th
-									scope="rowgroup"
-									colSpan={4}
-									className="px-3 py-1.5 text-left text-xs font-semibold capitalize text-tinta-tenue"
-								>
-									{recurso}
-								</th>
-							</tr>
+			<div className="divide-y divide-borde overflow-hidden rounded-lg border border-borde">
+				{agruparPorRecurso(permisos).map(([recurso, delRecurso]) => (
+					<section key={recurso} aria-label={recurso}>
+						<h4 className="bg-elevada/60 px-3 py-1.5 text-xs font-semibold capitalize text-tinta-suave">
+							{recurso}
+						</h4>
+						<ul className="divide-y divide-borde">
 							{delRecurso.map((permiso) => {
 								const decision = decisiones.get(permiso.id) ?? "heredado";
 								const heredado = porRoles.has(permiso.id);
 								const final =
 									decision === "heredado" ? heredado : decision === "conceder";
 								return (
-									<tr
+									<li
 										key={permiso.id}
+										// Móvil: nombre y resultado arriba, selector debajo a todo el ancho.
 										className={cn(
+											"grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto_7rem]",
 											decision !== "heredado" && "bg-aviso-suave/40",
 										)}
 									>
-										<th
-											scope="row"
-											className="px-3 py-2 text-left font-normal capitalize"
-										>
-											{permiso.accion}
-										</th>
-										<td className="hidden px-3 py-2 text-center sm:table-cell">
-											{heredado ? (
-												<Check
-													className="mx-auto size-4 text-tinta-suave"
-													aria-label="Sí"
-												/>
-											) : (
-												<Minus
-													className="mx-auto size-4 text-tinta-tenue"
-													aria-label="No"
-												/>
-											)}
-										</td>
-										<td className="px-3 py-2">
-											<fieldset className="inline-flex rounded-md bg-elevada p-0.5">
-												<legend className="sr-only">
-													{`${permiso.recurso}:${permiso.accion}`}
-												</legend>
-												{OPCIONES.map((o) => (
-													<label
-														key={o.valor}
-														className={cn(
-															"cursor-pointer rounded-sm px-2 py-1 text-xs transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-acento",
-															decision === o.valor
-																? o.activa
-																: "text-tinta-tenue hover:text-tinta",
-														)}
-													>
-														<input
-															type="radio"
-															className="sr-only"
-															name={`decision-${permiso.id}`}
-															checked={decision === o.valor}
-															onChange={() => onDecidir(permiso.id, o.valor)}
-														/>
-														{o.etiqueta}
-													</label>
-												))}
-											</fieldset>
-										</td>
-										<td className="px-3 py-2 text-center">
+										<div className="min-w-0">
+											<p className="text-sm font-medium capitalize">
+												{permiso.accion}
+											</p>
+											<p className="flex items-center gap-1 text-xs text-tinta-tenue">
+												{heredado ? (
+													<Check className="size-3" aria-hidden />
+												) : (
+													<Minus className="size-3" aria-hidden />
+												)}
+												{heredado ? "Lo dan sus roles" : "Sus roles no lo dan"}
+											</p>
+										</div>
+										<fieldset className="order-last col-span-2 grid grid-cols-3 rounded-md bg-elevada p-0.5 sm:order-none sm:col-span-1 sm:inline-grid">
+											<legend className="sr-only">
+												{`Excepción para ${permiso.recurso}:${permiso.accion}`}
+											</legend>
+											{OPCIONES.map((o) => (
+												<label
+													key={o.valor}
+													className={cn(
+														"cursor-pointer rounded-sm px-2 py-1.5 text-center text-xs whitespace-nowrap transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-acento sm:py-1",
+														decision === o.valor
+															? o.activa
+															: "text-tinta-tenue hover:text-tinta",
+													)}
+												>
+													<input
+														type="radio"
+														className="sr-only"
+														name={`decision-${permiso.id}`}
+														checked={decision === o.valor}
+														onChange={() => onDecidir(permiso.id, o.valor)}
+													/>
+													{o.etiqueta}
+												</label>
+											))}
+										</fieldset>
+										<div className="justify-self-end">
 											{final ? (
 												<Badge variant="success">
 													<Check className="size-3" />
@@ -160,13 +125,13 @@ export function ExcepcionesPermisos({
 													Sin acceso
 												</Badge>
 											)}
-										</td>
-									</tr>
+										</div>
+									</li>
 								);
 							})}
-						</tbody>
-					))}
-				</table>
+						</ul>
+					</section>
+				))}
 			</div>
 		</div>
 	);

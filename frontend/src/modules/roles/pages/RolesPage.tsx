@@ -40,7 +40,7 @@ export function RolesPage() {
 					{getErrorMessage(error)}
 				</div>
 			) : roles.isLoading || permisos.isLoading ? (
-				<div className="grid gap-6 lg:grid-cols-[17rem_1fr]">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-[17rem_1fr]">
 					<Skeleton className="h-64" />
 					<Skeleton className="h-96" />
 				</div>
@@ -57,7 +57,7 @@ export function RolesPage() {
 					}
 				/>
 			) : (
-				<div className="grid items-start gap-6 lg:grid-cols-[17rem_1fr]">
+				<div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[17rem_1fr]">
 					<RolesLista
 						roles={lista}
 						totalPermisos={permisos.data?.length ?? 0}

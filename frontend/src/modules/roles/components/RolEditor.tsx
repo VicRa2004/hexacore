@@ -63,7 +63,7 @@ export function RolEditor({ rol, permisos, onEliminado }: RolEditorProps) {
 
 	return (
 		<Card className="space-y-5 p-0">
-			<div className="grid gap-3 px-6 pt-6 sm:grid-cols-[1fr_2fr]">
+			<div className="grid gap-3 px-4 pt-4 sm:grid-cols-[1fr_2fr] sm:px-6 sm:pt-6">
 				<Input
 					id={`rol-${rol.id}-nombre`}
 					label="Nombre"
@@ -81,7 +81,7 @@ export function RolEditor({ rol, permisos, onEliminado }: RolEditorProps) {
 				/>
 			</div>
 
-			<div className="space-y-2 px-6">
+			<div className="space-y-2 px-4 sm:px-6">
 				<div className="flex items-baseline justify-between gap-3">
 					<h3 className="text-sm font-semibold">Permisos</h3>
 					<p className="text-xs text-tinta-tenue tabular-nums">
@@ -95,7 +95,7 @@ export function RolEditor({ rol, permisos, onEliminado }: RolEditorProps) {
 				/>
 			</div>
 
-			<div className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-borde bg-elevada/40 px-6 py-3">
+			<div className="flex flex-wrap items-center gap-2 rounded-b-xl border-t border-borde bg-elevada/40 px-4 py-3 sm:px-6">
 				<Button
 					variant="ghost"
 					size="sm"
