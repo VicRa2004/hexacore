@@ -34,7 +34,7 @@ function obtenerPuertoLibre(): Promise<number> {
 		const servidor = net.createServer();
 		servidor.unref();
 		servidor.on("error", reject);
-		servidor.listen(0, "127.0.0.1", () => {
+		servidor.listen(0, "localhost", () => {
 			const direccion = servidor.address();
 			if (!direccion || typeof direccion === "string") {
 				servidor.close(() =>
@@ -115,8 +115,8 @@ ejecutarSync(["bun", "prisma/seed-demo.ts"], BACKEND_DIR, dbEnv);
 
 const puertoBackend = await obtenerPuertoLibre();
 const puertoFrontend = await obtenerPuertoLibre();
-const urlBackend = `http://127.0.0.1:${puertoBackend}`;
-const urlFrontend = `http://127.0.0.1:${puertoFrontend}`;
+const urlBackend = `http://localhost:${puertoBackend}`;
+const urlFrontend = `http://localhost:${puertoFrontend}`;
 
 let backendProc: Bun.Subprocess | undefined;
 let frontendProc: Bun.Subprocess | undefined;
@@ -128,7 +128,7 @@ try {
 		env: {
 			...dbEnv,
 			PORT: String(puertoBackend),
-			CORS_ORIGIN: `${urlFrontend},http://localhost:${puertoFrontend}`,
+			CORS_ORIGIN: urlFrontend,
 			APP_URL: urlFrontend,
 			JWT_SECRET:
 				process.env.JWT_SECRET ||
@@ -148,7 +148,7 @@ try {
 			String(puertoFrontend),
 			"--strictPort",
 			"--host",
-			"127.0.0.1",
+			"localhost",
 		],
 		{
 			cwd: ROOT_DIR,
