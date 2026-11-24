@@ -44,9 +44,26 @@ export const cambiarPasswordSchema = z
 		path: ["confirmacion"],
 	});
 
+const codigoDosFactores = z
+	.string()
+	.trim()
+	.min(6, "Introduce el código de 6 dígitos o un código de recuperación")
+	.max(20, "Código demasiado largo");
+
+export const codigoSchema = z.object({ codigo: codigoDosFactores });
+
+export const desactivarDosFactoresSchema = z.object({
+	password: z.string().min(1, "La contraseña es requerida"),
+	codigo: codigoDosFactores,
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegistroInput = z.infer<typeof registroSchema>;
 export type RestablecerPasswordInput = z.infer<
 	typeof restablecerPasswordSchema
 >;
 export type CambiarPasswordInput = z.infer<typeof cambiarPasswordSchema>;
+export type CodigoInput = z.infer<typeof codigoSchema>;
+export type DesactivarDosFactoresInput = z.infer<
+	typeof desactivarDosFactoresSchema
+>;
