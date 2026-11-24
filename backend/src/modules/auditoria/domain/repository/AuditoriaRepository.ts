@@ -21,17 +21,26 @@ export interface RegistroAuditoria {
 	ocurridoEn: Date;
 }
 
-export interface AuditoriaFiltros {
-	pagina: number;
-	limite: number;
+export interface AuditoriaFiltrosBase {
 	/** Prefijo del nombre del evento (`usuario.` o `usuario.creado`). */
 	evento?: string;
 	usuarioId?: number;
+	desde?: Date;
+	hasta?: Date;
 	orden?: CampoOrdenAuditoria;
 	direccion?: DireccionOrden;
+}
+
+export interface AuditoriaFiltros extends AuditoriaFiltrosBase {
+	pagina: number;
+	limite: number;
 }
 
 export interface AuditoriaRepository {
 	guardar(registro: Omit<RegistroAuditoria, "id">): Promise<void>;
 	buscar(filtros: AuditoriaFiltros): Promise<Paginacion<RegistroAuditoria>>;
+	iterarLotes(
+		filtros: AuditoriaFiltrosBase,
+		tamanoLote?: number,
+	): AsyncIterable<RegistroAuditoria[]>;
 }

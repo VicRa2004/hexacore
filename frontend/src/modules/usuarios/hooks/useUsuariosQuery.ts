@@ -10,9 +10,13 @@ export const usuariosKeys = {
 	detail: (id: number) => [...usuariosKeys.details(), id] as const,
 };
 
-export function useUsuariosQuery(params: ObtenerUsuariosParams = {}) {
+export function useUsuariosQuery(
+	params: ObtenerUsuariosParams = {},
+	opciones: { enabled?: boolean } = {},
+) {
 	return useQuery({
 		queryKey: usuariosKeys.list(params),
 		queryFn: () => usuariosApi.obtenerUsuarios(params),
+		...opciones,
 	});
 }

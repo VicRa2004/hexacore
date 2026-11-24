@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import {
 	errorResponse,
 	jsonResponse,
@@ -9,6 +9,7 @@ import type { AuthMiddleware } from "@/modules/auth";
 import type { AuditoriaController } from "../controllers/AuditoriaController";
 import {
 	auditoriaPaginaSchema,
+	exportarAuditoriaSchema,
 	obtenerAuditoriaSchema,
 } from "../schemas/auditoriaSchemas";
 
@@ -37,7 +38,32 @@ export class AuditoriaRouter {
 			"/",
 			authMiddleware.handle,
 			requierePermiso.handle("auditoria", "leer"),
-			controller.ejecutar,
+			controller.obtenerTodos,
+		);
+
+		this.router.openAPIRegistry.registerPath({
+			method: "get",
+			path: "/exportar",
+			tags: ["Auditoría"],
+			security: [{ bearerAuth: [] }],
+			summary: "Exportar el registro de auditoría en CSV (streaming)",
+			request: { query: exportarAuditoriaSchema },
+			responses: {
+				200: {
+					description: "Archivo CSV con los registros filtrados",
+					content: {
+						"text/csv": { schema: z.string() },
+					},
+				},
+				400: errorResponse("Parámetros inválidos"),
+				...protectedErrorResponses("auditoria:leer"),
+			},
+		});
+		this.router.get(
+			"/exportar",
+			authMiddleware.handle,
+			requierePermiso.handle("auditoria", "leer"),
+			controller.exportar,
 		);
 	}
 }

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { requierePermiso } from "@/core/auth/permisos";
 import {
 	direccionSearchSchema,
+	enteroPositivoSearchSchema,
+	fechaSearchSchema,
 	ordenSearchSchema,
 	tablaSearchSchema,
 	textoSearchSchema,
@@ -13,6 +15,9 @@ export const Route = createFileRoute("/_authenticated/auditoria")({
 	beforeLoad: requierePermiso("auditoria:leer"),
 	validateSearch: tablaSearchSchema({
 		evento: textoSearchSchema,
+		usuarioId: enteroPositivoSearchSchema,
+		desde: fechaSearchSchema,
+		hasta: fechaSearchSchema,
 		orden: ordenSearchSchema(CAMPOS_ORDEN_AUDITORIA),
 		direccion: direccionSearchSchema,
 	}),

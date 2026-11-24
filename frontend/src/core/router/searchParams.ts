@@ -16,6 +16,28 @@ export const textoSearchSchema = z
 	.optional()
 	.catch(undefined);
 
+/** Valida un entero positivo en la URL (p. ej. `usuarioId`). */
+export const enteroPositivoSearchSchema = z.coerce
+	.number()
+	.int()
+	.min(1)
+	.optional()
+	.catch(undefined);
+
+const FECHA_ISO_CORTA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Valida una fecha real de calendario `YYYY-MM-DD` en la URL. */
+export const fechaSearchSchema = z
+	.string()
+	.trim()
+	.refine((v) => {
+		if (!FECHA_ISO_CORTA_REGEX.test(v)) return false;
+		const d = new Date(`${v}T00:00:00.000Z`);
+		return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(v);
+	})
+	.optional()
+	.catch(undefined);
+
 /** Dirección válida de ordenamiento por columna. */
 export type DireccionOrden = "asc" | "desc";
 

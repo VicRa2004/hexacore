@@ -2064,6 +2064,10 @@ export interface paths {
                     /** @description Prefijo del evento (`usuario.` o `usuario.creado`) */
                     evento?: string;
                     usuarioId?: string;
+                    /** @description Fecha inicial (YYYY-MM-DD o ISO 8601) */
+                    desde?: string;
+                    /** @description Fecha final (YYYY-MM-DD o ISO 8601) */
+                    hasta?: string;
                     orden?: "id" | "ocurridoEn" | "evento" | "usuarioId";
                     direccion?: "asc" | "desc";
                 };
@@ -2088,6 +2092,79 @@ export interface paths {
                             /** @example 1 */
                             totalPaginas: number;
                         };
+                    };
+                };
+                /** @description Parámetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Permiso denegado (requiere auditoria:leer) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auditoria/exportar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exportar el registro de auditoría en CSV (streaming) */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Prefijo del evento (`usuario.` o `usuario.creado`) */
+                    evento?: string;
+                    usuarioId?: string;
+                    /** @description Fecha inicial (YYYY-MM-DD o ISO 8601) */
+                    desde?: string;
+                    /** @description Fecha final (YYYY-MM-DD o ISO 8601) */
+                    hasta?: string;
+                    orden?: "id" | "ocurridoEn" | "evento" | "usuarioId";
+                    direccion?: "asc" | "desc";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Archivo CSV con los registros filtrados */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
                     };
                 };
                 /** @description Parámetros inválidos */

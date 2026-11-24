@@ -1,8 +1,8 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Download } from "lucide-react";
 import type { RegistroAuditoria } from "@/core/api/schema.gen";
 import { Encabezado } from "@/core/components/layout/Encabezado";
-import { Input } from "@/core/components/ui/Input";
+import { Button } from "@/core/components/ui/Button";
 import { type Columna, Tabla } from "@/core/components/ui/Table";
 import { useBusquedaDebounced } from "@/core/hooks/useBusquedaDebounced";
 import {
@@ -12,8 +12,12 @@ import {
 } from "@/core/router/searchParams";
 import { fechaCompleta, fechaRelativa } from "@/core/utils/fecha";
 import type { CampoOrdenAuditoria } from "../api/auditoriaApi";
+import { AuditoriaFiltrosBar } from "../components/AuditoriaFiltrosBar";
 import { EventoBadge } from "../components/EventoBadge";
-import { useAuditoriaQuery } from "../hooks/useAuditoriaQuery";
+import {
+	useAuditoriaQuery,
+	useExportarAuditoriaMutation,
+} from "../hooks/useAuditoriaQuery";
 
 const COLUMNAS: Columna<RegistroAuditoria>[] = [
 	{
@@ -81,13 +85,25 @@ export function AuditoriaPage() {
 		}),
 	);
 
+	const filtrosActivos = {
+		evento: search.evento,
+		usuarioId: search.usuarioId,
+		desde: search.desde,
+		hasta: search.hasta,
+		orden: search.orden,
+		direccion: search.orden ? search.direccion : undefined,
+	};
+
 	const { data, isLoading, error } = useAuditoriaQuery({
 		pagina: search.pagina ?? 1,
 		limite: 15,
-		evento: search.evento,
-		orden: search.orden,
-		direccion: search.orden ? search.direccion : undefined,
+		...filtrosActivos,
 	});
+	const exportar = useExportarAuditoriaMutation();
+
+	const hayFiltros = Boolean(
+		search.evento || search.usuarioId || search.desde || search.hasta,
+	);
 
 	return (
 		<div className="space-y-6">
@@ -95,19 +111,57 @@ export function AuditoriaPage() {
 				titulo="Auditoría"
 				descripcion="Quién hizo qué y cuándo: cada evento del sistema con su usuario y petición."
 				acciones={
-					<div className="relative w-full sm:w-64">
-						<Input
-							type="search"
-							aria-label="Filtrar por evento"
-							placeholder="Filtrar por evento…"
-							value={evento}
-							onChange={(e) => setEvento(e.target.value)}
-							className="pl-9"
-						/>
-						<Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-tinta-tenue" />
-					</div>
+					<Button
+						variant="outline"
+						isLoading={exportar.isPending}
+						onClick={() => exportar.mutate(filtrosActivos)}
+					>
+						<Download />
+						Exportar CSV
+					</Button>
 				}
 			/>
+
+			<AuditoriaFiltrosBar
+				evento={evento}
+				onEventoChange={setEvento}
+				usuarioId={search.usuarioId}
+				onUsuarioIdChange={(usuarioId) =>
+					navigate({
+						search: (prev) => conFiltro(prev, { usuarioId }),
+						replace: true,
+					})
+				}
+				desde={search.desde}
+				onDesdeChange={(desde) =>
+					navigate({
+						search: (prev) => conFiltro(prev, { desde }),
+						replace: true,
+					})
+				}
+				hasta={search.hasta}
+				onHastaChange={(hasta) =>
+					navigate({
+						search: (prev) => conFiltro(prev, { hasta }),
+						replace: true,
+					})
+				}
+				hayFiltrosActivos={hayFiltros}
+				onLimpiar={() => {
+					setEvento("");
+					navigate({
+						search: (prev) =>
+							conFiltro(prev, {
+								evento: undefined,
+								usuarioId: undefined,
+								desde: undefined,
+								hasta: undefined,
+							}),
+						replace: true,
+					});
+				}}
+			/>
+
 			<Tabla
 				tablaId="auditoria"
 				etiqueta="Registro de auditoría"

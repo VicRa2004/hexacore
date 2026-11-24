@@ -6,6 +6,7 @@ import type {
 } from "@/core/shared/domain/Paginacion";
 import type {
 	AuditoriaFiltros,
+	AuditoriaFiltrosBase,
 	AuditoriaRepository,
 	CampoOrdenAuditoria,
 	RegistroAuditoria,
@@ -21,6 +22,25 @@ export function construirOrdenAuditoria(
 	return [{ [orden]: direccion }, { id: "desc" }];
 }
 
+export function construirWhereAuditoria(
+	filtros: AuditoriaFiltrosBase,
+): Prisma.AuditoriaWhereInput {
+	const ocurridoEn =
+		filtros.desde || filtros.hasta
+			? {
+					...(filtros.desde ? { gte: filtros.desde } : {}),
+					...(filtros.hasta ? { lte: filtros.hasta } : {}),
+				}
+			: undefined;
+
+	return {
+		// Prefijo: `usuario.` filtra todos los eventos de usuario; el nombre exacto sigue valiendo.
+		evento: filtros.evento ? { startsWith: filtros.evento } : undefined,
+		usuarioId: filtros.usuarioId,
+		ocurridoEn,
+	};
+}
+
 export class PrismaAuditoriaRepository implements AuditoriaRepository {
 	async guardar(registro: Omit<RegistroAuditoria, "id">): Promise<void> {
 		await prisma.auditoria.create({
@@ -34,12 +54,8 @@ export class PrismaAuditoriaRepository implements AuditoriaRepository {
 	async buscar(
 		filtros: AuditoriaFiltros,
 	): Promise<Paginacion<RegistroAuditoria>> {
-		const { pagina, limite, evento, usuarioId } = filtros;
-		// Prefijo: `usuario.` filtra todos los eventos de usuario; el nombre exacto sigue valiendo.
-		const where = {
-			evento: evento ? { startsWith: evento } : undefined,
-			usuarioId,
-		};
+		const { pagina, limite } = filtros;
+		const where = construirWhereAuditoria(filtros);
 
 		const [datos, totalElementos] = await prisma.$transaction([
 			prisma.auditoria.findMany({
@@ -57,5 +73,31 @@ export class PrismaAuditoriaRepository implements AuditoriaRepository {
 			totalElementos,
 			totalPaginas: Math.ceil(totalElementos / limite),
 		};
+	}
+
+	async *iterarLotes(
+		filtros: AuditoriaFiltrosBase,
+		tamanoLote = 500,
+	): AsyncIterable<RegistroAuditoria[]> {
+		const where = construirWhereAuditoria(filtros);
+		const orderBy = construirOrdenAuditoria(filtros.orden, filtros.direccion);
+		let cursorId: number | undefined;
+
+		while (true) {
+			const lote = await prisma.auditoria.findMany({
+				where,
+				orderBy,
+				take: tamanoLote,
+				...(cursorId !== undefined
+					? { cursor: { id: cursorId }, skip: 1 }
+					: {}),
+			});
+
+			if (lote.length === 0) break;
+			yield lote;
+			if (lote.length < tamanoLote) break;
+
+			cursorId = lote[lote.length - 1]?.id;
+		}
 	}
 }

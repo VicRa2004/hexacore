@@ -3,6 +3,8 @@ import {
 	conFiltro,
 	conOrden,
 	direccionSearchSchema,
+	enteroPositivoSearchSchema,
+	fechaSearchSchema,
 	normalizarPagina,
 	ordenSearchSchema,
 	paginaSearchSchema,
@@ -146,6 +148,29 @@ describe("searchParams", () => {
 				orden: undefined,
 				direccion: undefined,
 			});
+		});
+	});
+
+	describe("enteroPositivoSearchSchema", () => {
+		it("acepta enteros >= 1 y descarta cero, negativos o texto", () => {
+			expect(enteroPositivoSearchSchema.parse("7")).toBe(7);
+			expect(enteroPositivoSearchSchema.parse(12)).toBe(12);
+			expect(enteroPositivoSearchSchema.parse(0)).toBeUndefined();
+			expect(enteroPositivoSearchSchema.parse(-3)).toBeUndefined();
+			expect(enteroPositivoSearchSchema.parse("1.5")).toBeUndefined();
+			expect(enteroPositivoSearchSchema.parse("abc")).toBeUndefined();
+			expect(enteroPositivoSearchSchema.parse(undefined)).toBeUndefined();
+		});
+	});
+
+	describe("fechaSearchSchema", () => {
+		it("acepta fechas reales YYYY-MM-DD y descarta formatos o fechas inválidas", () => {
+			expect(fechaSearchSchema.parse("2026-11-23")).toBe("2026-11-23");
+			expect(fechaSearchSchema.parse(" 2026-02-28 ")).toBe("2026-02-28");
+			expect(fechaSearchSchema.parse("2026-02-30")).toBeUndefined();
+			expect(fechaSearchSchema.parse("23-11-2026")).toBeUndefined();
+			expect(fechaSearchSchema.parse("")).toBeUndefined();
+			expect(fechaSearchSchema.parse(undefined)).toBeUndefined();
 		});
 	});
 });
