@@ -1,5 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 
+export function normalizarBusqueda(
+	valor: string | undefined,
+): string | undefined {
+	return valor?.trim() || undefined;
+}
+
+export function sincronizarValorDesdeUrl(
+	actual: string,
+	valorUrl: string | undefined,
+): string {
+	return normalizarBusqueda(actual) === normalizarBusqueda(valorUrl)
+		? actual
+		: (valorUrl ?? "");
+}
+
 /**
  * Mantiene el texto inmediato de un input de búsqueda y notifica el valor
  * normalizado tras `esperaMs` sin cambios, sincronizándose cuando `valorUrl`
@@ -15,12 +30,12 @@ export function useBusquedaDebounced(
 	onConfirmarRef.current = onConfirmar;
 
 	useEffect(() => {
-		setValor(valorUrl ?? "");
+		setValor((actual) => sincronizarValorDesdeUrl(actual, valorUrl));
 	}, [valorUrl]);
 
 	useEffect(() => {
-		const normalizado = valor.trim() || undefined;
-		const normalizadoUrl = valorUrl?.trim() || undefined;
+		const normalizado = normalizarBusqueda(valor);
+		const normalizadoUrl = normalizarBusqueda(valorUrl);
 		if (normalizado === normalizadoUrl) return;
 
 		const timer = setTimeout(() => {
