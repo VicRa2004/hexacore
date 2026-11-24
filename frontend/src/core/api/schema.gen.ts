@@ -18,6 +18,8 @@ export interface paths {
                     pagina?: string;
                     limite?: string;
                     email?: string;
+                    orden?: "id" | "nombre" | "email" | "isActivo";
+                    direccion?: "asc" | "desc";
                 };
                 header?: never;
                 path?: never;
@@ -2062,6 +2064,8 @@ export interface paths {
                     /** @description Prefijo del evento (`usuario.` o `usuario.creado`) */
                     evento?: string;
                     usuarioId?: string;
+                    orden?: "id" | "ocurridoEn" | "evento" | "usuarioId";
+                    direccion?: "asc" | "desc";
                 };
                 header?: never;
                 path?: never;

@@ -1,4 +1,15 @@
-import type { Paginacion } from "@/core/shared/domain/Paginacion";
+import type {
+	DireccionOrden,
+	Paginacion,
+} from "@/core/shared/domain/Paginacion";
+
+export const CAMPOS_ORDEN_AUDITORIA = [
+	"id",
+	"ocurridoEn",
+	"evento",
+	"usuarioId",
+] as const;
+export type CampoOrdenAuditoria = (typeof CAMPOS_ORDEN_AUDITORIA)[number];
 
 /** Modelo de lectura: un registro de auditoría no tiene comportamiento ni se modifica. */
 export interface RegistroAuditoria {
@@ -16,6 +27,8 @@ export interface AuditoriaFiltros {
 	/** Prefijo del nombre del evento (`usuario.` o `usuario.creado`). */
 	evento?: string;
 	usuarioId?: number;
+	orden?: CampoOrdenAuditoria;
+	direccion?: DireccionOrden;
 }
 
 export interface AuditoriaRepository {

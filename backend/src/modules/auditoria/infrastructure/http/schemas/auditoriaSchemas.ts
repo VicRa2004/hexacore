@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { CAMPOS_ORDEN_AUDITORIA } from "../../../domain/repository/AuditoriaRepository";
 
 export const obtenerAuditoriaSchema = z.object({
 	pagina: z.string().regex(/^\d+$/).transform(Number).optional().default(1),
@@ -7,6 +8,8 @@ export const obtenerAuditoriaSchema = z.object({
 		description: "Prefijo del evento (`usuario.` o `usuario.creado`)",
 	}),
 	usuarioId: z.string().regex(/^\d+$/).transform(Number).optional(),
+	orden: z.enum(CAMPOS_ORDEN_AUDITORIA).optional(),
+	direccion: z.enum(["asc", "desc"]).optional(),
 });
 
 // ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────

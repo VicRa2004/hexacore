@@ -1,3 +1,5 @@
+export type DireccionOrden = "asc" | "desc";
+
 export interface Paginacion<T> {
 	datos: T[];
 	pagina: number;

@@ -1,8 +1,25 @@
-import type { Paginacion } from "@/core/shared/domain/Paginacion";
-import type { UsuarioFiltros } from "../../domain/repository/UsuarioFiltros";
+import type {
+	DireccionOrden,
+	Paginacion,
+} from "@/core/shared/domain/Paginacion";
+import type {
+	CampoOrdenUsuario,
+	UsuarioFiltros,
+} from "../../domain/repository/UsuarioFiltros";
 import type { UsuarioRepository } from "../../domain/repository/UsuarioRepository";
 import { prisma } from "@/core/config/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 import { Usuario } from "../../domain/Usuario";
+
+/** Construye un `orderBy` determinista a partir de una lista blanca de campos. */
+export function construirOrdenUsuario(
+	orden?: CampoOrdenUsuario,
+	direccion: DireccionOrden = "asc",
+): Prisma.UsuarioOrderByWithRelationInput[] {
+	if (!orden) return [{ id: "asc" }];
+	if (orden === "id") return [{ id: direccion }];
+	return [{ [orden]: direccion }, { id: "asc" }];
+}
 
 /**
  * Representa la estructura cruda del registro de Prisma.
@@ -59,7 +76,7 @@ export class PrismaUsuarioRepository implements UsuarioRepository {
 				where,
 				skip,
 				take: limite,
-				orderBy: { id: "asc" },
+				orderBy: construirOrdenUsuario(filtros.orden, filtros.direccion),
 				include: { roles: { include: { rol: true } } },
 			}),
 			prisma.usuario.count({ where }),

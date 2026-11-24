@@ -12,6 +12,8 @@ export class ObtenerUsuariosUseCase {
 			pagina: dto.pagina,
 			limite: dto.limite,
 			email: dto.email,
+			orden: dto.orden,
+			direccion: dto.direccion,
 		};
 
 		const resultadoPaginado = await this.usuarioRepository.buscar(filtros);

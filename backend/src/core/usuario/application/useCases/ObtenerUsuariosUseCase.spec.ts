@@ -38,6 +38,30 @@ describe("ObtenerUsuariosUseCase", () => {
 		expect(mockUsuarioRepository.buscar).toHaveBeenCalled();
 	});
 
+	it("debería reenviar orden y direccion al repositorio", async () => {
+		mockUsuarioRepository.buscar.mockResolvedValue({
+			datos: [],
+			pagina: 1,
+			totalElementos: 0,
+			totalPaginas: 0,
+		});
+
+		await useCase.ejecutar({
+			pagina: 1,
+			limite: 10,
+			orden: "email",
+			direccion: "desc",
+		});
+
+		expect(mockUsuarioRepository.buscar).toHaveBeenCalledWith({
+			pagina: 1,
+			limite: 10,
+			email: undefined,
+			orden: "email",
+			direccion: "desc",
+		});
+	});
+
 	it("debería devolver lista vacía si no hay usuarios", async () => {
 		mockUsuarioRepository.buscar.mockResolvedValue({
 			datos: [],

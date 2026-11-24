@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { CAMPOS_ORDEN_USUARIO } from "../../../domain/repository/UsuarioFiltros";
 
 const passwordSchema = z
 	.string("La contraseña es obligatoria")
@@ -43,6 +44,8 @@ export const obtenerUsuariosSchema = z.object({
 	limite: z.string().regex(/^\d+$/).transform(Number).optional().default(10),
 	// Búsqueda parcial: basta un fragmento del email
 	email: z.string().trim().min(1).max(128).optional(),
+	orden: z.enum(CAMPOS_ORDEN_USUARIO).optional(),
+	direccion: z.enum(["asc", "desc"]).optional(),
 });
 
 // ── Respuestas (sólo documentación OpenAPI) ──────────────────────────────────

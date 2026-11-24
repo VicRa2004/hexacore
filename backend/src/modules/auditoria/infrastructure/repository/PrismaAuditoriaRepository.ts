@@ -1,11 +1,25 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/core/config/prisma";
-import type { Paginacion } from "@/core/shared/domain/Paginacion";
+import type {
+	DireccionOrden,
+	Paginacion,
+} from "@/core/shared/domain/Paginacion";
 import type {
 	AuditoriaFiltros,
 	AuditoriaRepository,
+	CampoOrdenAuditoria,
 	RegistroAuditoria,
 } from "../../domain/repository/AuditoriaRepository";
+
+/** Construye un `orderBy` determinista a partir de una lista blanca de campos. */
+export function construirOrdenAuditoria(
+	orden?: CampoOrdenAuditoria,
+	direccion: DireccionOrden = "desc",
+): Prisma.AuditoriaOrderByWithRelationInput[] {
+	if (!orden) return [{ id: "desc" }];
+	if (orden === "id") return [{ id: direccion }];
+	return [{ [orden]: direccion }, { id: "desc" }];
+}
 
 export class PrismaAuditoriaRepository implements AuditoriaRepository {
 	async guardar(registro: Omit<RegistroAuditoria, "id">): Promise<void> {
@@ -32,7 +46,7 @@ export class PrismaAuditoriaRepository implements AuditoriaRepository {
 				where,
 				skip: (pagina - 1) * limite,
 				take: limite,
-				orderBy: { id: "desc" },
+				orderBy: construirOrdenAuditoria(filtros.orden, filtros.direccion),
 			}),
 			prisma.auditoria.count({ where }),
 		]);
