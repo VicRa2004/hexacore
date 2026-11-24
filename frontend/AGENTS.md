@@ -63,7 +63,7 @@ frontend/src/
 ├── modules/                        # Lógica de dominio modular
 │   ├── auth/                       # Módulo de Autenticación
 │   │   ├── api/                    # Llamadas a la API de auth (authApi.ts)
-│   │   ├── components/             # Formularios (Login con paso 2FA, Registro, Recuperar/Restablecer/CambiarPassword), SesionesCard, DosFactoresCard (QR con uqr), AvisoVerificacionEmail
+│   │   ├── components/             # Formularios (Login con paso 2FA, Registro, Recuperar/Restablecer/CambiarPassword), SesionesCard, DosFactoresCard (QR con uqr), AvisoVerificacionEmail, BotonesOAuth, CuentasVinculadasCard, OAuthCallback
 │   │   ├── hooks/                  # Mutaciones de cuenta (useCuentaMutation.ts)
 │   │   ├── pages/                  # Login, Registro, RecuperarPassword, RestablecerPassword, VerificarEmail
 │   │   └── schemas/                # Validaciones Zod (authSchemas.ts)
@@ -89,6 +89,7 @@ frontend/src/
 │   ├── recuperar-password.tsx      # Pide el enlace de recuperación
 │   ├── restablecer-password.tsx    # ?token= del correo → nueva contraseña
 │   ├── verificar-email.tsx         # ?token= del correo → verifica el email
+│   ├── oauth-callback.tsx          # Vuelta del login con Google/GitHub (#codigo, #vinculada o #error)
 │   ├── _authenticated.tsx          # Layout protegido: guardián de sesión
 │   └── _authenticated/             # Rutas hijas protegidas
 │       ├── dashboard.tsx           # Vista /dashboard

@@ -463,6 +463,379 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/oauth/proveedores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Proveedores de login social configurados
+         * @description Solo aparecen los que tienen `<PROVEEDOR>_CLIENT_ID` y `<PROVEEDOR>_CLIENT_SECRET`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Proveedores disponibles */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProveedoresOAuth"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/{proveedor}/iniciar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Empezar el login con un proveedor
+         * @description Fija la cookie firmada `oauth_estado` (state + verificador PKCE, 10 min) y devuelve la URL del proveedor a la que navegar.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    proveedor: components["schemas"]["ProveedorOAuth"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description URL de autorización */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UrlAutorizacionOAuth"];
+                    };
+                };
+                /** @description Proveedor no configurado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/{proveedor}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Empezar a vincular un proveedor al usuario en sesión */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    proveedor: components["schemas"]["ProveedorOAuth"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description URL de autorización */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UrlAutorizacionOAuth"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Proveedor no configurado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/{proveedor}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Vuelta desde el proveedor
+         * @description La llama el navegador al volver del proveedor. Redirige a `${APP_URL}/oauth-callback#codigo=…` (canjear en `POST /canjear`), `#vinculada=<proveedor>` o `#error=<mensaje>`.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    code?: string;
+                    state?: string;
+                    error?: string;
+                };
+                header?: never;
+                path: {
+                    proveedor: components["schemas"]["ProveedorOAuth"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Redirección a la web */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/canjear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Canjear el código de la vuelta OAuth por la sesión
+         * @description Igual que `POST /api/auth/login`: access token + cookie `refresh_token`, o `{ requiere2fa, token2fa }` si el usuario tiene 2FA.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Sesión iniciada o pendiente del segundo factor */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthResponse"] | components["schemas"]["Requiere2faResponse"];
+                    };
+                };
+                /** @description Código inválido, caducado o ya usado */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Usuario desactivado */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos o cuenta bloqueada */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/cuentas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuentas externas vinculadas al usuario en sesión */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Cuentas vinculadas */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CuentaOAuth"][];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/oauth/cuentas/{proveedor}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Desvincular un proveedor */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    proveedor: components["schemas"]["ProveedorOAuth"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Cuenta desvinculada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Sesión cerrada correctamente */
+                            mensaje: string;
+                        };
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No había una cuenta de ese proveedor vinculada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -2638,6 +3011,18 @@ export interface components {
             /** @description Id de la petición (sólo en errores 5xx), para reportarlo */
             requestId?: string;
         };
+        ProveedoresOAuth: {
+            proveedores: components["schemas"]["ProveedorOAuth"][];
+        };
+        /** @enum {string} */
+        ProveedorOAuth: "google" | "github";
+        UrlAutorizacionOAuth: {
+            /**
+             * Format: uri
+             * @description Página de autorización del proveedor a la que navegar
+             */
+            url: string;
+        };
         AuthResponse: {
             /** @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... */
             accessToken: string;
@@ -2648,6 +3033,12 @@ export interface components {
             requiere2fa: true;
             /** @description Token intermedio (5 min) para POST /api/auth/login/2fa */
             token2fa: string;
+        };
+        CuentaOAuth: {
+            proveedor: components["schemas"]["ProveedorOAuth"];
+            email: string | null;
+            /** Format: date-time */
+            vinculadaEn: string;
         };
         Sesion: {
             id: number;
@@ -2738,8 +3129,12 @@ export interface components {
 }
 export type UsuarioDto = components['schemas']['UsuarioDto'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
+export type ProveedoresOAuth = components['schemas']['ProveedoresOAuth'];
+export type ProveedorOAuth = components['schemas']['ProveedorOAuth'];
+export type UrlAutorizacionOAuth = components['schemas']['UrlAutorizacionOAuth'];
 export type AuthResponse = components['schemas']['AuthResponse'];
 export type Requiere2faResponse = components['schemas']['Requiere2faResponse'];
+export type CuentaOAuth = components['schemas']['CuentaOAuth'];
 export type Sesion = components['schemas']['Sesion'];
 export type EstadoDosFactores = components['schemas']['EstadoDosFactores'];
 export type AltaDosFactores = components['schemas']['AltaDosFactores'];
