@@ -4,6 +4,7 @@ import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Tabs } from "@/core/components/ui/Tabs";
 import { AvisoVerificacionEmail } from "@/modules/auth/components/AvisoVerificacionEmail";
 import { CambiarPasswordForm } from "@/modules/auth/components/CambiarPasswordForm";
+import { CuentasVinculadasCard } from "@/modules/auth/components/CuentasVinculadasCard";
 import { DosFactoresCard } from "@/modules/auth/components/DosFactoresCard";
 import { SesionesCard } from "@/modules/auth/components/SesionesCard";
 import { PerfilUsuarioCard } from "../components/PerfilUsuarioCard";
@@ -45,6 +46,7 @@ export function PerfilPage() {
 							<div className="space-y-6">
 								<CambiarPasswordForm />
 								<DosFactoresCard />
+								<CuentasVinculadasCard />
 								<SesionesCard />
 							</div>
 						),

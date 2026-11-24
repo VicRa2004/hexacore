@@ -4,9 +4,13 @@ import type { AuthTokens } from "@/core/auth/types";
 import type {
 	AltaDosFactores,
 	CodigosRecuperacion,
+	CuentaOAuth,
 	EstadoDosFactores,
+	ProveedorOAuth,
+	ProveedoresOAuth,
 	Requiere2faResponse,
 	Sesion,
+	UrlAutorizacionOAuth,
 } from "@/core/api/schema.gen";
 import type { LoginInput, RegistroInput } from "../schemas/authSchemas";
 
@@ -138,6 +142,47 @@ export const authApi = {
 
 	async cerrarSesion(id: number): Promise<Mensaje> {
 		const response = await apiClient.delete<Mensaje>(`/auth/sesiones/${id}`);
+		return response.data;
+	},
+
+	// ── Login social (OAuth) ─────────────────────────────────────────────
+	async proveedoresOAuth(): Promise<ProveedorOAuth[]> {
+		const response = await apiClient.get<ProveedoresOAuth>(
+			"/auth/oauth/proveedores",
+		);
+		return response.data.proveedores;
+	},
+
+	// Login (`iniciar`) o, con sesión, vincular la cuenta: la web navega a la URL devuelta.
+	async urlOAuth(
+		proveedor: ProveedorOAuth,
+		modo: "iniciar" | "vincular",
+	): Promise<string> {
+		const response = await apiClient.post<UrlAutorizacionOAuth>(
+			`/auth/oauth/${proveedor}/${modo}`,
+		);
+		return response.data.url;
+	},
+
+	async canjearOAuth(
+		codigo: string,
+	): Promise<AuthResponse | Requiere2faResponse> {
+		const response = await apiClient.post<AuthResponse | Requiere2faResponse>(
+			"/auth/oauth/canjear",
+			{ codigo },
+		);
+		return response.data;
+	},
+
+	async cuentasOAuth(): Promise<CuentaOAuth[]> {
+		const response = await apiClient.get<CuentaOAuth[]>("/auth/oauth/cuentas");
+		return response.data;
+	},
+
+	async desvincularOAuth(proveedor: ProveedorOAuth): Promise<Mensaje> {
+		const response = await apiClient.delete<Mensaje>(
+			`/auth/oauth/cuentas/${proveedor}`,
+		);
 		return response.data;
 	},
 };

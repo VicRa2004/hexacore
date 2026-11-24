@@ -43,6 +43,7 @@ model Usuario {
   refreshTokens       RefreshToken[]
   tokensCuenta        TokenCuenta[]
   codigosRecuperacion CodigoRecuperacion[]
+  cuentasOAuth        CuentaOAuth[]
 
   @@map("usuario")
 }
@@ -151,7 +152,7 @@ model TokenCuenta {
   id        Int       @id @default(autoincrement()) @map("tkc_id")
   tokenHash String    @unique @map("tkc_token_hash") @db.VarChar(128)
   usuarioId Int       @map("tkc_fkusuario")
-  /// "recuperar_password" | "verificar_email"
+  /// "recuperar_password" | "verificar_email" | "oauth_login"
   tipo      String    @map("tkc_tipo") @db.VarChar(30)
   expiraEn  DateTime  @map("tkc_expira_en")
   usadoEn   DateTime? @map("tkc_usado_en")
@@ -175,6 +176,24 @@ model CodigoRecuperacion {
 
   @@unique([usuarioId, codigoHash])
   @@map("codigo_recuperacion")
+}
+
+/// Cuentas externas (Google, GitHub) vinculadas a un usuario para el login social.
+model CuentaOAuth {
+  id        Int      @id @default(autoincrement()) @map("cto_id")
+  usuarioId Int      @map("cto_fkusuario")
+  /// "google" | "github"
+  proveedor String   @map("cto_proveedor") @db.VarChar(30)
+  /// Id del usuario en el proveedor (`sub` de Google, `id` de GitHub)
+  idExterno String   @map("cto_id_externo") @db.VarChar(255)
+  email     String?  @map("cto_email") @db.VarChar(128)
+  createdAt DateTime @default(now()) @map("cto_created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([proveedor, idExterno])
+  @@unique([usuarioId, proveedor])
+  @@map("cuenta_oauth")
 }
 
 // ─────────────────────────────────────────────

@@ -56,6 +56,28 @@ Un login correcto o restablecer la contraseña reinician el contador.
   la web). Activar/desactivar publican `auth.2fa_activado` / `auth.2fa_desactivado`
   (auditoría).
 
+## Login social (Google / GitHub)
+
+- Opcional por entorno: un proveedor existe solo con `<PROVEEDOR>_CLIENT_ID` y
+  `<PROVEEDOR>_CLIENT_SECRET` (`GET /oauth/proveedores` lista los activos; la web oculta
+  los botones si está vacío). Callback a registrar en el proveedor:
+  `${APP_URL}/api/auth/oauth/<proveedor>/callback`.
+- Vive en `auth` (no es módulo aparte): reutiliza `EmisorSesion`, la cookie del refresh
+  y el 2FA. Rutas en `OAuthRouter`, montado en `/api/auth/oauth`.
+- Flujo Authorization Code + PKCE (S256): `POST /oauth/{proveedor}/iniciar` (o
+  `/vincular` con Bearer) fija la cookie firmada `oauth_estado` (state, verificador y,
+  al vincular, el usuario; `SameSite=Lax`, `Path=/api/auth/oauth`, 10 min) y devuelve
+  `{ url }`. El proveedor vuelve a `GET /oauth/{proveedor}/callback`, que redirige a
+  `${APP_URL}/oauth-callback#codigo=…` (`#vinculada=…` o `#error=…`). La web canjea el
+  código en `POST /oauth/canjear`: misma respuesta que `/login` (sesión + cookie o
+  `requiere2fa`). El código es un `token_cuenta` de tipo `oauth_login` (2 min, un uso).
+- Resolución del usuario (`AutenticarOAuthUseCase`): cuenta ya vinculada
+  (`cuenta_oauth`, único por proveedor + id externo y por usuario + proveedor) → usuario
+  con el mismo email **verificado por el proveedor** (se vincula) → alta nueva con
+  contraseña aleatoria y email verificado. Sin email verificado se rechaza.
+- `GET /oauth/cuentas` y `DELETE /oauth/cuentas/{proveedor}` (Bearer) gestionan las
+  vinculadas desde el perfil.
+
 ## Tokens de un solo uso y correos
 
 - Tabla `token_cuenta` (hash SHA-256, nunca el token en claro), tipos

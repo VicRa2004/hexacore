@@ -13,6 +13,11 @@ x-app: &app
     JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (mínimo 32 caracteres)}
     TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:-}
     APP_URL: ${APP_URL:?Define APP_URL (dominio público, base de los enlaces de los correos)}
+    # Login con Google/GitHub: cada proveedor se activa con su client id y secret.
+    GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+    GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
     RESEND_API_KEY: ${RESEND_API_KEY:-}
     MAIL_FROM: ${MAIL_FROM:-}
     # Con S3_BUCKET los archivos van a S3/R2; si no, al volumen `uploads`.
