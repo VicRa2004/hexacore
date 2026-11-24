@@ -1,5 +1,6 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { AlertCircle, Plus, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/core/api/client";
 import { usePermisos } from "@/core/auth/permisos";
 import { Encabezado } from "@/core/components/layout/Encabezado";
@@ -14,11 +15,25 @@ import { usePermisosQuery, useRolesQuery } from "../hooks/useRolesQuery";
 
 export function RolesPage() {
 	const { puede } = usePermisos();
+	const search = useSearch({ from: "/_authenticated/roles" });
+	const navigate = useNavigate({ from: "/roles" });
 	const roles = useRolesQuery();
 	const permisos = usePermisosQuery();
 	const error = roles.error ?? permisos.error;
 	const [seleccionadoId, setSeleccionadoId] = useState<number>();
 	const [creando, setCreando] = useState(false);
+	const puedeCrear = puede("roles:crear");
+
+	useEffect(() => {
+		if (search.accion !== "crear") return;
+		if (puedeCrear) {
+			setCreando(true);
+		}
+		navigate({
+			search: (prev) => ({ ...prev, accion: undefined }),
+			replace: true,
+		});
+	}, [search.accion, puedeCrear, navigate]);
 
 	const lista = roles.data ?? [];
 	const rol = lista.find((r) => r.id === seleccionadoId) ?? lista[0];

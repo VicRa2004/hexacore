@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Search, Trash2, UserPlus, UserX } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePermisos } from "@/core/auth/permisos";
 import { useAuthStore } from "@/core/auth/store";
 import type { Usuario } from "@/core/auth/types";
@@ -57,6 +57,18 @@ export function UsuariosPage() {
 	const desactivarLote = useDesactivarUsuariosEnBloqueMutation();
 	const eliminarLote = useEliminarUsuariosEnBloqueMutation();
 	const cerrar = () => setAbierto(null);
+	const puedeCrear = puede("usuarios:crear");
+
+	useEffect(() => {
+		if (search.accion !== "crear") return;
+		if (puedeCrear) {
+			setAbierto({ tipo: "editar", usuario: "nuevo" });
+		}
+		navigate({
+			search: (prev) => ({ ...prev, accion: undefined }),
+			replace: true,
+		});
+	}, [search.accion, puedeCrear, navigate]);
 
 	const { data, isLoading, error } = useUsuariosQuery({
 		pagina: search.pagina ?? 1,

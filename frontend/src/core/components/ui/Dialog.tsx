@@ -8,6 +8,7 @@ export interface DialogProps {
 	onCerrar: () => void;
 	titulo: string;
 	descripcion?: ReactNode;
+	ocultarCabecera?: boolean;
 	children: ReactNode;
 	className?: string;
 }
@@ -18,6 +19,7 @@ export function Dialog({
 	onCerrar,
 	titulo,
 	descripcion,
+	ocultarCabecera = false,
 	children,
 	className,
 }: DialogProps) {
@@ -45,34 +47,42 @@ export function Dialog({
 				className,
 			)}
 		>
-			{abierto && (
-				<div className="space-y-4 p-4 sm:p-6">
-					<div className="flex items-start justify-between gap-4">
-						<div className="space-y-1">
-							<h2 id={`${id}-titulo`} className="text-lg font-bold">
-								{titulo}
-							</h2>
-							{descripcion && (
-								<p
-									id={`${id}-descripcion`}
-									className="text-sm text-tinta-tenue"
-								>
-									{descripcion}
-								</p>
-							)}
+			{abierto &&
+				(ocultarCabecera ? (
+					<>
+						<h2 id={`${id}-titulo`} className="sr-only">
+							{titulo}
+						</h2>
+						{children}
+					</>
+				) : (
+					<div className="space-y-4 p-4 sm:p-6">
+						<div className="flex items-start justify-between gap-4">
+							<div className="space-y-1">
+								<h2 id={`${id}-titulo`} className="text-lg font-bold">
+									{titulo}
+								</h2>
+								{descripcion && (
+									<p
+										id={`${id}-descripcion`}
+										className="text-sm text-tinta-tenue"
+									>
+										{descripcion}
+									</p>
+								)}
+							</div>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={onCerrar}
+								aria-label="Cerrar"
+							>
+								<X className="h-4 w-4" />
+							</Button>
 						</div>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={onCerrar}
-							aria-label="Cerrar"
-						>
-							<X className="h-4 w-4" />
-						</Button>
+						{children}
 					</div>
-					{children}
-				</div>
-			)}
+				))}
 		</dialog>
 	);
 }

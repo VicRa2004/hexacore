@@ -14,7 +14,7 @@ import { type Permiso, usePermisos } from "@/core/auth/permisos";
 import { Tooltip } from "@/core/components/ui/Tooltip";
 import { cn } from "@/core/utils/cn";
 
-interface Enlace {
+export interface Enlace {
 	to: LinkProps["to"];
 	etiqueta: string;
 	icono: LucideIcon;
@@ -23,7 +23,7 @@ interface Enlace {
 }
 
 // Para quitar un módulo, quita también su enlace (ver AGENTS.md).
-const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
+export const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
 	{
 		titulo: "General",
 		enlaces: [
