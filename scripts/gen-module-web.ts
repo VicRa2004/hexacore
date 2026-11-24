@@ -464,27 +464,42 @@ ${columnas.join("\n")}
 }
 `,
 
-	[`pages/${Ns}Page.tsx`]: `import { Plus${filtro ? ", Search" : ""} } from "lucide-react";
+	[`pages/${Ns}Page.tsx`]: `import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Plus${filtro ? ", Search" : ""} } from "lucide-react";
 import { useState } from "react";
 import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Button } from "@/core/components/ui/Button";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { Dialog } from "@/core/components/ui/Dialog";
-${filtro ? `import { Input } from "@/core/components/ui/Input";\n` : ""}import type { ${N}Dto } from "../api/${ns}Api";
+${filtro ? `import { Input } from "@/core/components/ui/Input";\nimport { useBusquedaDebounced } from "@/core/hooks/useBusquedaDebounced";\n` : ""}import { ${filtro ? "conFiltro, " : ""}normalizarPagina } from "@/core/router/searchParams";
+import type { ${N}Dto } from "../api/${ns}Api";
 import { ${N}Form } from "../components/${N}Form";
 import { ${Ns}Table } from "../components/${Ns}Table";
 import { useEliminar${N}Mutation } from "../hooks/use${Ns}Mutation";
 import { use${Ns}Query } from "../hooks/use${Ns}Query";
 
 export function ${Ns}Page() {
-	const [pagina, setPagina] = useState(1);${filtro ? `\n\tconst [busqueda, setBusqueda] = useState("");` : ""}
+	const search = useSearch({ from: "/_authenticated/${kebabs}" });
+	const navigate = useNavigate({ from: "/${kebabs}" });${
+		filtro
+			? `
+	const [busqueda, setBusqueda] = useBusquedaDebounced(
+		search.${filtro},
+		(${filtro}) =>
+			navigate({
+				search: (prev) => conFiltro(prev, { ${filtro} }),
+				replace: true,
+			}),
+	);`
+			: ""
+	}
 	/** \`null\` = cerrado; \`"nuevo"\` = alta; un DTO = edición. */
 	const [editando, setEditando] = useState<${N}Dto | "nuevo" | null>(null);
 	const [eliminando, setEliminando] = useState<${N}Dto | null>(null);
 	const eliminar = useEliminar${N}Mutation();
 	const { data, isLoading, error } = use${Ns}Query({
-		pagina,
-		limite: 10,${filtro ? `\n\t\t${filtro}: busqueda.trim() || undefined,` : ""}
+		pagina: search.pagina ?? 1,
+		limite: 10,${filtro ? `\n\t\t${filtro}: search.${filtro},` : ""}
 	});
 
 	return (
@@ -497,13 +512,11 @@ export function ${Ns}Page() {
 						? `
 					<div className="relative w-full sm:w-64">
 						<Input
+							type="search"
 							aria-label="Buscar por ${humano(filtro).toLowerCase()}"
 							placeholder="Buscar por ${humano(filtro).toLowerCase()}..."
 							value={busqueda}
-							onChange={(e) => {
-								setBusqueda(e.target.value);
-								setPagina(1);
-							}}
+							onChange={(e) => setBusqueda(e.target.value)}
 							className="pl-9"
 						/>
 						<Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-tinta-tenue" />
@@ -522,7 +535,14 @@ export function ${Ns}Page() {
 				pagina={data}
 				isLoading={isLoading}
 				error={error}
-				onCambioPagina={setPagina}
+				onCambioPagina={(nuevaPagina) =>
+					navigate({
+						search: (prev) => ({
+							...prev,
+							pagina: normalizarPagina(nuevaPagina),
+						}),
+					})
+				}
 				onEditar={setEditando}
 				onEliminar={setEliminando}
 			/>
@@ -570,9 +590,11 @@ mkdirSync(dirname(routeFile), { recursive: true });
 writeFileSync(
 	routeFile,
 	`import { createFileRoute } from "@tanstack/react-router";
+import { tablaSearchSchema${filtro ? ", textoSearchSchema" : ""} } from "@/core/router/searchParams";
 import { ${Ns}Page } from "@/modules/${ns}/pages/${Ns}Page";
 
 export const Route = createFileRoute("/_authenticated/${kebabs}")({
+	validateSearch: ${filtro ? `tablaSearchSchema({ ${filtro}: textoSearchSchema })` : "tablaSearchSchema()"},
 	component: ${Ns}Page,
 	staticData: { titulo: "${humano(ns)}" },
 });

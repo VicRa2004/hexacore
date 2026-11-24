@@ -53,7 +53,8 @@ frontend/src/
 │   │   │                           #   Encabezado (cabecera de página) y SelectorTema
 │   │   └── ui/                     # Primitivas: Button, Input, Select, Checkbox, Card, Badge, Spinner, Skeleton,
 │   │                               #   Avatar, Tooltip, Menu, Tabs, Dialog, ConfirmDialog, Table (Tabla + Paginacion), EmptyState
-│   ├── router/                     # QueryClient, instancia del router y pantallas de error/404 (RouteFallbacks)
+│   ├── hooks/                      # Hooks transversales (useBusquedaDebounced.ts)
+│   ├── router/                     # QueryClient, instancia del router, searchParams.ts y pantallas de error/404 (RouteFallbacks)
 │   ├── monitoreo.ts                # Errores a GlitchTip (@sentry/react) si hay VITE_SENTRY_DSN
 │   ├── telemetria.ts               # Trazas OpenTelemetry si VITE_OTEL_ENABLED="true" (túnel /api/telemetria/v1/traces)
 │   ├── tema.ts                     # Tema claro/oscuro/sistema (data-tema) y color de marca (--marca-h)
@@ -176,6 +177,12 @@ Viven en `frontend/.agents/skills/` (TanStack Query/Router/Form/Table, Tailwind 
 ### 7. Errores de render
 - Errores dentro de una ruta: `DefaultErrorComponent` (con el layout intacto y «Reintentar»). Rutas inexistentes: `DefaultNotFoundComponent`. Ambos en `core/router/RouteFallbacks.tsx`.
 - Fuera de las rutas (providers, el propio router): `core/components/ErrorBoundary.tsx`, sin hooks del router ni primitivas.
+
+### 8. Filtros y paginación en la URL
+- **Search params tipados:** definir `validateSearch` en la ruta con `tablaSearchSchema(...)` y `textoSearchSchema` (`core/router/searchParams.ts`). Valida y limpia valores inválidos (`.catch(undefined)`) y omite `pagina=1` o textos vacíos para mantener URLs limpias.
+- **Búsqueda con debounce y reinicio de página:** usar `useBusquedaDebounced` (`core/hooks/useBusquedaDebounced.ts`) junto con `navigate({ search: (prev) => conFiltro(prev, { campo }), replace: true })`; `replace: true` evita llenar el historial al escribir y `conFiltro` reinicia `pagina` a `undefined` (página 1) al cambiar cualquier filtro.
+- **Paginación:** actualizar con `navigate({ search: (prev) => ({ ...prev, pagina: normalizarPagina(nuevaPagina) }) })` sin `replace`, de modo que el usuario pueda navegar entre páginas con Atrás/Adelante.
+- **Generador:** `pnpm gen:module:web` ya genera las rutas y páginas CRUD siguiendo este mismo patrón.
 
 ---
 

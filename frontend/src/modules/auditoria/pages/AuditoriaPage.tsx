@@ -1,9 +1,11 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useDeferredValue, useState } from "react";
 import type { RegistroAuditoria } from "@/core/api/schema.gen";
 import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Input } from "@/core/components/ui/Input";
 import { type Columna, Tabla } from "@/core/components/ui/Table";
+import { useBusquedaDebounced } from "@/core/hooks/useBusquedaDebounced";
+import { conFiltro, normalizarPagina } from "@/core/router/searchParams";
 import { fechaCompleta, fechaRelativa } from "@/core/utils/fecha";
 import { EventoBadge } from "../components/EventoBadge";
 import { useAuditoriaQuery } from "../hooks/useAuditoriaQuery";
@@ -54,14 +56,19 @@ const COLUMNAS: Columna<RegistroAuditoria>[] = [
 ];
 
 export function AuditoriaPage() {
-	const [pagina, setPagina] = useState(1);
-	const [evento, setEvento] = useState("");
-	const eventoDiferido = useDeferredValue(evento.trim());
+	const search = useSearch({ from: "/_authenticated/auditoria" });
+	const navigate = useNavigate({ from: "/auditoria" });
+	const [evento, setEvento] = useBusquedaDebounced(search.evento, (valor) =>
+		navigate({
+			search: (prev) => conFiltro(prev, { evento: valor }),
+			replace: true,
+		}),
+	);
 
 	const { data, isLoading, error } = useAuditoriaQuery({
-		pagina,
+		pagina: search.pagina ?? 1,
 		limite: 15,
-		evento: eventoDiferido || undefined,
+		evento: search.evento,
 	});
 
 	return (
@@ -76,10 +83,7 @@ export function AuditoriaPage() {
 							aria-label="Filtrar por evento"
 							placeholder="Filtrar por evento…"
 							value={evento}
-							onChange={(e) => {
-								setEvento(e.target.value);
-								setPagina(1);
-							}}
+							onChange={(e) => setEvento(e.target.value)}
 							className="pl-9"
 						/>
 						<Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-tinta-tenue" />
@@ -91,7 +95,14 @@ export function AuditoriaPage() {
 				columnas={COLUMNAS}
 				datos={data}
 				clave={(r) => r.id}
-				onCambioPagina={setPagina}
+				onCambioPagina={(nuevaPagina) =>
+					navigate({
+						search: (prev) => ({
+							...prev,
+							pagina: normalizarPagina(nuevaPagina),
+						}),
+					})
+				}
 				isLoading={isLoading}
 				error={error}
 			/>

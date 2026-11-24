@@ -1,3 +1,4 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { usePermisos } from "@/core/auth/permisos";
@@ -6,6 +7,8 @@ import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Button } from "@/core/components/ui/Button";
 import { ConfirmDialog } from "@/core/components/ui/ConfirmDialog";
 import { Input } from "@/core/components/ui/Input";
+import { useBusquedaDebounced } from "@/core/hooks/useBusquedaDebounced";
+import { conFiltro, normalizarPagina } from "@/core/router/searchParams";
 import { AsignacionUsuarioPanel } from "@/modules/roles/components/AsignacionUsuarioPanel";
 import type { AccionUsuario } from "../components/AccionesUsuario";
 import { UsuarioDialog } from "../components/UsuarioForm";
@@ -24,17 +27,25 @@ type Abierto =
 
 export function UsuariosPage() {
 	const { puede } = usePermisos();
-	const [pagina, setPagina] = useState(1);
-	const [emailBusqueda, setEmailBusqueda] = useState("");
+	const search = useSearch({ from: "/_authenticated/usuarios" });
+	const navigate = useNavigate({ from: "/usuarios" });
+	const [emailBusqueda, setEmailBusqueda] = useBusquedaDebounced(
+		search.email,
+		(email) =>
+			navigate({
+				search: (prev) => conFiltro(prev, { email }),
+				replace: true,
+			}),
+	);
 	const [abierto, setAbierto] = useState<Abierto>(null);
 	const cambiarActivo = useCambiarActivoMutation();
 	const eliminar = useEliminarUsuarioMutation();
 	const cerrar = () => setAbierto(null);
 
 	const { data, isLoading, error } = useUsuariosQuery({
-		pagina,
+		pagina: search.pagina ?? 1,
 		limite: 10,
-		email: emailBusqueda.trim() ? emailBusqueda.trim() : undefined,
+		email: search.email,
 	});
 
 	const onAccion = (accion: AccionUsuario, usuario: Usuario) => {
@@ -74,10 +85,7 @@ export function UsuariosPage() {
 					aria-label="Buscar por email"
 					placeholder="Buscar por email…"
 					value={emailBusqueda}
-					onChange={(e) => {
-						setEmailBusqueda(e.target.value);
-						setPagina(1); // Reset a primera página al buscar
-					}}
+					onChange={(e) => setEmailBusqueda(e.target.value)}
 					className="pl-9"
 				/>
 				<Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-tinta-tenue" />
@@ -87,7 +95,14 @@ export function UsuariosPage() {
 				pagina={data}
 				isLoading={isLoading}
 				error={error}
-				onCambioPagina={setPagina}
+				onCambioPagina={(nuevaPagina) =>
+					navigate({
+						search: (prev) => ({
+							...prev,
+							pagina: normalizarPagina(nuevaPagina),
+						}),
+					})
+				}
 				onAccion={onAccion}
 			/>
 
