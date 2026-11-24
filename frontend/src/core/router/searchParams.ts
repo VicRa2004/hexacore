@@ -16,6 +16,28 @@ export const textoSearchSchema = z
 	.optional()
 	.catch(undefined);
 
+/** Dirección válida de ordenamiento por columna. */
+export type DireccionOrden = "asc" | "desc";
+
+/** Estado de ordenamiento sincronizable con la URL. */
+export interface EstadoOrden<T extends string = string> {
+	orden?: T;
+	direccion?: DireccionOrden;
+}
+
+/** Valida `direccion` (`asc` | `desc`) en la URL. */
+export const direccionSearchSchema = z
+	.enum(["asc", "desc"])
+	.optional()
+	.catch(undefined);
+
+/** Valida `orden` contra una lista blanca de campos permitidos por la API. */
+export function ordenSearchSchema<
+	const T extends readonly [string, ...string[]],
+>(campos: T) {
+	return z.enum(campos).optional().catch(undefined);
+}
+
 /** Construye un schema de `validateSearch` con `pagina` y los filtros de la tabla. */
 export function tablaSearchSchema(): z.ZodObject<{
 	pagina: typeof paginaSearchSchema;
@@ -41,4 +63,25 @@ export function conFiltro<T extends { pagina?: number }>(
 	cambios: Partial<Omit<T, "pagina">>,
 ): T {
 	return { ...prev, ...cambios, pagina: undefined };
+}
+
+/** Actualiza el orden de columna reiniciando la paginación a la página 1. */
+export function conOrden<
+	T extends { pagina?: number; orden?: C; direccion?: DireccionOrden },
+	C extends string,
+>(prev: T, estado: EstadoOrden<C> | undefined): T {
+	if (!estado?.orden) {
+		return {
+			...prev,
+			orden: undefined,
+			direccion: undefined,
+			pagina: undefined,
+		};
+	}
+	return {
+		...prev,
+		orden: estado.orden,
+		direccion: estado.direccion ?? "asc",
+		pagina: undefined,
+	};
 }

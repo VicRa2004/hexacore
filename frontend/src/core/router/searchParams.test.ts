@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	conFiltro,
+	conOrden,
+	direccionSearchSchema,
 	normalizarPagina,
+	ordenSearchSchema,
 	paginaSearchSchema,
 	tablaSearchSchema,
 	textoSearchSchema,
@@ -89,6 +92,59 @@ describe("searchParams", () => {
 				pagina: undefined,
 				email: "nuevo@b.com",
 				rol: "admin",
+			});
+		});
+	});
+
+	describe("ordenSearchSchema y direccionSearchSchema", () => {
+		const ordenSchema = ordenSearchSchema(["id", "email", "nombre"]);
+
+		it("acepta campos permitidos y descarta valores fuera de lista blanca", () => {
+			expect(ordenSchema.parse("email")).toBe("email");
+			expect(ordenSchema.parse("password")).toBeUndefined();
+			expect(ordenSchema.parse(undefined)).toBeUndefined();
+			expect(ordenSchema.parse(123)).toBeUndefined();
+		});
+
+		it("acepta asc/desc y descarta valores inválidos en dirección", () => {
+			expect(direccionSearchSchema.parse("asc")).toBe("asc");
+			expect(direccionSearchSchema.parse("desc")).toBe("desc");
+			expect(direccionSearchSchema.parse("random")).toBeUndefined();
+			expect(direccionSearchSchema.parse(undefined)).toBeUndefined();
+		});
+	});
+
+	describe("conOrden", () => {
+		it("establece orden y dirección y reinicia la página", () => {
+			expect(
+				conOrden(
+					{ pagina: 4, email: "a@b.com" },
+					{ orden: "email", direccion: "desc" },
+				),
+			).toEqual({
+				pagina: undefined,
+				email: "a@b.com",
+				orden: "email",
+				direccion: "desc",
+			});
+		});
+
+		it("usa asc por defecto si se omite la dirección y limpia ambos si orden es undefined", () => {
+			expect(conOrden({ pagina: 2 }, { orden: "nombre" })).toEqual({
+				pagina: undefined,
+				orden: "nombre",
+				direccion: "asc",
+			});
+			expect(
+				conOrden(
+					{ pagina: 3, orden: "nombre", direccion: "desc", email: "x" },
+					undefined,
+				),
+			).toEqual({
+				pagina: undefined,
+				email: "x",
+				orden: undefined,
+				direccion: undefined,
 			});
 		});
 	});

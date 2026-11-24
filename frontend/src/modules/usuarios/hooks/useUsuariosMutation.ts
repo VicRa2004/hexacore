@@ -77,3 +77,65 @@ export function useEliminarUsuarioMutation() {
 		onError,
 	});
 }
+
+async function ejecutarEnBloque(
+	ids: number[],
+	operacion: (id: number) => Promise<unknown>,
+) {
+	const resultados = await Promise.allSettled(ids.map((id) => operacion(id)));
+	const exitosos = resultados.filter((r) => r.status === "fulfilled").length;
+	const fallidos = resultados.length - exitosos;
+	return { exitosos, fallidos };
+}
+
+export function useDesactivarUsuariosEnBloqueMutation() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (ids: number[]) =>
+			ejecutarEnBloque(ids, (id) =>
+				usuariosApi.actualizarUsuario(id, { isActivo: false }),
+			),
+		onSuccess: ({ exitosos, fallidos }) => {
+			if (fallidos === 0) {
+				toast.success(
+					exitosos === 1
+						? "1 usuario desactivado"
+						: `${exitosos} usuarios desactivados`,
+				);
+			} else if (exitosos > 0) {
+				toast.warning(
+					`${exitosos} desactivados; ${fallidos} no se pudieron desactivar`,
+				);
+			} else {
+				toast.error("No se pudo desactivar a los usuarios seleccionados");
+			}
+			return queryClient.invalidateQueries({ queryKey: usuariosKeys.all });
+		},
+		onError,
+	});
+}
+
+export function useEliminarUsuariosEnBloqueMutation() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (ids: number[]) =>
+			ejecutarEnBloque(ids, (id) => usuariosApi.eliminarUsuario(id)),
+		onSuccess: ({ exitosos, fallidos }) => {
+			if (fallidos === 0) {
+				toast.success(
+					exitosos === 1
+						? "1 usuario eliminado"
+						: `${exitosos} usuarios eliminados`,
+				);
+			} else if (exitosos > 0) {
+				toast.warning(
+					`${exitosos} eliminados; ${fallidos} no se pudieron eliminar`,
+				);
+			} else {
+				toast.error("No se pudo eliminar a los usuarios seleccionados");
+			}
+			return queryClient.invalidateQueries({ queryKey: usuariosKeys.all });
+		},
+		onError,
+	});
+}

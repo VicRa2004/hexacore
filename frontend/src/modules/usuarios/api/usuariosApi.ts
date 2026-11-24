@@ -1,11 +1,22 @@
 import { apiClient } from "@/core/api/client";
 import type { paths } from "@/core/api/schema.gen";
 import type { Usuario } from "@/core/auth/types";
+import type { DireccionOrden } from "@/core/router/searchParams";
+
+export const CAMPOS_ORDEN_USUARIOS = [
+	"id",
+	"nombre",
+	"email",
+	"isActivo",
+] as const;
+export type CampoOrdenUsuarios = (typeof CAMPOS_ORDEN_USUARIOS)[number];
 
 export interface ObtenerUsuariosParams {
 	pagina?: number;
 	limite?: number;
 	email?: string;
+	orden?: CampoOrdenUsuarios;
+	direccion?: DireccionOrden;
 }
 
 export type CrearUsuarioInput =

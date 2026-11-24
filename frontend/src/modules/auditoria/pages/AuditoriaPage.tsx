@@ -5,14 +5,21 @@ import { Encabezado } from "@/core/components/layout/Encabezado";
 import { Input } from "@/core/components/ui/Input";
 import { type Columna, Tabla } from "@/core/components/ui/Table";
 import { useBusquedaDebounced } from "@/core/hooks/useBusquedaDebounced";
-import { conFiltro, normalizarPagina } from "@/core/router/searchParams";
+import {
+	conFiltro,
+	conOrden,
+	normalizarPagina,
+} from "@/core/router/searchParams";
 import { fechaCompleta, fechaRelativa } from "@/core/utils/fecha";
+import type { CampoOrdenAuditoria } from "../api/auditoriaApi";
 import { EventoBadge } from "../components/EventoBadge";
 import { useAuditoriaQuery } from "../hooks/useAuditoriaQuery";
 
 const COLUMNAS: Columna<RegistroAuditoria>[] = [
 	{
+		id: "ocurridoEn",
 		cabecera: "Cuándo",
+		ordenable: true,
 		className: "whitespace-nowrap",
 		celda: (r) => (
 			<time dateTime={r.ocurridoEn} title={fechaCompleta(r.ocurridoEn)}>
@@ -20,9 +27,16 @@ const COLUMNAS: Columna<RegistroAuditoria>[] = [
 			</time>
 		),
 	},
-	{ cabecera: "Evento", celda: (r) => <EventoBadge evento={r.evento} /> },
 	{
+		id: "evento",
+		cabecera: "Evento",
+		ordenable: true,
+		celda: (r) => <EventoBadge evento={r.evento} />,
+	},
+	{
+		id: "usuarioId",
 		cabecera: "Usuario",
+		ordenable: true,
 		celda: (r) =>
 			r.usuarioId === null ? (
 				<span className="text-tinta-tenue">Sistema</span>
@@ -31,6 +45,7 @@ const COLUMNAS: Columna<RegistroAuditoria>[] = [
 			),
 	},
 	{
+		id: "datos",
 		cabecera: "Datos",
 		className: "w-full",
 		celda: (r) =>
@@ -46,6 +61,7 @@ const COLUMNAS: Columna<RegistroAuditoria>[] = [
 			),
 	},
 	{
+		id: "requestId",
 		cabecera: "Petición",
 		celda: (r) => (
 			<span className="font-mono text-xs text-tinta-tenue">
@@ -69,6 +85,8 @@ export function AuditoriaPage() {
 		pagina: search.pagina ?? 1,
 		limite: 15,
 		evento: search.evento,
+		orden: search.orden,
+		direccion: search.orden ? search.direccion : undefined,
 	});
 
 	return (
@@ -91,6 +109,7 @@ export function AuditoriaPage() {
 				}
 			/>
 			<Tabla
+				tablaId="auditoria"
 				etiqueta="Registro de auditoría"
 				columnas={COLUMNAS}
 				datos={data}
@@ -101,6 +120,16 @@ export function AuditoriaPage() {
 							...prev,
 							pagina: normalizarPagina(nuevaPagina),
 						}),
+					})
+				}
+				orden={{ orden: search.orden, direccion: search.direccion }}
+				onCambioOrden={(nuevoOrden) =>
+					navigate({
+						search: (prev) =>
+							conOrden(prev, {
+								orden: nuevoOrden.orden as CampoOrdenAuditoria | undefined,
+								direccion: nuevoOrden.direccion,
+							}),
 					})
 				}
 				isLoading={isLoading}
