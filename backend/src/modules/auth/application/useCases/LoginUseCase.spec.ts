@@ -16,6 +16,14 @@ const mockTokenService = {
 	generarToken: mock(() => "access"),
 	generarRefreshToken: mock(() => "refresh"),
 	hashearRefreshToken: mock(() => "refresh_hash"),
+	generarTokenDosPasos: mock(() => "token_2fa"),
+};
+
+const mockDosFactores = {
+	obtener: mock(async () => ({
+		secretoCifrado: null as string | null,
+		activadoEn: null as Date | null,
+	})),
 };
 
 const mockRefreshTokenRepo = {
@@ -49,6 +57,8 @@ describe("LoginUseCase", () => {
 				mockRefreshTokenRepo as never,
 			),
 			mockCuentaRepo as never,
+			mockDosFactores as never,
+			mockTokenService as never,
 		);
 	});
 
@@ -134,5 +144,27 @@ describe("LoginUseCase", () => {
 		await useCase.ejecutar({ email: "a@x.com", password: "pass" });
 
 		expect(mockCuentaRepo.reiniciarFallos).toHaveBeenCalledWith(5);
+	});
+
+	it("con 2FA activo devuelve el token intermedio, sin sesión ni reinicio de fallos", async () => {
+		mockUsuarioRepository.buscarPorEmail.mockResolvedValue(
+			construirUsuario(true),
+		);
+		mockPasswordHasher.comparar.mockResolvedValue(true);
+		mockDosFactores.obtener.mockResolvedValueOnce({
+			secretoCifrado: "cifrado",
+			activadoEn: new Date(),
+		});
+
+		const resultado = await useCase.ejecutar({
+			email: "a@x.com",
+			password: "pass",
+		});
+
+		expect(resultado).toEqual({ requiere2fa: true, token2fa: "token_2fa" });
+		expect(mockTokenService.generarTokenDosPasos).toHaveBeenCalledWith(5);
+		expect(mockRefreshTokenRepo.crear).not.toHaveBeenCalled();
+		// Los fallos se reinician tras el código: repetir la contraseña no da intentos extra.
+		expect(mockCuentaRepo.reiniciarFallos).not.toHaveBeenCalled();
 	});
 });

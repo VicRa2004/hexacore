@@ -6,6 +6,8 @@ import { EmisorSesion } from "../services/EmisorSesion";
 import type { UsuarioDto } from "@/core/usuario";
 import { UsuarioMapper } from "@/core/usuario";
 import type { CuentaRepository } from "../../domain/repository/CuentaRepository";
+import type { DosFactoresRepository } from "../../domain/repository/DosFactoresRepository";
+import type { TokenService } from "../../domain/service/TokenService";
 
 /**
  * Hash bcrypt de una contraseña aleatoria: si el email no existe se compara
@@ -15,7 +17,7 @@ const HASH_PASSWORD_FICTICIO =
 	"$2b$10$UZQKZ7yo9nGiqhSbmYdj4eV9jrthslRlUx4lX.r5eMN.sW4Pb.boi";
 
 /** Bloqueo por cuenta (además del rate limit por IP): frena ataques distribuidos. */
-const POLITICA_BLOQUEO = { maxIntentos: 5, bloqueoMs: 15 * 60 * 1000 };
+export const POLITICA_BLOQUEO = { maxIntentos: 5, bloqueoMs: 15 * 60 * 1000 };
 
 export class LoginUseCase {
 	constructor(
@@ -23,13 +25,16 @@ export class LoginUseCase {
 		private readonly passwordHasher: PasswordHasher,
 		private readonly emisorSesion: EmisorSesion,
 		private readonly cuentaRepo: CuentaRepository,
+		private readonly dosFactores: DosFactoresRepository,
+		private readonly tokenService: TokenService,
 	) {}
 
-	async ejecutar(dto: LoginDto): Promise<{
-		accessToken: string;
-		refreshToken: string;
-		usuario: UsuarioDto;
-	}> {
+	async ejecutar(
+		dto: LoginDto,
+	): Promise<
+		| { accessToken: string; refreshToken: string; usuario: UsuarioDto }
+		| { requiere2fa: true; token2fa: string }
+	> {
 		const usuario = await this.usuarioRepository.buscarPorEmail(dto.email);
 
 		// Bloqueada: ni se comprueba la contraseña, para no dar pistas durante el bloqueo.
@@ -52,10 +57,20 @@ export class LoginUseCase {
 			throw new BaseError("Credenciales inválidas", 401);
 		}
 
-		await this.cuentaRepo.reiniciarFallos(usuario.getId());
+		// Con 2FA los fallos se reinician tras el código: si no, repetir la contraseña
+		// correcta daría intentos ilimitados de adivinar el código.
+		const { activadoEn } = await this.dosFactores.obtener(usuario.getId());
+		if (!activadoEn) await this.cuentaRepo.reiniciarFallos(usuario.getId());
 
 		if (!usuario.getIsActivo()) {
 			throw new BaseError("El usuario está inactivo", 403);
+		}
+
+		if (activadoEn) {
+			return {
+				requiere2fa: true,
+				token2fa: this.tokenService.generarTokenDosPasos(usuario.getId()),
+			};
 		}
 
 		return {

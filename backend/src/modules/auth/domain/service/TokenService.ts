@@ -24,4 +24,13 @@ export interface TokenService {
 	 * Nunca se persiste el token en claro.
 	 */
 	hashearRefreshToken(token: string): string;
+
+	/** Token intermedio del login con 2FA (5 min). No sirve como access token. */
+	generarTokenDosPasos(usuarioId: number): string;
+
+	/**
+	 * @returns el ID del usuario.
+	 * @throws si es inválido, caducó o es un access token.
+	 */
+	verificarTokenDosPasos(token: string): number;
 }

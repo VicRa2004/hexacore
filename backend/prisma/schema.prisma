@@ -25,16 +25,24 @@ model Usuario {
   intentosFallidos  Int       @default(0) @map("usr_intentos_fallidos")
   bloqueadoHasta    DateTime? @map("usr_bloqueado_hasta")
 
+  // Segundo factor TOTP (módulo auth): secreto cifrado (AES-256-GCM). Con secreto y sin
+  // fecha de activación, el alta está pendiente de verificar el primer código.
+  totpSecreto    String?   @map("usr_totp_secreto") @db.VarChar(255)
+  totpActivadoEn DateTime? @map("usr_totp_activado_en")
+  /// Último paso de 30 s aceptado: impide reutilizar un código ya usado
+  totpUltimoPaso Int?      @map("usr_totp_ultimo_paso")
+
   /// Clave del avatar en el almacenamiento de archivos
   avatar    String?   @map("usr_avatar") @db.VarChar(255)
   /// Borrado lógico: los repositorios ignoran las filas con fecha
   deletedAt DateTime? @map("deleted_at")
 
   // Relaciones N-a-N gestionadas por tablas intermedias explícitas
-  roles            UsuarioRol[]
-  permisosDirectos UsuarioPermiso[]
-  refreshTokens    RefreshToken[]
-  tokensCuenta     TokenCuenta[]
+  roles               UsuarioRol[]
+  permisosDirectos    UsuarioPermiso[]
+  refreshTokens       RefreshToken[]
+  tokensCuenta        TokenCuenta[]
+  codigosRecuperacion CodigoRecuperacion[]
 
   @@map("usuario")
 }
@@ -153,6 +161,20 @@ model TokenCuenta {
 
   @@index([usuarioId, tipo])
   @@map("token_cuenta")
+}
+
+/// Códigos de recuperación del 2FA (un solo uso). Se guarda el hash, nunca el código.
+model CodigoRecuperacion {
+  id         Int       @id @default(autoincrement()) @map("cdr_id")
+  usuarioId  Int       @map("cdr_fkusuario")
+  codigoHash String    @map("cdr_codigo_hash") @db.VarChar(64)
+  usadoEn    DateTime? @map("cdr_usado_en")
+  createdAt  DateTime  @default(now()) @map("cdr_created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, codigoHash])
+  @@map("codigo_recuperacion")
 }
 
 // ─────────────────────────────────────────────

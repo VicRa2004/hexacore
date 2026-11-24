@@ -1,5 +1,6 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 
+import type { DosFactoresController } from "../controllers/DosFactoresController";
 import { LoginController } from "../controllers/LoginController";
 import { RegistroController } from "../controllers/RegistroController";
 import { RefreshTokenController } from "../controllers/RefreshTokenController";
@@ -13,7 +14,14 @@ import {
 	jsonResponse,
 } from "@/core/shared/infrastructure/http/openapi";
 import {
+	altaDosFactoresSchema,
 	authResponseSchema,
+	codigoSchema,
+	codigosRecuperacionSchema,
+	desactivarDosFactoresSchema,
+	estadoDosFactoresSchema,
+	loginDosFactoresSchema,
+	requiere2faResponseSchema,
 	cambiarPasswordSchema,
 	loginSchema,
 	mensajeResponseSchema,
@@ -48,6 +56,7 @@ export class AuthRouter {
 		private readonly logoutController: LogoutController,
 		private readonly cuentaController: CuentaController,
 		private readonly sesionController: SesionController,
+		private readonly dosFactoresController: DosFactoresController,
 		private readonly authMiddleware: AuthMiddleware,
 	) {
 		this.router = new OpenAPIHono();
@@ -73,7 +82,7 @@ export class AuthRouter {
 			security,
 			summary: "Iniciar sesión",
 			description:
-				"Devuelve el access token y fija el refresh token en la cookie httpOnly `refresh_token`.",
+				"Devuelve el access token y fija el refresh token en la cookie httpOnly `refresh_token`. Si el usuario tiene la verificación en dos pasos activa, devuelve `{ requiere2fa, token2fa }` sin sesión: se completa en `POST /login/2fa`.",
 			request: {
 				body: {
 					required: true,
@@ -81,7 +90,10 @@ export class AuthRouter {
 				},
 			},
 			responses: {
-				200: jsonResponse(authResponseSchema, "Login exitoso"),
+				200: jsonResponse(
+					z.union([authResponseSchema, requiere2faResponseSchema]),
+					"Login exitoso o pendiente del segundo factor",
+				),
 				400: errorResponse("Datos inválidos"),
 				401: errorResponse("Credenciales inválidas"),
 				403: errorResponse("Usuario desactivado"),
@@ -90,7 +102,32 @@ export class AuthRouter {
 				},
 			},
 		});
-		this.router.post("/login", limiteLogin, this.loginController.ejecutar);
+		this.router.post("/login", limiteLogin, this.loginController.login);
+
+		// Límite propio por IP; además, el bloqueo por cuenta (5 fallos → 15 min).
+		const limiteDosFactores = rateLimit({ windowMs: 15 * MINUTE, limit: 10 });
+		docs.registerPath({
+			method: "post",
+			path: "/login/2fa",
+			tags,
+			security,
+			summary: "Completar el login con el código de verificación en dos pasos",
+			description:
+				"Canjea el `token2fa` del primer paso y un código TOTP (o de recuperación, que se consume) por la sesión.",
+			request: { body: cuerpo(loginDosFactoresSchema) },
+			responses: {
+				200: jsonResponse(authResponseSchema, "Login exitoso"),
+				400: errorResponse("Datos inválidos"),
+				401: errorResponse("Código incorrecto o token caducado"),
+				403: errorResponse("Usuario desactivado"),
+				429: errorResponse("Demasiados intentos o cuenta bloqueada"),
+			},
+		});
+		this.router.post(
+			"/login/2fa",
+			limiteDosFactores,
+			this.loginController.dosFactores,
+		);
 
 		docs.registerPath({
 			method: "post",
@@ -157,6 +194,107 @@ export class AuthRouter {
 		this.router.post("/logout", this.logoutController.ejecutar);
 
 		this.iniciarRutasCuenta(limiteCorreos, limiteTokens);
+		this.iniciarRutasDosFactores();
+	}
+
+	private iniciarRutasDosFactores() {
+		// Por IP, aparte del bloqueo por cuenta que aplica el verificador.
+		const limiteTokens = rateLimit({ windowMs: 15 * MINUTE, limit: 10 });
+		const docs = this.router.openAPIRegistry;
+		const auth = this.authMiddleware.handle;
+		const dosFactores = this.dosFactoresController;
+		const tags = ["Auth · 2FA"];
+
+		docs.registerPath({
+			method: "get",
+			path: "/2fa",
+			tags,
+			security: bearer,
+			summary: "Estado de la verificación en dos pasos",
+			responses: {
+				200: jsonResponse(estadoDosFactoresSchema, "Estado del 2FA"),
+				401: errorResponse("No autenticado"),
+			},
+		});
+		this.router.get("/2fa", auth, dosFactores.obtener);
+
+		docs.registerPath({
+			method: "post",
+			path: "/2fa/alta",
+			tags,
+			security: bearer,
+			summary: "Generar el secreto TOTP (paso 1 del alta)",
+			description:
+				"Devuelve el secreto y la URI `otpauth://` para el QR. No activa nada hasta confirmar un código en `/2fa/activar`.",
+			responses: {
+				200: jsonResponse(altaDosFactoresSchema, "Secreto generado"),
+				400: errorResponse("El 2FA ya está activado"),
+				401: errorResponse("No autenticado"),
+			},
+		});
+		this.router.post("/2fa/alta", auth, dosFactores.iniciar);
+
+		docs.registerPath({
+			method: "post",
+			path: "/2fa/activar",
+			tags,
+			security: bearer,
+			summary: "Confirmar el primer código y activar el 2FA (paso 2 del alta)",
+			description:
+				"Devuelve los códigos de recuperación: solo se muestran esta vez.",
+			request: { body: cuerpo(codigoSchema) },
+			responses: {
+				200: jsonResponse(codigosRecuperacionSchema, "2FA activado"),
+				400: errorResponse("Código incorrecto, sin alta iniciada o ya activo"),
+				401: errorResponse("No autenticado"),
+				429: { description: "Demasiados intentos" },
+			},
+		});
+		this.router.post("/2fa/activar", auth, limiteTokens, dosFactores.activar);
+
+		docs.registerPath({
+			method: "post",
+			path: "/2fa/desactivar",
+			tags,
+			security: bearer,
+			summary: "Desactivar el 2FA (pide contraseña y código)",
+			request: { body: cuerpo(desactivarDosFactoresSchema) },
+			responses: {
+				200: jsonResponse(mensajeResponseSchema, "2FA desactivado"),
+				400: errorResponse("Contraseña o código incorrectos"),
+				401: errorResponse("No autenticado"),
+				429: errorResponse("Demasiados intentos o cuenta bloqueada"),
+			},
+		});
+		this.router.post(
+			"/2fa/desactivar",
+			auth,
+			limiteTokens,
+			dosFactores.desactivar,
+		);
+
+		docs.registerPath({
+			method: "post",
+			path: "/2fa/codigos-recuperacion",
+			tags,
+			security: bearer,
+			summary: "Regenerar los códigos de recuperación",
+			description:
+				"Invalida los anteriores. Los nuevos solo se muestran en esta respuesta.",
+			request: { body: cuerpo(codigoSchema) },
+			responses: {
+				200: jsonResponse(codigosRecuperacionSchema, "Códigos nuevos"),
+				400: errorResponse("Código incorrecto o 2FA no activo"),
+				401: errorResponse("No autenticado"),
+				429: errorResponse("Demasiados intentos o cuenta bloqueada"),
+			},
+		});
+		this.router.post(
+			"/2fa/codigos-recuperacion",
+			auth,
+			limiteTokens,
+			dosFactores.regenerarCodigos,
+		);
 	}
 
 	private iniciarRutasCuenta(

@@ -82,3 +82,58 @@ export const sesionSchema = z
 		actual: z.boolean(),
 	})
 	.openapi("Sesion");
+
+// ── Verificación en dos pasos (TOTP) ─────────────────────────────────────────
+
+/** Código de 6 dígitos de la app o código de recuperación `XXXXX-XXXXX`. */
+const codigoDosFactoresSchema = z
+	.string("El código es obligatorio")
+	.trim()
+	.min(6, "El código es obligatorio")
+	.max(20);
+
+export const codigoSchema = z.object({ codigo: codigoDosFactoresSchema });
+
+export const desactivarDosFactoresSchema = z.object({
+	password: z.string().min(1, "La contraseña es obligatoria"),
+	codigo: codigoDosFactoresSchema,
+});
+
+export const loginDosFactoresSchema = z.object({
+	token2fa: z.string().min(1, "Falta el token del primer paso").max(1024),
+	codigo: codigoDosFactoresSchema,
+});
+
+export const requiere2faResponseSchema = z
+	.object({
+		requiere2fa: z.literal(true),
+		token2fa: z.string().openapi({
+			description: "Token intermedio (5 min) para POST /api/auth/login/2fa",
+		}),
+	})
+	.openapi("Requiere2faResponse");
+
+export const estadoDosFactoresSchema = z
+	.object({
+		activo: z.boolean(),
+		codigosRestantes: z.number().int(),
+	})
+	.openapi("EstadoDosFactores");
+
+export const altaDosFactoresSchema = z
+	.object({
+		secreto: z
+			.string()
+			.openapi({ example: "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP" }),
+		otpauthUri: z.string(),
+	})
+	.openapi("AltaDosFactores");
+
+export const codigosRecuperacionSchema = z
+	.object({
+		codigosRecuperacion: z
+			.string()
+			.array()
+			.openapi({ example: ["ABCDE-FGHIJ"] }),
+	})
+	.openapi("CodigosRecuperacion");

@@ -474,7 +474,7 @@ export interface paths {
         put?: never;
         /**
          * Iniciar sesión
-         * @description Devuelve el access token y fija el refresh token en la cookie httpOnly `refresh_token`.
+         * @description Devuelve el access token y fija el refresh token en la cookie httpOnly `refresh_token`. Si el usuario tiene la verificación en dos pasos activa, devuelve `{ requiere2fa, token2fa }` sin sesión: se completa en `POST /login/2fa`.
          */
         post: {
             parameters: {
@@ -493,13 +493,13 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Login exitoso */
+                /** @description Login exitoso o pendiente del segundo factor */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["AuthResponse"];
+                        "application/json": components["schemas"]["AuthResponse"] | components["schemas"]["Requiere2faResponse"];
                     };
                 };
                 /** @description Datos inválidos */
@@ -535,6 +535,88 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login/2fa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Completar el login con el código de verificación en dos pasos
+         * @description Canjea el `token2fa` del primer paso y un código TOTP (o de recuperación, que se consume) por la sesión.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        token2fa: string;
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Login exitoso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuthResponse"];
+                    };
+                };
+                /** @description Datos inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Código incorrecto o token caducado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Usuario desactivado */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos o cuenta bloqueada */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
                 };
             };
         };
@@ -1191,6 +1273,323 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/2fa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estado de la verificación en dos pasos */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Estado del 2FA */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EstadoDosFactores"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/2fa/alta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generar el secreto TOTP (paso 1 del alta)
+         * @description Devuelve el secreto y la URI `otpauth://` para el QR. No activa nada hasta confirmar un código en `/2fa/activar`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Secreto generado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AltaDosFactores"];
+                    };
+                };
+                /** @description El 2FA ya está activado */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/2fa/activar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmar el primer código y activar el 2FA (paso 2 del alta)
+         * @description Devuelve los códigos de recuperación: solo se muestran esta vez.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description 2FA activado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CodigosRecuperacion"];
+                    };
+                };
+                /** @description Código incorrecto, sin alta iniciada o ya activo */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/2fa/desactivar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desactivar el 2FA (pide contraseña y código) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        password: string;
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description 2FA desactivado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example Sesión cerrada correctamente */
+                            mensaje: string;
+                        };
+                    };
+                };
+                /** @description Contraseña o código incorrectos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos o cuenta bloqueada */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/2fa/codigos-recuperacion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Regenerar los códigos de recuperación
+         * @description Invalida los anteriores. Los nuevos solo se muestran en esta respuesta.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        codigo: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Códigos nuevos */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CodigosRecuperacion"];
+                    };
+                };
+                /** @description Código incorrecto o 2FA no activo */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Demasiados intentos o cuenta bloqueada */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2244,6 +2643,12 @@ export interface components {
             accessToken: string;
             usuario: components["schemas"]["UsuarioDto"];
         };
+        Requiere2faResponse: {
+            /** @enum {boolean} */
+            requiere2fa: true;
+            /** @description Token intermedio (5 min) para POST /api/auth/login/2fa */
+            token2fa: string;
+        };
         Sesion: {
             id: number;
             userAgent: string | null;
@@ -2252,6 +2657,23 @@ export interface components {
             /** Format: date-time */
             expiraEn: string;
             actual: boolean;
+        };
+        EstadoDosFactores: {
+            activo: boolean;
+            codigosRestantes: number;
+        };
+        AltaDosFactores: {
+            /** @example JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP */
+            secreto: string;
+            otpauthUri: string;
+        };
+        CodigosRecuperacion: {
+            /**
+             * @example [
+             *       "ABCDE-FGHIJ"
+             *     ]
+             */
+            codigosRecuperacion: string[];
         };
         PermisoDto: {
             /** @example 1 */
@@ -2317,7 +2739,11 @@ export interface components {
 export type UsuarioDto = components['schemas']['UsuarioDto'];
 export type ErrorResponse = components['schemas']['ErrorResponse'];
 export type AuthResponse = components['schemas']['AuthResponse'];
+export type Requiere2faResponse = components['schemas']['Requiere2faResponse'];
 export type Sesion = components['schemas']['Sesion'];
+export type EstadoDosFactores = components['schemas']['EstadoDosFactores'];
+export type AltaDosFactores = components['schemas']['AltaDosFactores'];
+export type CodigosRecuperacion = components['schemas']['CodigosRecuperacion'];
 export type PermisoDto = components['schemas']['PermisoDto'];
 export type RolDto = components['schemas']['RolDto'];
 export type AsignacionUsuario = components['schemas']['AsignacionUsuario'];
