@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RecuperarPasswordRouteImport } from './routes/recuperar-password'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as RestablecerPasswordRouteImport } from './routes/restablecer-password'
+import { Route as UiRouteImport } from './routes/ui'
 import { Route as VerificarEmailRouteImport } from './routes/verificar-email'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -49,6 +50,11 @@ const RegistroRoute = RegistroRouteImport.update({
 const RestablecerPasswordRoute = RestablecerPasswordRouteImport.update({
   id: '/restablecer-password',
   path: '/restablecer-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UiRoute = UiRouteImport.update({
+  id: '/ui',
+  path: '/ui',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerificarEmailRoute = VerificarEmailRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
+  '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
+  '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/recuperar-password': typeof RecuperarPasswordRoute
   '/registro': typeof RegistroRoute
   '/restablecer-password': typeof RestablecerPasswordRoute
+  '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/recuperar-password'
     | '/registro'
     | '/restablecer-password'
+    | '/ui'
     | '/verificar-email'
     | '/auditoria'
     | '/dashboard'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/recuperar-password'
     | '/registro'
     | '/restablecer-password'
+    | '/ui'
     | '/verificar-email'
     | '/auditoria'
     | '/dashboard'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/recuperar-password'
     | '/registro'
     | '/restablecer-password'
+    | '/ui'
     | '/verificar-email'
     | '/_authenticated/auditoria'
     | '/_authenticated/dashboard'
@@ -173,6 +185,7 @@ export interface RootRouteChildren {
   RecuperarPasswordRoute: typeof RecuperarPasswordRoute
   RegistroRoute: typeof RegistroRoute
   RestablecerPasswordRoute: typeof RestablecerPasswordRoute
+  UiRoute: typeof UiRoute
   VerificarEmailRoute: typeof VerificarEmailRoute
 }
 
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/restablecer-password'
       fullPath: '/restablecer-password'
       preLoaderRoute: typeof RestablecerPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ui': {
+      id: '/ui'
+      path: '/ui'
+      fullPath: '/ui'
+      preLoaderRoute: typeof UiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verificar-email': {
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecuperarPasswordRoute: RecuperarPasswordRoute,
   RegistroRoute: RegistroRoute,
   RestablecerPasswordRoute: RestablecerPasswordRoute,
+  UiRoute: UiRoute,
   VerificarEmailRoute: VerificarEmailRoute,
 }
 export const routeTree = rootRouteImport

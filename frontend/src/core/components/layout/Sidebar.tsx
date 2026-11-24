@@ -4,6 +4,7 @@ import {
 	History,
 	LayoutDashboard,
 	type LucideIcon,
+	Palette,
 	PanelLeftClose,
 	PanelLeftOpen,
 	ShieldCheck,
@@ -52,6 +53,20 @@ const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
 			},
 		],
 	},
+	...(import.meta.env.DEV
+		? [
+				{
+					titulo: "Desarrollo",
+					enlaces: [
+						{
+							to: "/ui" as const,
+							etiqueta: "Catálogo UI",
+							icono: Palette,
+						},
+					],
+				},
+			]
+		: []),
 ];
 
 interface SidebarProps {
