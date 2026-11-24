@@ -99,7 +99,7 @@ export class OAuthRouter {
 			security,
 			summary: "Vuelta desde el proveedor",
 			description:
-				"La llama el navegador al volver del proveedor. Redirige a `${APP_URL}/oauth-callback#codigo=…` (canjear en `POST /canjear`), `#vinculada=<proveedor>` o `#error=<mensaje>`.",
+				"La llama el navegador al volver del proveedor. Redirige a `<APP_URL>/oauth-callback#codigo=…` (canjear en `POST /canjear`), `#vinculada=<proveedor>` o `#error=<mensaje>`.",
 			request: {
 				params: proveedorParamSchema,
 				query: callbackOAuthQuerySchema,

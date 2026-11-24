@@ -626,7 +626,7 @@ export interface paths {
         };
         /**
          * Vuelta desde el proveedor
-         * @description La llama el navegador al volver del proveedor. Redirige a `${APP_URL}/oauth-callback#codigo=…` (canjear en `POST /canjear`), `#vinculada=<proveedor>` o `#error=<mensaje>`.
+         * @description La llama el navegador al volver del proveedor. Redirige a `<APP_URL>/oauth-callback#codigo=…` (canjear en `POST /canjear`), `#vinculada=<proveedor>` o `#error=<mensaje>`.
          */
         get: {
             parameters: {
