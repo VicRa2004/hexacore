@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Check, LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
-import { toast } from "sonner";
 import { useAuthStore } from "@/core/auth/store";
+import { useCerrarSesion } from "@/core/auth/useCerrarSesion";
 import { Avatar } from "@/core/components/ui/Avatar";
 import { Menu, MenuOpcion, MenuSeparador } from "@/core/components/ui/Menu";
 import {
@@ -14,7 +14,6 @@ import {
 	useTema,
 } from "@/core/tema";
 import { cn } from "@/core/utils/cn";
-import { authApi } from "@/modules/auth/api/authApi";
 
 const TEMAS: { valor: Tema; etiqueta: string; icono: typeof Sun }[] = [
 	{ valor: "claro", etiqueta: "Claro", icono: Sun },
@@ -25,23 +24,12 @@ const TEMAS: { valor: Tema; etiqueta: string; icono: typeof Sun }[] = [
 /** Avatar de la barra superior: cuenta, apariencia (tema y color) y cerrar sesión. */
 export function MenuUsuario() {
 	const navigate = useNavigate();
-	const { usuario, logout } = useAuthStore();
+	const usuario = useAuthStore((s) => s.usuario);
+	const cerrarSesion = useCerrarSesion();
 	const { preferencia } = useTema();
 	const acento = useAcento();
 
 	if (!usuario) return null;
-
-	const cerrarSesion = async () => {
-		try {
-			await authApi.logout();
-		} catch {
-			// Se limpia la sesión local aunque falle el servidor.
-		} finally {
-			logout();
-			toast.info("Sesión cerrada correctamente");
-			navigate({ to: "/login" });
-		}
-	};
 
 	return (
 		<Menu

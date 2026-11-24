@@ -1,9 +1,10 @@
-import { Menu as IconoMenu } from "lucide-react";
+import { Menu as IconoMenu, Search } from "lucide-react";
 import { useLocation } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/core/utils/cn";
 import { MenuUsuario } from "./MenuUsuario";
 import { Migas } from "./Migas";
+import { PaletaComandos } from "./PaletaComandos";
 import { Sidebar } from "./Sidebar";
 
 const CLAVE_PLEGADO = "sidebar-plegado";
@@ -19,6 +20,7 @@ function leerPlegado() {
 export function MainLayout({ children }: { children: ReactNode }) {
 	const [plegado, setPlegado] = useState(leerPlegado);
 	const [cajonAbierto, setCajonAbierto] = useState(false);
+	const [paletaAbierta, setPaletaAbierta] = useState(false);
 	const cajon = useRef<HTMLDialogElement>(null);
 	const contenido = useRef<HTMLDivElement>(null);
 	const ruta = useLocation({ select: (l) => l.pathname });
@@ -78,7 +80,19 @@ export function MainLayout({ children }: { children: ReactNode }) {
 						<IconoMenu className="size-5" />
 					</button>
 					<Migas />
-					<div className="ml-auto">
+					<div className="ml-auto flex items-center gap-2">
+						<button
+							type="button"
+							onClick={() => setPaletaAbierta(true)}
+							aria-label="Abrir paleta de comandos"
+							className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-borde bg-superficie px-2.5 text-sm text-tinta-tenue transition-colors hover:bg-elevada hover:text-tinta focus-visible:outline-2 focus-visible:outline-acento"
+						>
+							<Search className="size-4" />
+							<span className="hidden sm:inline">Buscar…</span>
+							<kbd className="hidden rounded border border-borde bg-elevada px-1.5 py-0.5 font-sans text-[11px] font-medium text-tinta-tenue sm:inline">
+								Ctrl K
+							</kbd>
+						</button>
 						<MenuUsuario />
 					</div>
 				</header>
@@ -92,6 +106,12 @@ export function MainLayout({ children }: { children: ReactNode }) {
 					</main>
 				</div>
 			</div>
+
+			<PaletaComandos
+				abierto={paletaAbierta}
+				onCerrar={() => setPaletaAbierta(false)}
+				onAlternar={() => setPaletaAbierta((v) => !v)}
+			/>
 		</div>
 	);
 }

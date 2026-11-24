@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { requierePermiso } from "@/core/auth/permisos";
 import {
 	direccionSearchSchema,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/usuarios")({
 		email: textoSearchSchema,
 		orden: ordenSearchSchema(CAMPOS_ORDEN_USUARIOS),
 		direccion: direccionSearchSchema,
+		accion: z.enum(["crear"]).optional().catch(undefined),
 	}),
 	component: UsuariosPage,
 	staticData: { titulo: "Usuarios" },
