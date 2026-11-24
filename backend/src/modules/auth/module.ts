@@ -8,6 +8,11 @@ import { VerificadorDosFactores } from "./application/services/VerificadorDosFac
 import { CambiarPasswordUseCase } from "./application/useCases/CambiarPasswordUseCase";
 import { CerrarSesionUseCase } from "./application/useCases/CerrarSesionUseCase";
 import { CerrarSesionesUseCase } from "./application/useCases/CerrarSesionesUseCase";
+import { AutenticarOAuthUseCase } from "./application/useCases/AutenticarOAuthUseCase";
+import { CanjearOAuthUseCase } from "./application/useCases/CanjearOAuthUseCase";
+import { DesvincularOAuthUseCase } from "./application/useCases/DesvincularOAuthUseCase";
+import { ListarCuentasOAuthUseCase } from "./application/useCases/ListarCuentasOAuthUseCase";
+import { VincularOAuthUseCase } from "./application/useCases/VincularOAuthUseCase";
 import { ListarSesionesUseCase } from "./application/useCases/ListarSesionesUseCase";
 import { ActivarDosFactoresUseCase } from "./application/useCases/ActivarDosFactoresUseCase";
 import { DesactivarDosFactoresUseCase } from "./application/useCases/DesactivarDosFactoresUseCase";
@@ -32,6 +37,10 @@ import { RegistroController } from "./infrastructure/http/controllers/RegistroCo
 import { SesionController } from "./infrastructure/http/controllers/SesionController";
 import { AuthMiddleware } from "./infrastructure/http/middlewares/authMiddleware";
 import { AuthRouter } from "./infrastructure/http/routes/AuthRouter";
+import { OAuthController } from "./infrastructure/http/controllers/OAuthController";
+import { OAuthRouter } from "./infrastructure/http/routes/OAuthRouter";
+import { PrismaCuentaOAuthRepository } from "./infrastructure/repository/PrismaCuentaOAuthRepository";
+import { crearProveedoresOAuth } from "./infrastructure/service/proveedoresOAuth";
 import { PrismaDosFactoresRepository } from "./infrastructure/repository/PrismaDosFactoresRepository";
 import { PrismaCuentaRepository } from "./infrastructure/repository/PrismaCuentaRepository";
 import { PrismaRefreshTokenRepository } from "./infrastructure/repository/PrismaRefreshTokenRepository";
@@ -45,6 +54,18 @@ const refreshTokenRepo = new PrismaRefreshTokenRepository();
 const cuentaRepo = new PrismaCuentaRepository();
 const dosFactoresRepo = new PrismaDosFactoresRepository();
 const cifrador = new AesGcmCifrador(env.TOTP_ENCRYPTION_KEY ?? env.JWT_SECRET);
+const cuentasOAuthRepo = new PrismaCuentaOAuthRepository();
+// Login social: sin client id y secret, el proveedor no aparece.
+const proveedoresOAuth = crearProveedoresOAuth({
+	google: {
+		clientId: env.GOOGLE_CLIENT_ID,
+		clientSecret: env.GOOGLE_CLIENT_SECRET,
+	},
+	github: {
+		clientId: env.GITHUB_CLIENT_ID,
+		clientSecret: env.GITHUB_CLIENT_SECRET,
+	},
+});
 /** Nombre que muestra la app de autenticación junto a la cuenta. */
 const EMISOR_TOTP = "Hexacore";
 
@@ -160,6 +181,31 @@ export const authModule: AppModule = {
 			}),
 			container.get(AUTH_TOKENS.AuthMiddleware),
 		);
+		const oauthRouter = new OAuthRouter(
+			new OAuthController(proveedoresOAuth, env.APP_URL, {
+				autenticar: new AutenticarOAuthUseCase(
+					usuarios,
+					hasher,
+					cuentasOAuthRepo,
+					cuentaRepo,
+					tokenService,
+					uow,
+				),
+				canjear: new CanjearOAuthUseCase(
+					tokenService,
+					cuentaRepo,
+					usuarios,
+					dosFactoresRepo,
+					sesiones,
+				),
+				vincular: new VincularOAuthUseCase(cuentasOAuthRepo),
+				listar: new ListarCuentasOAuthUseCase(cuentasOAuthRepo),
+				desvincular: new DesvincularOAuthUseCase(cuentasOAuthRepo),
+			}),
+			container.get(AUTH_TOKENS.AuthMiddleware),
+		);
+		// Antes que /api/auth para que sus rutas no las intercepte el router general.
+		app.route("/api/auth/oauth", oauthRouter.router);
 		app.route("/api/auth", router.router);
 	},
 	onStart(container) {

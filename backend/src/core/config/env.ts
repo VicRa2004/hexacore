@@ -30,6 +30,12 @@ const EnvSchema = z
 			.url("APP_URL debe ser una URL valida")
 			.default("http://localhost:5173")
 			.transform((url) => url.replace(/\/$/, "")),
+		// Login social: cada proveedor se activa solo con su client id y su secret.
+		// Callback a registrar en el proveedor: ${APP_URL}/api/auth/oauth/<proveedor>/callback
+		GOOGLE_CLIENT_ID: z.string().optional(),
+		GOOGLE_CLIENT_SECRET: z.string().optional(),
+		GITHUB_CLIENT_ID: z.string().optional(),
+		GITHUB_CLIENT_SECRET: z.string().optional(),
 		// Sin RESEND_API_KEY los correos se escriben en consola (ConsoleMailer).
 		RESEND_API_KEY: z.string().optional(),
 		MAIL_FROM: z.string().default("Hexacore <no-reply@localhost>"),
@@ -66,6 +72,10 @@ const envPrev = {
 	TOTP_ENCRYPTION_KEY: process.env.TOTP_ENCRYPTION_KEY || undefined,
 	CORS_ORIGIN: process.env.CORS_ORIGIN,
 	APP_URL: process.env.APP_URL || undefined,
+	GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || undefined,
+	GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || undefined,
+	GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || undefined,
+	GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || undefined,
 	RESEND_API_KEY: process.env.RESEND_API_KEY || undefined,
 	MAIL_FROM: process.env.MAIL_FROM || undefined,
 	STORAGE_DIR: process.env.STORAGE_DIR || undefined,

@@ -8,8 +8,11 @@ import type { TokenService } from "../../domain/service/TokenService";
 
 const HORA = 60 * 60 * 1000;
 
+/** Tokens que viajan por correo (el de OAuth no). */
+type TipoCorreoCuenta = Exclude<TipoTokenCuenta, "oauth_login">;
+
 const PLANTILLAS: Record<
-	TipoTokenCuenta,
+	TipoCorreoCuenta,
 	{ ruta: string; vigenciaMs: number; asunto: string; texto: string }
 > = {
 	recuperar_password: {
@@ -40,7 +43,7 @@ export class EmisorCorreosCuenta {
 		private readonly appUrl: string,
 	) {}
 
-	async enviar(usuario: Usuario, tipo: TipoTokenCuenta): Promise<void> {
+	async enviar(usuario: Usuario, tipo: TipoCorreoCuenta): Promise<void> {
 		const plantilla = PLANTILLAS[tipo];
 		const token = this.tokenService.generarRefreshToken();
 

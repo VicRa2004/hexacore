@@ -1,4 +1,8 @@
-export type TipoTokenCuenta = "recuperar_password" | "verificar_email";
+export type TipoTokenCuenta =
+	| "recuperar_password"
+	| "verificar_email"
+	// Código de un solo uso con el que la web canjea la sesión tras volver del proveedor OAuth.
+	| "oauth_login";
 
 /**
  * Estado de seguridad de la cuenta: tokens de un solo uso (recuperar contraseña,
