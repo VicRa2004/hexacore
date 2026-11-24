@@ -41,6 +41,7 @@ pnpm build:frontend     # compila el frontend para producción
 pnpm test:backend       # tests del backend con Bun
 pnpm test:frontend      # tests del frontend con Vitest
 pnpm test:e2e           # e2e del backend contra Postgres real (DATABASE_URL_TEST, se resetea)
+pnpm test:e2e:web       # e2e del frontend con Playwright (backend + Postgres de test)
 pnpm typecheck          # tsc --noEmit en backend y frontend
 pnpm gen:module <nombre> # módulo CRUD completo: backend + gen:api + frontend (ver skill crear-modulo)
 pnpm gen:module:web <nombre> # solo el frontend de un módulo backend ya existente (tras gen:api)

@@ -12,3 +12,5 @@ build
 *.tsbuildinfo
 pnpm-debug.log*
 backend/uploads
+frontend/playwright-report
+frontend/test-results
