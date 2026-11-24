@@ -63,7 +63,7 @@ frontend/src/
 ├── modules/                        # Lógica de dominio modular
 │   ├── auth/                       # Módulo de Autenticación
 │   │   ├── api/                    # Llamadas a la API de auth (authApi.ts)
-│   │   ├── components/             # Formularios (Login, Registro, Recuperar/Restablecer/CambiarPassword), SesionesCard, AvisoVerificacionEmail
+│   │   ├── components/             # Formularios (Login con paso 2FA, Registro, Recuperar/Restablecer/CambiarPassword), SesionesCard, DosFactoresCard (QR con uqr), AvisoVerificacionEmail
 │   │   ├── hooks/                  # Mutaciones de cuenta (useCuentaMutation.ts)
 │   │   ├── pages/                  # Login, Registro, RecuperarPassword, RestablecerPassword, VerificarEmail
 │   │   └── schemas/                # Validaciones Zod (authSchemas.ts)
@@ -95,7 +95,7 @@ frontend/src/
 │       ├── usuarios.tsx               # Vista /usuarios
 │       ├── roles.tsx               # Vista /roles
 │       ├── auditoria.tsx           # Vista /auditoria
-│       └── perfil.tsx              # Vista /perfil (pestañas Cuenta / Seguridad con sesiones)
+│       └── perfil.tsx              # Vista /perfil (pestañas Cuenta / Seguridad: contraseña, 2FA y sesiones)
 │
 ├── routeTree.gen.ts                # Árbol de rutas generado automáticamente por TanStack Router
 ├── index.css                       # Directivas y tema base de Tailwind CSS v4

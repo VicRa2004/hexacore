@@ -1,7 +1,13 @@
 import { apiClient } from "@/core/api/client";
 import type { AuthResponse } from "@/core/auth/types";
 import type { AuthTokens } from "@/core/auth/types";
-import type { Sesion } from "@/core/api/schema.gen";
+import type {
+	AltaDosFactores,
+	CodigosRecuperacion,
+	EstadoDosFactores,
+	Requiere2faResponse,
+	Sesion,
+} from "@/core/api/schema.gen";
 import type { LoginInput, RegistroInput } from "../schemas/authSchemas";
 
 interface Mensaje {
@@ -9,10 +15,61 @@ interface Mensaje {
 }
 
 export const authApi = {
-	async login(credentials: LoginInput): Promise<AuthResponse> {
-		const response = await apiClient.post<AuthResponse>(
+	// Con la verificación en dos pasos activa aún no hay sesión: llega `token2fa`.
+	async login(
+		credentials: LoginInput,
+	): Promise<AuthResponse | Requiere2faResponse> {
+		const response = await apiClient.post<AuthResponse | Requiere2faResponse>(
 			"/auth/login",
 			credentials,
+		);
+		return response.data;
+	},
+
+	async loginDosFactores(datos: {
+		token2fa: string;
+		codigo: string;
+	}): Promise<AuthResponse> {
+		const response = await apiClient.post<AuthResponse>(
+			"/auth/login/2fa",
+			datos,
+		);
+		return response.data;
+	},
+
+	async obtenerDosFactores(): Promise<EstadoDosFactores> {
+		const response = await apiClient.get<EstadoDosFactores>("/auth/2fa");
+		return response.data;
+	},
+
+	async iniciarDosFactores(): Promise<AltaDosFactores> {
+		const response = await apiClient.post<AltaDosFactores>("/auth/2fa/alta");
+		return response.data;
+	},
+
+	async activarDosFactores(codigo: string): Promise<CodigosRecuperacion> {
+		const response = await apiClient.post<CodigosRecuperacion>(
+			"/auth/2fa/activar",
+			{ codigo },
+		);
+		return response.data;
+	},
+
+	async desactivarDosFactores(datos: {
+		password: string;
+		codigo: string;
+	}): Promise<Mensaje> {
+		const response = await apiClient.post<Mensaje>(
+			"/auth/2fa/desactivar",
+			datos,
+		);
+		return response.data;
+	},
+
+	async regenerarCodigos(codigo: string): Promise<CodigosRecuperacion> {
+		const response = await apiClient.post<CodigosRecuperacion>(
+			"/auth/2fa/codigos-recuperacion",
+			{ codigo },
 		);
 		return response.data;
 	},

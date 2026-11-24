@@ -9,7 +9,8 @@ description: "Flujo de autenticación del backend: access token JWT + refresh to
 
 | Método | Ruta | Body | Respuesta |
 |--------|------|------|-----------|
-| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, usuario }` + cookie |
+| POST | `/api/auth/login` | `{ email, password }` | `{ accessToken, usuario }` + cookie, o `{ requiere2fa: true, token2fa }` sin cookie si el usuario tiene 2FA |
+| POST | `/api/auth/login/2fa` | `{ token2fa, codigo }` | `{ accessToken, usuario }` + cookie (código TOTP o de recuperación) |
 | POST | `/api/auth/registro` | `{ nombre, email, password }` | `{ accessToken, usuario }` + cookie |
 | POST | `/api/auth/refresh` | — (lee la cookie) | `{ accessToken }` + cookie nueva |
 | POST | `/api/auth/logout` | — (lee la cookie) | `{ mensaje }` y borra la cookie |
@@ -33,6 +34,27 @@ y reenviar verificación) 5 / hora, uso de tokens 10 / 15 min (responden `429`).
 Bloqueo por cuenta (además del límite por IP, contra ataques distribuidos): 5
 fallos seguidos bloquean la cuenta 15 min (`429`, sin comprobar la contraseña).
 Un login correcto o restablecer la contraseña reinician el contador.
+
+## Verificación en dos pasos (TOTP)
+
+- Opcional por usuario. Endpoints (Bearer): `GET /2fa` (`{ activo, codigosRestantes }`),
+  `POST /2fa/alta` (`{ secreto, otpauthUri }`, el alta queda pendiente),
+  `POST /2fa/activar` `{ codigo }` (activa y devuelve 10 códigos de recuperación),
+  `POST /2fa/desactivar` `{ password, codigo }` y `POST /2fa/codigos-recuperacion`
+  `{ codigo }` (los regenera). Los códigos de recuperación solo se ven en esas respuestas.
+- TOTP RFC 6238 (SHA-1, 6 dígitos, 30 s, ±1 paso) con `node:crypto`
+  (`application/services/totp.ts`). Un código ya aceptado no se reutiliza
+  (`usr_totp_ultimo_paso`).
+- Secreto cifrado con AES-256-GCM (`AesGcmCifrador`) con `TOTP_ENCRYPTION_KEY`, o
+  derivado de `JWT_SECRET` si no está (rotar `JWT_SECRET` invalidaría entonces todos
+  los 2FA). Códigos de recuperación en `codigo_recuperacion` como hash SHA-256.
+- `token2fa`: JWT de 5 min firmado con una clave derivada de `JWT_SECRET`, así que no
+  vale como access token. `/login/2fa` tiene límite propio (10 / 15 min por IP) y
+  comparte el bloqueo por cuenta: con 2FA, la contraseña correcta **no** reinicia el
+  contador (lo hace el código), para que repetirla no dé intentos ilimitados.
+- Con sesión, un código incorrecto responde `400` (un `401` haría renovar el token en
+  la web). Activar/desactivar publican `auth.2fa_activado` / `auth.2fa_desactivado`
+  (auditoría).
 
 ## Tokens de un solo uso y correos
 
