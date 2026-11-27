@@ -2,6 +2,7 @@ import { Menu as IconoMenu, Search } from "lucide-react";
 import { useLocation } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/core/utils/cn";
+import { CampanaNotificaciones } from "@/modules/notificaciones/components/CampanaNotificaciones";
 import { MenuUsuario } from "./MenuUsuario";
 import { Migas } from "./Migas";
 import { PaletaComandos } from "./PaletaComandos";
@@ -93,6 +94,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 								Ctrl K
 							</kbd>
 						</button>
+						<CampanaNotificaciones />
 						<MenuUsuario />
 					</div>
 				</header>
