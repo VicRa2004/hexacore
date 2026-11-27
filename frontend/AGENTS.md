@@ -70,6 +70,10 @@ frontend/src/
 │   │
 │   ├── auditoria/                  # Registro de auditoría (/auditoria) y ActividadReciente del dashboard
 │   │
+│   ├── notificaciones/             # Campana de notificaciones en la barra superior (módulo backend `notificaciones`)
+│   │   ├── api/ hooks/ utils/
+│   │   └── components/             # CampanaNotificaciones.tsx
+│   │
 │   ├── roles/                      # Roles, permisos y su asignación a usuarios (módulo backend `autorizacion`)
 │   │   ├── api/ hooks/ schemas/ utils/
 │   │   ├── components/             # RolesLista + RolEditor (PermisosMatriz), CrearRolForm, AsignacionUsuarioPanel (ExcepcionesPermisos)
@@ -110,7 +114,8 @@ Parte frontend de la checklist de `backend/AGENTS.md` ("Cómo quitar un módulo"
 1. Borrar `src/modules/<nombre>/`.
 2. Borrar sus rutas en `src/routes/` (`routeTree.gen.ts` se regenera solo en `dev`/`build`).
 3. Quitar sus enlaces de navegación en `SECCIONES` de `src/core/components/layout/Sidebar.tsx`.
-4. `pnpm gen:api` desde la raíz (el backend ya no expone sus endpoints) y `pnpm verify`.
+4. Si el módulo añade widgets al layout (p. ej. `notificaciones` con `<CampanaNotificaciones />` en `src/core/components/layout/MainLayout.tsx`), quitar su referencia.
+5. `pnpm gen:api` desde la raíz (el backend ya no expone sus endpoints) y `pnpm verify`.
 
 ---
 
