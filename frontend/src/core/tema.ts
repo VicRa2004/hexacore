@@ -96,3 +96,19 @@ export function cambiarAcento(nuevo: Acento) {
 export function useAcento(): Acento {
 	return useSyncExternalStore(suscribir, () => acento);
 }
+
+export function tieneAcentoPersonal(): boolean {
+	try {
+		const guardado = localStorage.getItem(CLAVE_ACENTO);
+		return Boolean(guardado && guardado in ACENTOS);
+	} catch {
+		return false;
+	}
+}
+
+/** Aplica el tono de marca configurado por defecto si el usuario no eligió uno personal. */
+export function aplicarColorMarcaDefecto(tono: number): void {
+	if (tieneAcentoPersonal()) return;
+	const limpio = Math.max(0, Math.min(360, Math.round(tono)));
+	document.documentElement.style.setProperty("--marca-h", String(limpio));
+}

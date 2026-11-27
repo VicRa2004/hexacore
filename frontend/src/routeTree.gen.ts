@@ -18,6 +18,7 @@ import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as RestablecerPasswordRouteImport } from './routes/restablecer-password'
 import { Route as UiRouteImport } from './routes/ui'
 import { Route as VerificarEmailRouteImport } from './routes/verificar-email'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAuditoriaRouteImport } from './routes/_authenticated/auditoria'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -68,6 +69,11 @@ const VerificarEmailRoute = VerificarEmailRouteImport.update({
   path: '/verificar-email',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAuditoriaRoute = AuthenticatedAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
   '/auditoria': typeof AuthenticatedAuditoriaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/restablecer-password': typeof RestablecerPasswordRoute
   '/ui': typeof UiRoute
   '/verificar-email': typeof VerificarEmailRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/auditoria': typeof AuthenticatedAuditoriaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/restablecer-password'
     | '/ui'
     | '/verificar-email'
+    | '/ajustes'
     | '/auditoria'
     | '/dashboard'
     | '/perfil'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/restablecer-password'
     | '/ui'
     | '/verificar-email'
+    | '/ajustes'
     | '/auditoria'
     | '/dashboard'
     | '/perfil'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/restablecer-password'
     | '/ui'
     | '/verificar-email'
+    | '/_authenticated/ajustes'
     | '/_authenticated/auditoria'
     | '/_authenticated/dashboard'
     | '/_authenticated/perfil'
@@ -267,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerificarEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/auditoria': {
       id: '/_authenticated/auditoria'
       path: '/auditoria'
@@ -306,6 +325,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedAuditoriaRoute: typeof AuthenticatedAuditoriaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -314,6 +334,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedAuditoriaRoute: AuthenticatedAuditoriaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,

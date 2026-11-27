@@ -5,9 +5,11 @@ export class ResendMailer implements Mailer {
 	constructor(
 		private readonly apiKey: string,
 		private readonly remitente: string,
+		private readonly obtenerRemitente?: () => Promise<string>,
 	) {}
 
 	async enviar({ para, asunto, texto }: Correo): Promise<void> {
+		const from = (await this.obtenerRemitente?.()) || this.remitente;
 		const res = await fetch("https://api.resend.com/emails", {
 			method: "POST",
 			headers: {
@@ -15,7 +17,7 @@ export class ResendMailer implements Mailer {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				from: this.remitente,
+				from,
 				to: para,
 				subject: asunto,
 				text: texto,

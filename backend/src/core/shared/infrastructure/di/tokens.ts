@@ -1,3 +1,4 @@
+import type { LectorAjustes } from "@/core/shared/domain/AjustesSistema";
 import type { Almacenamiento } from "@/core/shared/domain/Almacenamiento";
 import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { Mailer } from "@/core/shared/domain/Mailer";
@@ -16,4 +17,5 @@ export const TOKENS = {
 	UnitOfWork: token<UnitOfWork>("UnitOfWork"),
 	Almacenamiento: token<Almacenamiento>("Almacenamiento"),
 	Telemetria: token<Telemetria>("Telemetria"),
+	LectorAjustes: token<LectorAjustes>("LectorAjustes"),
 } as const;

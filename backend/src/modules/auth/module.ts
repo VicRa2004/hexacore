@@ -88,6 +88,7 @@ export const authModule: AppModule = {
 			container.get(TOKENS.Mailer),
 			env.APP_URL,
 		);
+		const lectorAjustes = container.get(TOKENS.LectorAjustes);
 		const verificador = new VerificadorDosFactores(
 			dosFactoresRepo,
 			cifrador,
@@ -112,7 +113,7 @@ export const authModule: AppModule = {
 				),
 			}),
 			new RegistroController(
-				new RegistroUseCase(usuarios, hasher, sesiones, correos),
+				new RegistroUseCase(usuarios, hasher, sesiones, correos, lectorAjustes),
 			),
 			new RefreshTokenController(
 				new RefreshTokenUseCase(
@@ -192,6 +193,7 @@ export const authModule: AppModule = {
 					cuentaRepo,
 					tokenService,
 					uow,
+					lectorAjustes,
 				),
 				canjear: new CanjearOAuthUseCase(
 					tokenService,

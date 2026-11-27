@@ -7,12 +7,14 @@ import {
 	Palette,
 	PanelLeftClose,
 	PanelLeftOpen,
+	Settings,
 	ShieldCheck,
 	Users,
 } from "lucide-react";
 import { type Permiso, usePermisos } from "@/core/auth/permisos";
 import { Tooltip } from "@/core/components/ui/Tooltip";
 import { cn } from "@/core/utils/cn";
+import { useAjustesPublicos } from "@/modules/ajustes/hooks/useAjustesQuery";
 
 export interface Enlace {
 	to: LinkProps["to"];
@@ -50,6 +52,12 @@ export const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
 				etiqueta: "Auditoría",
 				icono: History,
 				permiso: "auditoria:leer",
+			},
+			{
+				to: "/ajustes",
+				etiqueta: "Ajustes",
+				icono: Settings,
+				permiso: "ajustes:leer",
 			},
 		],
 	},
@@ -106,6 +114,7 @@ function EnlaceNav({
 
 export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
 	const { puede } = usePermisos();
+	const { ajustes } = useAjustesPublicos();
 	const secciones = SECCIONES.map((s) => ({
 		...s,
 		enlaces: s.enlaces.filter((e) => !e.permiso || puede(e.permiso)),
@@ -121,12 +130,20 @@ export function Sidebar({ plegado, onPlegar, onNavegar }: SidebarProps) {
 					plegado && "justify-center px-0",
 				)}
 			>
-				<span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-acento text-sobre-acento shadow-sm">
-					<Hexagon className="size-4.5 stroke-[2.4]" />
-				</span>
+				{ajustes.logoUrl ? (
+					<img
+						src={ajustes.logoUrl}
+						alt={ajustes.nombreApp}
+						className="size-8 shrink-0 rounded-lg object-contain"
+					/>
+				) : (
+					<span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-acento text-sobre-acento shadow-sm">
+						<Hexagon className="size-4.5 stroke-[2.4]" />
+					</span>
+				)}
 				{!plegado && (
-					<span className="text-base font-semibold tracking-tight">
-						Hexacore
+					<span className="truncate text-base font-semibold tracking-tight">
+						{ajustes.nombreApp}
 					</span>
 				)}
 			</Link>

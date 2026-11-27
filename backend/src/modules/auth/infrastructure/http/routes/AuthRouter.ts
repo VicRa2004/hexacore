@@ -147,6 +147,7 @@ export class AuthRouter {
 					"Usuario registrado exitosamente y sesión iniciada",
 				),
 				400: errorResponse("Validación fallida o correo ya registrado"),
+				403: errorResponse("El registro público está desactivado"),
 				429: { description: "Demasiados registros (máx. 4 por IP cada hora)" },
 			},
 		});

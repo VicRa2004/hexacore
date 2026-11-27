@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Hexagon } from "lucide-react";
+import { useAjustesPublicos } from "@/modules/ajustes/hooks/useAjustesQuery";
 import { SelectorTema } from "./SelectorTema";
 
 interface AuthLayoutProps {
@@ -9,6 +10,8 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+	const { ajustes } = useAjustesPublicos();
+
 	return (
 		<div className="relative min-h-screen flex items-center justify-center bg-fondo px-4 py-12">
 			<div className="absolute top-4 right-4 z-10">
@@ -21,9 +24,17 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 			/>
 			<div className="relative w-full max-w-sm space-y-8">
 				<div className="text-center">
-					<div className="mb-5 inline-flex size-11 items-center justify-center rounded-xl bg-acento text-sobre-acento shadow">
-						<Hexagon className="size-6 stroke-[2.4]" />
-					</div>
+					{ajustes.logoUrl ? (
+						<img
+							src={ajustes.logoUrl}
+							alt={ajustes.nombreApp}
+							className="mx-auto mb-5 size-11 rounded-xl object-contain"
+						/>
+					) : (
+						<div className="mb-5 inline-flex size-11 items-center justify-center rounded-xl bg-acento text-sobre-acento shadow">
+							<Hexagon className="size-6 stroke-[2.4]" />
+						</div>
+					)}
 					<h1 className="text-2xl font-semibold tracking-tight text-tinta">
 						{title}
 					</h1>

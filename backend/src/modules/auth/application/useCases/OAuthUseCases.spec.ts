@@ -116,6 +116,32 @@ describe("AutenticarOAuthUseCase", () => {
 		expect(usuarios.buscarPorEmail).not.toHaveBeenCalled();
 		expect(cuentaRepo.crearToken).not.toHaveBeenCalled();
 	});
+
+	it("rechaza el alta de un usuario nuevo con 403 si el registro público está cerrado", async () => {
+		const ajustesCerrados = {
+			obtener: mock(async () => ({ registroPublicoAbierto: false })),
+			invalidar: mock(),
+		};
+		const cerrado = new AutenticarOAuthUseCase(
+			usuarios as never,
+			hasher as never,
+			cuentasOAuth as never,
+			cuentaRepo as never,
+			tokenService as never,
+			uow,
+			ajustesCerrados as never,
+		);
+
+		await expect(cerrado.ejecutar("google", perfil())).rejects.toMatchObject({
+			code: 403,
+			message: "El registro público está desactivado",
+		});
+		expect(usuarios.crear).not.toHaveBeenCalled();
+
+		// Un usuario ya existente sí puede iniciar sesión con OAuth
+		cuentasOAuth.buscarUsuarioId.mockResolvedValue(3);
+		expect(await cerrado.ejecutar("google", perfil())).toBe("aleatorio");
+	});
 });
 
 describe("CanjearOAuthUseCase", () => {
