@@ -3,6 +3,7 @@ import { usuarioModule } from "@/core/usuario/module";
 import { authModule } from "@/modules/auth/module";
 import { autorizacionModule } from "@/modules/autorizacion/module";
 import { auditoriaModule } from "@/modules/auditoria/module";
+import { ajustesModule } from "@/modules/ajustes/module";
 import { eventosModule } from "@/modules/eventos/module";
 
 /**
@@ -15,4 +16,5 @@ export const modules: AppModule[] = [
 	autorizacionModule,
 	eventosModule,
 	auditoriaModule,
+	ajustesModule,
 ];

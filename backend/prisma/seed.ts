@@ -41,6 +41,8 @@ export async function sembrarCatalogo() {
 		{ recurso: "asignaciones", accion: "leer" },
 		{ recurso: "asignaciones", accion: "actualizar" },
 		{ recurso: "auditoria", accion: "leer" },
+		{ recurso: "ajustes", accion: "leer" },
+		{ recurso: "ajustes", accion: "actualizar" },
 	];
 
 	for (const p of datosPermisos) {

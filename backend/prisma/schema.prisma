@@ -234,3 +234,17 @@ model Auditoria {
   @@index([evento])
   @@map("auditoria")
 }
+
+// ─────────────────────────────────────────────
+//  7. Ajustes del sistema (módulo opcional ajustes)
+// ─────────────────────────────────────────────
+
+/// Configuración clave/valor editable desde la aplicación.
+/// Los valores se serializan como JSON y se validan con Zod en el backend.
+model Ajuste {
+  clave     String   @id @map("aju_clave") @db.VarChar(100)
+  valor     Json     @map("aju_valor")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ajuste")
+}

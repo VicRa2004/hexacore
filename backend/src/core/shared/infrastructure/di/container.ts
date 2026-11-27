@@ -18,9 +18,27 @@ const container = new DependencyContainer();
 // Infraestructura compartida; los módulos se registran después y pueden sobrescribirla.
 container.set(TOKENS.EventBus, () => new NoopEventBus());
 container.set(TOKENS.PermisoGuard, () => new PermitirAutenticadoGuard());
+container.set(TOKENS.LectorAjustes, () => ({
+	async obtener() {
+		return {
+			nombreApp: "Hexacore",
+			colorMarca: 277,
+			remitenteCorreo: env.MAIL_FROM,
+			registroPublicoAbierto: true,
+			logoClave: null,
+			faviconClave: null,
+		};
+	},
+	invalidar() {},
+}));
 container.set(TOKENS.Mailer, () =>
 	env.RESEND_API_KEY
-		? new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM)
+		? new ResendMailer(env.RESEND_API_KEY, env.MAIL_FROM, () =>
+				container
+					.get(TOKENS.LectorAjustes)
+					.obtener()
+					.then((a) => a.remitenteCorreo),
+			)
 		: new ConsoleMailer(env.NODE_ENV === "prod"),
 );
 container.set(TOKENS.Scheduler, () => new IntervalScheduler());
