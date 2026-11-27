@@ -44,6 +44,7 @@ model Usuario {
   tokensCuenta        TokenCuenta[]
   codigosRecuperacion CodigoRecuperacion[]
   cuentasOAuth        CuentaOAuth[]
+  notificaciones      Notificacion[]
 
   @@map("usuario")
 }
@@ -236,7 +237,29 @@ model Auditoria {
 }
 
 // ─────────────────────────────────────────────
-//  7. Ajustes del sistema (módulo opcional ajustes)
+//  7. Notificaciones (módulo opcional notificaciones)
+// ─────────────────────────────────────────────
+
+/// Notificaciones dentro de la app para un usuario, generadas por eventos de dominio.
+model Notificacion {
+  id        Int       @id @default(autoincrement()) @map("not_id")
+  usuarioId Int       @map("not_fkusuario")
+  /// Clave del tipo de notificación (p. ej. "autorizacion.asignacion_actualizada", "auth.password_cambiada", "auth.sesion_iniciada")
+  tipo      String    @map("not_tipo") @db.VarChar(100)
+  /// Datos estructurados para renderizar el mensaje en la interfaz (sin secretos)
+  datos     Json      @map("not_datos")
+  leidaEn   DateTime? @map("not_leida_en")
+  createdAt DateTime  @default(now()) @map("not_created_at")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, leidaEn, createdAt])
+  @@index([createdAt])
+  @@map("notificacion")
+}
+
+// ─────────────────────────────────────────────
+//  8. Ajustes del sistema (módulo opcional ajustes)
 // ─────────────────────────────────────────────
 
 /// Configuración clave/valor editable desde la aplicación.

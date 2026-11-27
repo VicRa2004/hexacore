@@ -73,7 +73,10 @@ export const autorizacionModule: AppModule = {
 			guard,
 			new AsignacionController({
 				obtener: new ObtenerAsignacionUsuarioUseCase(rolRepo),
-				actualizar: new ActualizarAsignacionUsuarioUseCase(rolRepo),
+				actualizar: new ActualizarAsignacionUsuarioUseCase(
+					rolRepo,
+					container.get(TOKENS.EventBus),
+				),
 			}),
 		);
 		app.route("/api/asignaciones", asignacionRouter.router);

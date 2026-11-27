@@ -38,6 +38,7 @@ export async function api(
 		token?: string;
 		cookie?: string;
 		ip?: string;
+		userAgent?: string;
 	} = {},
 ): Promise<Response> {
 	const headers: Record<string, string> = {
@@ -46,6 +47,7 @@ export async function api(
 	if (init.token) headers.Authorization = `Bearer ${init.token}`;
 	if (init.cookie) headers.Cookie = init.cookie;
 	if (init.ip) headers["X-Forwarded-For"] = init.ip;
+	if (init.userAgent) headers["User-Agent"] = init.userAgent;
 
 	return app.request(path, {
 		method: init.method ?? "GET",
@@ -64,12 +66,16 @@ export function refreshCookie(res: Response): string {
 }
 
 /** Login de preparación: con IP propia para no gastar el cupo de /login de los tests de auth. */
-export async function login(email: string): Promise<string> {
+export async function login(
+	email: string,
+	userAgent?: string,
+): Promise<string> {
 	ultimaIp++;
 	const res = await api("/api/auth/login", {
 		method: "POST",
 		body: { email, password: PASSWORD },
 		ip: `10.0.0.${ultimaIp}`,
+		userAgent,
 	});
 	if (res.status !== 200) throw new Error(`Login fallido: ${res.status}`);
 	return ((await res.json()) as { accessToken: string }).accessToken;

@@ -57,7 +57,7 @@ export class CanjearOAuthUseCase {
 		}
 
 		return {
-			...(await this.emisorSesion.emitir(usuario)),
+			...(await this.emisorSesion.emitir(usuario, "oauth")),
 			usuario: UsuarioMapper.toDto(usuario),
 		};
 	}

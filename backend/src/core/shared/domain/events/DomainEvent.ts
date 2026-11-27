@@ -3,5 +3,5 @@ export interface DomainEvent {
 	occurredOn: Date;
 	data: unknown;
 	/** Quién y en qué petición: lo rellena el bus al publicar (auditoría, logs). */
-	meta?: { requestId?: string; usuarioId?: number };
+	meta?: { requestId?: string; usuarioId?: number; userAgent?: string };
 }

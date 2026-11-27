@@ -2985,6 +2985,175 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notificaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar notificaciones del usuario autenticado */
+        get: {
+            parameters: {
+                query?: {
+                    pagina?: string;
+                    limite?: string;
+                    /** @description Si es true, devuelve solo las notificaciones no leídas */
+                    soloNoLeidas?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Notificaciones paginadas y contador de no leídas */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificacionesPagina"];
+                    };
+                };
+                /** @description Parámetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/notificaciones/leer-todas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Marcar todas las notificaciones pendientes como leídas */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Cantidad de notificaciones actualizadas */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MarcarTodasLeidasRespuesta"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/notificaciones/{id}/leer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Marcar una notificación como leída */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Notificación marcada como leída */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Notificacion"];
+                    };
+                };
+                /** @description Id inválido */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description No autenticado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Notificación no encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
     "/api/ajustes/publicos": {
         parameters: {
             query?: never;
@@ -3562,6 +3731,43 @@ export interface components {
             /** Format: date-time */
             ocurridoEn: string;
         };
+        NotificacionesPagina: {
+            datos: components["schemas"]["Notificacion"][];
+            /** @example 1 */
+            pagina: number;
+            /** @example 5 */
+            totalElementos: number;
+            /** @example 1 */
+            totalPaginas: number;
+            /** @example 2 */
+            noLeidas: number;
+        };
+        Notificacion: {
+            /** @example 1 */
+            id: number;
+            /** @example autorizacion.asignacion_actualizada */
+            tipo: string;
+            /**
+             * @example {
+             *       "rolesAgregados": [
+             *         "ADMIN"
+             *       ],
+             *       "rolesQuitados": [],
+             *       "permisosDirectosCambiados": false
+             *     }
+             */
+            datos?: unknown;
+            /** @example false */
+            leida: boolean;
+            /** Format: date-time */
+            leidaEn: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MarcarTodasLeidasRespuesta: {
+            /** @example 3 */
+            actualizadas: number;
+        };
         AjustesPublicosDto: {
             /** @example Hexacore */
             nombreApp: string;
@@ -3607,6 +3813,9 @@ export type PermisoDto = components['schemas']['PermisoDto'];
 export type RolDto = components['schemas']['RolDto'];
 export type AsignacionUsuario = components['schemas']['AsignacionUsuario'];
 export type RegistroAuditoria = components['schemas']['RegistroAuditoria'];
+export type NotificacionesPagina = components['schemas']['NotificacionesPagina'];
+export type Notificacion = components['schemas']['Notificacion'];
+export type MarcarTodasLeidasRespuesta = components['schemas']['MarcarTodasLeidasRespuesta'];
 export type AjustesPublicosDto = components['schemas']['AjustesPublicosDto'];
 export type AjustesDto = components['schemas']['AjustesDto'];
 export type ActualizarAjustesDto = components['schemas']['ActualizarAjustesDto'];
