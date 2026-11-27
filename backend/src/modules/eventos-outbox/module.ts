@@ -1,5 +1,6 @@
 import type { AppModule } from "@/core/shared/infrastructure/di/AppModule";
 import { TOKENS } from "@/core/shared/infrastructure/di/tokens";
+import { obtenerMeter } from "@/core/shared/infrastructure/telemetria";
 import { OutboxEventBus } from "./infrastructure/OutboxEventBus";
 
 const bus = new OutboxEventBus();
@@ -14,6 +15,12 @@ export const eventosOutboxModule: AppModule = {
 		container.set(TOKENS.EventBus, () => bus);
 	},
 	onStart(container) {
+		// Tamaño de la cola en cada exportación de métricas (no-op sin OpenTelemetry).
+		obtenerMeter()
+			.createObservableGauge("outbox.pendientes")
+			.addCallback(async (resultado) => {
+				resultado.observe(await bus.contarPendientes());
+			});
 		const scheduler = container.get(TOKENS.Scheduler);
 		scheduler.programar("eventos-outbox.despachar", 2000, async () => {
 			// Vacía la cola en lotes antes de esperar al siguiente tick.

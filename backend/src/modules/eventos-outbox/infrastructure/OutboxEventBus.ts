@@ -7,7 +7,7 @@ import type {
 } from "@/core/shared/domain/events/EventBus";
 import { contexto } from "@/core/shared/infrastructure/contexto";
 import { log } from "@/core/shared/infrastructure/logger";
-import { conSpan } from "@/core/shared/infrastructure/telemetria";
+import { conSpan, obtenerMeter } from "@/core/shared/infrastructure/telemetria";
 import type { Prisma } from "@/generated/prisma/client";
 
 /** Tras estos intentos fallidos el evento se queda en la tabla para revisarlo a mano. */
@@ -85,6 +85,13 @@ export class OutboxEventBus implements EventBus {
 		return filas.length;
 	}
 
+	/** Eventos aún por entregar (excluye los que agotaron los intentos). */
+	contarPendientes(): Promise<number> {
+		return prisma.eventoOutbox.count({
+			where: { procesadoEn: null, intentos: { lt: MAX_INTENTOS } },
+		});
+	}
+
 	/** Borra los eventos ya entregados hace más de `dias` días. */
 	async purgarProcesados(dias = 7): Promise<void> {
 		await prisma.eventoOutbox.deleteMany({
@@ -130,7 +137,9 @@ export class OutboxEventBus implements EventBus {
 				where: { id: fila.id },
 				data: { procesadoEn: new Date(), reservadoHasta: null },
 			});
+			this.contarEntrega("ok");
 		} catch (error) {
+			this.contarEntrega("error");
 			log.error(`[Outbox] Falló la entrega de "${fila.nombre}" (#${fila.id})`, {
 				error: String(error),
 				intento: fila.intentos + 1,
@@ -144,5 +153,9 @@ export class OutboxEventBus implements EventBus {
 				},
 			});
 		}
+	}
+
+	private contarEntrega(resultado: "ok" | "error"): void {
+		obtenerMeter().createCounter("outbox.entregas").add(1, { resultado });
 	}
 }

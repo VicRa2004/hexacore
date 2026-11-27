@@ -35,6 +35,24 @@ describe("OutboxEventBus (e2e)", () => {
 		expect(await bus.despacharPendientes()).toBe(0);
 	});
 
+	it("contarPendientes debería excluir los entregados y los que agotaron los intentos", async () => {
+		const bus = new OutboxEventBus();
+		await bus.publish(evento());
+		await bus.publish(evento());
+		expect(await bus.contarPendientes()).toBe(2);
+
+		await bus.despacharPendientes(1);
+		const restante = await prisma.eventoOutbox.findFirstOrThrow({
+			where: { procesadoEn: null },
+		});
+		await prisma.eventoOutbox.update({
+			where: { id: restante.id },
+			data: { intentos: 10 },
+		});
+
+		expect(await bus.contarPendientes()).toBe(0);
+	});
+
 	it("no debería guardar el evento si la transacción del caso de uso falla", async () => {
 		const bus = new OutboxEventBus();
 
