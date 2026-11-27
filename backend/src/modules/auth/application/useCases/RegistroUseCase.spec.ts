@@ -118,4 +118,33 @@ describe("RegistroUseCase", () => {
 		expect(mockUsuarioRepository.crear).not.toHaveBeenCalled();
 		expect(mockRefreshTokenRepo.crear).not.toHaveBeenCalled();
 	});
+
+	it("debería rechazar el registro con 403 cuando está cerrado en ajustes", async () => {
+		const ajustesCerrados = {
+			obtener: mock(async () => ({ registroPublicoAbierto: false })),
+			invalidar: mock(),
+		};
+		const cerrado = new RegistroUseCase(
+			mockUsuarioRepository as never,
+			mockPasswordHasher as never,
+			new EmisorSesion(
+				mockTokenService as never,
+				mockRefreshTokenRepo as never,
+			),
+			mockCorreos as never,
+			ajustesCerrados as never,
+		);
+
+		await expect(
+			cerrado.ejecutar({
+				nombre: "Ana",
+				email: "ana@x.com",
+				password: "secreta123",
+			}),
+		).rejects.toMatchObject({
+			code: 403,
+			message: "El registro público está desactivado",
+		});
+		expect(mockUsuarioRepository.crear).not.toHaveBeenCalled();
+	});
 });
