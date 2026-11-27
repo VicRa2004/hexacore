@@ -1,6 +1,6 @@
 import type { Scheduler } from "@/core/shared/domain/Scheduler";
 import { log } from "../logger";
-import { conSpan } from "../telemetria";
+import { conSpan, obtenerMeter } from "../telemetria";
 
 /**
  * Scheduler en proceso con `setInterval`. Una ejecución no se solapa con la
@@ -18,14 +18,24 @@ export class IntervalScheduler implements Scheduler {
 			setInterval(async () => {
 				if (enCurso) return;
 				enCurso = true;
+				const inicio = performance.now();
+				let resultado = "ok";
 				try {
 					await conSpan(`scheduler.${nombre}`, () => tarea(), {
 						attributes: { "scheduler.tarea": nombre },
 					});
 				} catch (error) {
+					resultado = "error";
 					log.error(`Falló la tarea "${nombre}"`, { error: String(error) });
 				} finally {
 					enCurso = false;
+					// Sin OpenTelemetry activo el meter es no-op.
+					const meter = obtenerMeter();
+					const atributos = { "scheduler.tarea": nombre, resultado };
+					meter.createCounter("scheduler.ejecuciones").add(1, atributos);
+					meter
+						.createHistogram("scheduler.duracion", { unit: "s" })
+						.record((performance.now() - inicio) / 1000, atributos);
 				}
 			}, cadaMs),
 		);
