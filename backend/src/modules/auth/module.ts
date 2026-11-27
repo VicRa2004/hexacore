@@ -79,15 +79,15 @@ export const authModule: AppModule = {
 	mount(app, container) {
 		const usuarios = container.get(USUARIO_TOKENS.UsuarioRepository);
 		const hasher = container.get(USUARIO_TOKENS.PasswordHasher);
-		const sesiones = new EmisorSesion(tokenService, refreshTokenRepo);
+		const eventBus = container.get(TOKENS.EventBus);
+		const uow = container.get(TOKENS.UnitOfWork);
+		const sesiones = new EmisorSesion(tokenService, refreshTokenRepo, eventBus);
 		const correos = new EmisorCorreosCuenta(
 			tokenService,
 			cuentaRepo,
 			container.get(TOKENS.Mailer),
 			env.APP_URL,
 		);
-		const eventBus = container.get(TOKENS.EventBus);
-		const uow = container.get(TOKENS.UnitOfWork);
 		const verificador = new VerificadorDosFactores(
 			dosFactoresRepo,
 			cifrador,
@@ -134,6 +134,7 @@ export const authModule: AppModule = {
 					usuarios,
 					hasher,
 					refreshTokenRepo,
+					eventBus,
 				),
 				verificarEmail: new VerificarEmailUseCase(tokenService, cuentaRepo),
 				reenviarVerificacion: new ReenviarVerificacionUseCase(
@@ -145,6 +146,7 @@ export const authModule: AppModule = {
 					hasher,
 					refreshTokenRepo,
 					sesiones,
+					eventBus,
 				),
 				cerrarSesiones: new CerrarSesionesUseCase(refreshTokenRepo),
 			}),

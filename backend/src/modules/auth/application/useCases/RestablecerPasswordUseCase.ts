@@ -1,5 +1,7 @@
 import { BaseError } from "@/core/shared/domain/error/BaseError";
+import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import type { PasswordHasher, UsuarioRepository } from "@/core/usuario";
+import { PasswordCambiadaEvent } from "../../domain/event/PasswordCambiadaEvent";
 import type { CuentaRepository } from "../../domain/repository/CuentaRepository";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 import type { TokenService } from "../../domain/service/TokenService";
@@ -16,6 +18,7 @@ export class RestablecerPasswordUseCase {
 		private readonly usuarioRepository: UsuarioRepository,
 		private readonly passwordHasher: PasswordHasher,
 		private readonly refreshTokenRepo: RefreshTokenRepository,
+		private readonly eventBus?: EventBus,
 	) {}
 
 	async ejecutar(dto: RestablecerPasswordDto): Promise<void> {
@@ -38,5 +41,14 @@ export class RestablecerPasswordUseCase {
 		await this.refreshTokenRepo.revocarTodosPorUsuarioId(usuario.getId());
 		await this.cuentaRepo.reiniciarFallos(usuario.getId());
 		await this.cuentaRepo.marcarEmailVerificado(usuario.getId());
+
+		if (this.eventBus) {
+			await this.eventBus.publish(
+				new PasswordCambiadaEvent({
+					usuarioId: usuario.getId(),
+					metodo: "restablecimiento",
+				}),
+			);
+		}
 	}
 }

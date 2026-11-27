@@ -1,9 +1,11 @@
 import { BaseError } from "@/core/shared/domain/error/BaseError";
+import type { EventBus } from "@/core/shared/domain/events/EventBus";
 import {
 	type PasswordHasher,
 	UsuarioNoEncontradoError,
 	type UsuarioRepository,
 } from "@/core/usuario";
+import { PasswordCambiadaEvent } from "../../domain/event/PasswordCambiadaEvent";
 import type { RefreshTokenRepository } from "../../domain/repository/RefreshTokenRepository";
 import type { CambiarPasswordDto } from "../dtos/CambiarPasswordDto";
 import type { EmisorSesion } from "../services/EmisorSesion";
@@ -18,6 +20,7 @@ export class CambiarPasswordUseCase {
 		private readonly passwordHasher: PasswordHasher,
 		private readonly refreshTokenRepo: RefreshTokenRepository,
 		private readonly emisorSesion: EmisorSesion,
+		private readonly eventBus?: EventBus,
 	) {}
 
 	async ejecutar(
@@ -40,6 +43,12 @@ export class CambiarPasswordUseCase {
 		});
 		await this.usuarioRepository.actualizar(usuario);
 		await this.refreshTokenRepo.revocarTodosPorUsuarioId(usuarioId);
+
+		if (this.eventBus) {
+			await this.eventBus.publish(
+				new PasswordCambiadaEvent({ usuarioId, metodo: "cambio" }),
+			);
+		}
 
 		return this.emisorSesion.emitir(usuario);
 	}

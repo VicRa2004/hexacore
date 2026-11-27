@@ -42,7 +42,7 @@ export class LoginDosFactoresUseCase {
 		}
 
 		return {
-			...(await this.emisorSesion.emitir(usuario)),
+			...(await this.emisorSesion.emitir(usuario, "2fa")),
 			usuario: UsuarioMapper.toDto(usuario),
 		};
 	}
