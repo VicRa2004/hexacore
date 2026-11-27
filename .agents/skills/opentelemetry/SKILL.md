@@ -56,8 +56,10 @@ Una vez definida `OTEL_EXPORTER_OTLP_ENDPOINT`, sin escribir una sola línea ext
 3. **Eventos de dominio (`InMemoryEventBus` y `OutboxEventBus`):**
    - `InMemoryEventBus.publish` crea spans `event.publish <nombre>`.
    - `OutboxEventBus.entregar` crea spans `event.process <nombre>` (`CONSUMER`) con `outbox.intento`.
+   - Métricas del outbox: contador `outbox.entregas` (`resultado: ok|error`) y gauge `outbox.pendientes` (eventos sin entregar que aún no agotaron los intentos; hace un `COUNT` en cada exportación, cada 60 s).
 4. **Tareas programadas (`IntervalScheduler`):**
    - Cada ejecución crea un span `scheduler.<nombre>`.
+   - Métricas: contador `scheduler.ejecuciones` e histograma `scheduler.duracion` (segundos), ambos con `scheduler.tarea` y `resultado: ok|error`.
 5. **Correlación con logs (`core/shared/infrastructure/logger.ts`):**
    - En producción (`NODE_ENV=prod`), cada línea JSON de `log.info|warn|error` incluye automáticamente `traceId` y `spanId` del span activo junto a `requestId` y `usuarioId`.
 6. **Propagación Frontend → Backend (`frontend/src/core/api/client.ts`):**
