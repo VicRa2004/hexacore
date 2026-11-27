@@ -1,3 +1,4 @@
+import type { LectorAjustes } from "@/core/shared/domain/AjustesSistema";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UnitOfWork } from "@/core/shared/domain/UnitOfWork";
 import type { PasswordHasher, UsuarioRepository } from "@/core/usuario";
@@ -26,6 +27,7 @@ export class AutenticarOAuthUseCase {
 		private readonly cuentaRepo: CuentaRepository,
 		private readonly tokenService: TokenService,
 		private readonly uow: UnitOfWork,
+		private readonly ajustes?: LectorAjustes,
 	) {}
 
 	async ejecutar(
@@ -79,6 +81,12 @@ export class AutenticarOAuthUseCase {
 	}
 
 	private async darDeAlta(nombre: string, email: string): Promise<Usuario> {
+		if (this.ajustes) {
+			const { registroPublicoAbierto } = await this.ajustes.obtener();
+			if (!registroPublicoAbierto) {
+				throw new BaseError("El registro público está desactivado", 403);
+			}
+		}
 		// Contraseña aleatoria que nadie conoce: si quiere una, usa «¿Olvidaste tu contraseña?».
 		const passwordHash = await this.hasher.hash(
 			this.tokenService.generarRefreshToken(),

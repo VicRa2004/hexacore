@@ -1,3 +1,4 @@
+import type { LectorAjustes } from "@/core/shared/domain/AjustesSistema";
 import type { RegistroDto } from "../dtos/RegistroDto";
 import { BaseError } from "@/core/shared/domain/error/BaseError";
 import type { UsuarioRepository } from "@/core/usuario";
@@ -14,6 +15,7 @@ export class RegistroUseCase {
 		private readonly passwordHasher: PasswordHasher,
 		private readonly emisorSesion: EmisorSesion,
 		private readonly correos: EmisorCorreosCuenta,
+		private readonly ajustes?: LectorAjustes,
 	) {}
 
 	async ejecutar(dto: RegistroDto): Promise<{
@@ -21,6 +23,13 @@ export class RegistroUseCase {
 		refreshToken: string;
 		usuario: UsuarioDto;
 	}> {
+		if (this.ajustes) {
+			const { registroPublicoAbierto } = await this.ajustes.obtener();
+			if (!registroPublicoAbierto) {
+				throw new BaseError("El registro público está desactivado", 403);
+			}
+		}
+
 		const usuarioExistente = await this.usuarioRepository.buscarPorEmail(
 			dto.email,
 		);
