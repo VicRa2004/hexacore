@@ -74,7 +74,7 @@ export class LoginUseCase {
 		}
 
 		return {
-			...(await this.emisorSesion.emitir(usuario)),
+			...(await this.emisorSesion.emitir(usuario, "password")),
 			usuario: UsuarioMapper.toDto(usuario),
 		};
 	}

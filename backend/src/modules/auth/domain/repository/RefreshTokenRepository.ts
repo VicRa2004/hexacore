@@ -65,4 +65,11 @@ export interface RefreshTokenRepository {
 	 * Elimina tokens expirados (revocados o no) de la base de datos (limpieza periódica).
 	 */
 	eliminarExpirados(): Promise<void>;
+
+	/**
+	 * Indica si el `userAgent` de la petición actual es nuevo para el usuario.
+	 * Devuelve `true` solo si existen refresh tokens previos (activos, revocados o caducados)
+	 * y ninguno coincide con el `userAgent` actual; en el primer login devuelve `false`.
+	 */
+	esDispositivoNuevo(usuarioId: number): Promise<boolean>;
 }

@@ -96,4 +96,17 @@ export class PrismaRefreshTokenRepository implements RefreshTokenRepository {
 			where: { expiraEn: { lt: new Date() } },
 		});
 	}
+
+	async esDispositivoNuevo(usuarioId: number): Promise<boolean> {
+		const userAgentActual = contexto.actual().userAgent ?? null;
+		const previas = await prisma.refreshToken.findMany({
+			where: { usuarioId },
+			select: { userAgent: true },
+		});
+		if (previas.length === 0) return false;
+
+		return !previas.some(
+			(sesion) => (sesion.userAgent ?? null) === userAgentActual,
+		);
+	}
 }
