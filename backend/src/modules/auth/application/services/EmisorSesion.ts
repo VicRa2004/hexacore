@@ -36,13 +36,19 @@ export class EmisorSesion {
 		const expiraEn = new Date();
 		expiraEn.setDate(expiraEn.getDate() + DIAS_EXPIRACION_REFRESH_TOKEN);
 
+		// Comprobar antes de guardar el nuevo refresh token para no contar esta misma sesión.
+		const notificarOtroDispositivo =
+			metodoLogin !== undefined &&
+			this.eventBus !== undefined &&
+			(await this.refreshTokenRepo.esDispositivoNuevo(usuario.getId()));
+
 		await this.refreshTokenRepo.crear({
 			tokenHash: this.tokenService.hashearRefreshToken(refreshToken),
 			usuarioId: usuario.getId(),
 			expiraEn,
 		});
 
-		if (metodoLogin && this.eventBus) {
+		if (notificarOtroDispositivo && metodoLogin && this.eventBus) {
 			await this.eventBus.publish(
 				new SesionIniciadaEvent({
 					usuarioId: usuario.getId(),

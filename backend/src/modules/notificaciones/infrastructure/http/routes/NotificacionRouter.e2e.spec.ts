@@ -16,7 +16,9 @@ describe("Notificaciones dentro de la app (e2e)", () => {
 		usuarioAId = (await crearUsuario("user-a@e2e.dev")).id;
 		await crearUsuario("user-b@e2e.dev");
 		adminToken = await login("admin-notif@e2e.dev");
-		tokenA = await login("user-a@e2e.dev");
+		await login("user-a@e2e.dev", "Firefox");
+		// Segundo navegador: genera la notificación de inicio de sesión en otro dispositivo.
+		tokenA = await login("user-a@e2e.dev", "Chrome");
 		tokenB = await login("user-b@e2e.dev");
 	});
 
@@ -69,6 +71,27 @@ describe("Notificaciones dentro de la app (e2e)", () => {
 			rolesQuitados: [],
 			permisosDirectosCambiados: false,
 		});
+	});
+
+	it("notifica el inicio de sesión solo desde un dispositivo nuevo", async () => {
+		const { id } = await crearUsuario("user-c@e2e.dev");
+		const contarSesiones = () =>
+			prisma.notificacion.count({
+				where: { usuarioId: id, tipo: "auth.sesion_iniciada" },
+			});
+
+		await login("user-c@e2e.dev", "Firefox");
+		expect(await contarSesiones()).toBe(0); // primer login
+
+		await login("user-c@e2e.dev", "Firefox");
+		expect(await contarSesiones()).toBe(0); // mismo navegador
+
+		await login("user-c@e2e.dev", "Chrome");
+		expect(await contarSesiones()).toBe(1); // navegador nuevo
+		const notif = await prisma.notificacion.findFirstOrThrow({
+			where: { usuarioId: id, tipo: "auth.sesion_iniciada" },
+		});
+		expect(notif.datos).toMatchObject({ dispositivo: "Chrome" });
 	});
 
 	it("aísla notificaciones entre usuarios y permite marcar una o todas como leídas", async () => {
