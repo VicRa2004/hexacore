@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ImagenAjusteInvalidaError } from "../../domain/error/ImagenAjusteInvalidaError";
 import { ServicioAjustes } from "../services/ServicioAjustes";
 import { CambiarImagenAjusteUseCase } from "./CambiarImagenAjusteUseCase";
@@ -84,6 +84,30 @@ describe("CambiarImagenAjusteUseCase", () => {
 		await expect(useCase.ejecutar("logo", PNG)).rejects.toThrow("fallo bd");
 		const [clave] = almacenamiento.guardar.mock.calls[0] ?? [];
 		expect(almacenamiento.eliminar).toHaveBeenCalledWith(clave);
+	});
+
+	it("conserva la imagen nueva si falla la eliminación de la anterior", async () => {
+		filas.set("logoClave", "ajustes/logo-anterior.png");
+		almacenamiento.eliminar.mockRejectedValueOnce(new Error("fallo storage"));
+		const consola = spyOn(console, "warn").mockImplementation(() => {});
+
+		try {
+			const dto = await useCase.ejecutar("logo", PNG);
+
+			const [claveNueva] = almacenamiento.guardar.mock.calls[0] ?? [];
+			expect(claveNueva).toBeDefined();
+			expect(filas.get("logoClave")).toBe(claveNueva);
+			expect(dto.logoUrl).toBe(
+				`/api/ajustes/logo?v=${encodeURIComponent(claveNueva)}`,
+			);
+			expect(almacenamiento.eliminar).toHaveBeenCalledTimes(1);
+			expect(almacenamiento.eliminar).toHaveBeenCalledWith(
+				"ajustes/logo-anterior.png",
+			);
+			expect(consola).toHaveBeenCalled();
+		} finally {
+			consola.mockRestore();
+		}
 	});
 
 	it("con null elimina la clave y borra el archivo anterior", async () => {

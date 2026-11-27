@@ -88,17 +88,32 @@ export class CambiarImagenAjusteUseCase {
 					new AjustesActualizadosEvent({ claves: [claveAjuste] }),
 				);
 			});
-
-			this.lector.invalidar();
-			if (anterior) {
-				await this.almacenamiento.eliminar(anterior);
-			}
-			return AjustesMapper.toDto(await this.lector.obtener());
 		} catch (error) {
 			if (nuevaClave) {
-				await this.almacenamiento.eliminar(nuevaClave);
+				try {
+					await this.almacenamiento.eliminar(nuevaClave);
+				} catch (err: unknown) {
+					console.warn(
+						`No se pudo limpiar la imagen recién subida (${nuevaClave}):`,
+						err,
+					);
+				}
 			}
 			throw error;
 		}
+
+		this.lector.invalidar();
+		if (anterior) {
+			// La transacción ya se confirmó: un fallo al limpiar la imagen vieja no debe abortar ni borrar la nueva.
+			try {
+				await this.almacenamiento.eliminar(anterior);
+			} catch (error: unknown) {
+				console.warn(
+					`No se pudo eliminar la imagen anterior (${anterior}):`,
+					error,
+				);
+			}
+		}
+		return AjustesMapper.toDto(await this.lector.obtener());
 	}
 }
